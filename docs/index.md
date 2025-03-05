@@ -51,8 +51,6 @@ ComfyUI是 最强大的开源节点式生成式AI应用，支持创建图像、�
 ## 部署架构
 ![](./img/deploy.png)
 
-
-
 ## 参数说明
 | <font style="color:rgb(51, 51, 51);">参数组</font> | <font style="color:rgb(51, 51, 51);">参数项</font> | <font style="color:rgb(51, 51, 51);">说明</font> |
 | --- | --- | --- |
