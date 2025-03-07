@@ -59,6 +59,7 @@ clone_and_install https://github.com/sh570655308/ComfyUI-TopazVideoAI.git
 clone_and_install https://github.com/cubiq/ComfyUI_InstantID.git
 clone_and_install https://github.com/pythongosssss/ComfyUI-Custom-Scripts.git
 clone_and_install https://github.com/bash-j/mikey_nodes.git
+clone_and_install https://github.com/kijai/ComfyUI-GIMM-VFI.git
 
 clone https://github.com/chrisgoringe/cg-use-everywhere.git
 clone https://github.com/cubiq/ComfyUI_essentials.git
