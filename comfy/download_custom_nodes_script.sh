@@ -55,7 +55,6 @@ clone_and_install https://github.com/Suzie1/ComfyUI_Comfyroll_CustomNodes.git
 clone_and_install https://github.com/ltdrdata/ComfyUI-Impact-Pack.git
 clone_and_install https://github.com/welltop-cn/ComfyUI-TeaCache.git
 clone_and_install https://github.com/sh570655308/ComfyUI-TopazVideoAI.git
-clone_and_install https://github.com/Suzie1/ComfyUI_Comfyroll_CustomNodes.git
 # General
 clone_and_install https://github.com/cubiq/ComfyUI_InstantID.git
 clone_and_install https://github.com/pythongosssss/ComfyUI-Custom-Scripts.git
