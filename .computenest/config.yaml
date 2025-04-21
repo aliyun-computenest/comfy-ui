@@ -50,6 +50,9 @@ Service:
     - Locale: zh-CN
       ShortDescription: demo
       Image: 'resources/icons/service_logo.png'
+      Softwares:
+        - name: comfyui
+          version: 0.3.24
 Artifact:
   EcsImage:
     ArtifactType: EcsImage

@@ -321,21 +321,21 @@ Resources:
             COMPOSE_FILE="comfy/docker-compose.yaml"
             MAX_WAIT_TIME=3600
             CHECK_INTERVAL=10
-          
+            
             if ! command -v docker compose &> /dev/null; then
             echo "Error: docker compose is not installed"
             exit 1
             fi
-          
+            
             SERVICES=$(docker compose -f "$COMPOSE_FILE" config --services 2>/dev/null)
             if [ -z "$SERVICES" ]; then
             echo "Error: No services found"
             exit 1
             fi
-          
+            
             WAIT_TIME=0
             TIMEOUT_REACHED=false
-          
+            
             while [ $WAIT_TIME -le $MAX_WAIT_TIME ]; do
             ALL_HEALTHY=true
             for SERVICE in $SERVICES; do
@@ -376,12 +376,12 @@ Resources:
             sleep $CHECK_INTERVAL
             WAIT_TIME=$((WAIT_TIME + CHECK_INTERVAL))
             done
-          
+            
             echo "Timeout reached! Abnormal services:" >&2
             docker compose -f "$COMPOSE_FILE" ps --all
             exit 1
             EOF
-          
+            
             chmod +x /usr/local/bin/check-container-status
             systemctl enable stable-diffusion-comfy
             
@@ -392,7 +392,7 @@ Resources:
               Ref: ALIYUN::Region
 Outputs:
   comfyui_address:
-    Description:
+    Label:
       en: comfyui address.
       zh-cn: comfyui 访问页面。
     Value:
@@ -404,6 +404,12 @@ Outputs:
               - Fn::GetAtt:
                   - InstanceGroup
                   - PrivateIps
+  comfyui_info:
+    Lable:
+      en: comfyui info
+      zh-cn: comfyui 信息
+    Value: "支持Wan2.1图生视频，文生视频。支持文生图，图生图模型"
+
 Metadata:
   ALIYUN::ROS::Interface:
     ParameterGroups:
