@@ -135,8 +135,6 @@ Parameters:
           - ecs.gn6i
           - ecs.gn6e
           - ecs.gn6v
-          - ecs.vgn6i-vws
-          - ecs.vgn7i-vws
           - ecs.ebmgn8v
           - ecs.ebmgn8is
           - ecs.ebmgn7ex
@@ -309,13 +307,82 @@ Resources:
             Type=oneshot
             RemainAfterExit=yes
             WorkingDirectory=/root/application
-            ExecStart=/usr/bin/docker compose -f comfy/docker-compose.yaml up -d
+            ExecStart=/bin/bash -c '/usr/bin/docker compose -f comfy/docker-compose.yaml up -d && /usr/local/bin/check-container-status'
+
             ExecStop=/usr/bin/docker compose down
             TimeoutStartSec=0
 
             [Install]
             WantedBy=multi-user.target
             EOF
+            # 创建状态检查脚本
+            cat > /usr/local/bin/check-container-status <<'EOF'
+            #!/bin/bash
+            COMPOSE_FILE="comfy/docker-compose.yaml"
+            MAX_WAIT_TIME=3600
+            CHECK_INTERVAL=10
+          
+            if ! command -v docker compose &> /dev/null; then
+            echo "Error: docker compose is not installed"
+            exit 1
+            fi
+          
+            SERVICES=$(docker compose -f "$COMPOSE_FILE" config --services 2>/dev/null)
+            if [ -z "$SERVICES" ]; then
+            echo "Error: No services found"
+            exit 1
+            fi
+          
+            WAIT_TIME=0
+            TIMEOUT_REACHED=false
+          
+            while [ $WAIT_TIME -le $MAX_WAIT_TIME ]; do
+            ALL_HEALTHY=true
+            for SERVICE in $SERVICES; do
+            CONTAINER_ID=$(docker compose -f "$COMPOSE_FILE" ps -q "$SERVICE")
+            
+            if [ -z "$CONTAINER_ID" ]; then
+            echo "[$SERVICE] Not running"
+            ALL_HEALTHY=false
+            continue
+            fi
+            
+            INSPECT_OUTPUT=$(docker inspect --format \
+            '{{.State.Status}} {{if .State.Health}}{{.State.Health.Status}}{{else}}no-healthcheck{{end}}' \
+            "$CONTAINER_ID" 2>/dev/null)
+            
+            STATUS=$(echo "$INSPECT_OUTPUT" | awk '{print $1}')
+            HEALTH_STATUS=$(echo "$INSPECT_OUTPUT" | awk '{print $2}')
+            
+            case "$HEALTH_STATUS" in
+            "healthy") ;;
+            "unhealthy"|"starting")
+            echo "[$SERVICE] Unhealthy: $HEALTH_STATUS"
+            ALL_HEALTHY=false
+            ;;
+            "no-healthcheck")
+            [ "$STATUS" != "running" ] && ALL_HEALTHY=false
+            ;;
+            *)
+            echo "[$SERVICE] Unknown status: $HEALTH_STATUS"
+            ALL_HEALTHY=false
+            ;;
+            esac
+            done
+            
+            $ALL_HEALTHY && exit 0
+            [ $WAIT_TIME -ge $MAX_WAIT_TIME ] && break
+            
+            sleep $CHECK_INTERVAL
+            WAIT_TIME=$((WAIT_TIME + CHECK_INTERVAL))
+            done
+          
+            echo "Timeout reached! Abnormal services:" >&2
+            docker compose -f "$COMPOSE_FILE" ps --all
+            exit 1
+            EOF
+          
+            chmod +x /usr/local/bin/check-container-status
             systemctl enable stable-diffusion-comfy
             
             fi

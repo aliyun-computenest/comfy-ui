@@ -40,6 +40,10 @@ Service:
         ArchitectureDiagramUrl: 'resources/architecture/architecture.jpg'
         AllowedRegions:
           - ap-southeast-1
+        OutputConfigs:
+          - OutputKey: comfyui_address
+            EnableWebProxy:
+              true:
   ServiceType: private
   ServiceInfo:
     # 英文版可以再配置Locale为en-US的服务信息
