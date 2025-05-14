@@ -43,7 +43,7 @@ Service:
         OutputConfigs:
           - OutputKey: comfyui_address
             EnableWebProxy:
-              true:
+              true
   ServiceType: private
   ServiceInfo:
     # 英文版可以再配置Locale为en-US的服务信息
