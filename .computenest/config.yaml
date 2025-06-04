@@ -68,7 +68,7 @@ Artifact:
         Branch: main
       RegionId: ap-southeast-1
       CommandType: RunShellScript
-      SourceImageId: "m-t4nf1taxyp02pjcfneia"
+      SourceImageId: "m-t4n34xdpx4bdnud9x1kd"
       CommandContent: |-
         mkdir -p /root/application
         if [ -e "/root/code/comfy" ]; then cp -r "/root/code/comfy" "/root/application/"; fi

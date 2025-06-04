@@ -49,3 +49,4 @@ WORKDIR /root/ComfyUI
 
 # 启动命令
 CMD ["python3", "main.py", "--listen", "--port", "8188", "--fast"]
+# python3 main.py --listen --port 8188 --fast
