@@ -41,6 +41,7 @@ RUN pip install --no-cache-dir \
 # 创建工作目录并克隆仓库
 WORKDIR /root
 COPY download_custom_nodes_script.sh download_custom_nodes_script.sh
+RUN date > /tmp/build_time
 RUN chmod +x download_custom_nodes_script.sh && ./download_custom_nodes_script.sh
 
 # 优化容器配置
