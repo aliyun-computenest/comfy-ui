@@ -4,7 +4,26 @@ Conditions:
     Fn::Equals:
       - NewVPC
       - Ref: VpcOption
+  EnableAuthenticationConditions:
+    Fn::Equals:
+      - Enable
+      - Ref: AuthenticationOption
 Parameters:
+  AuthenticationOption:
+    Type: String
+    Label: 是否开启公网访问
+    AllowedValues:
+      - Enable
+      - Disable
+    AssociationPropertyMetadata:
+      ValueLabelMapping:
+        Enable:
+          zh-cn: 开启公网访问
+          en: Enable Public Access
+        Disable:
+          zh-cn: 关闭公网访问
+          en: Disable Public Access
+    Default: Enable
   VpcOption:
     Type: String
     AllowedValues:
@@ -245,7 +264,11 @@ Resources:
       SecurityGroupIngress:
         - PortRange: 8188/8188
           Priority: 1
-          SourceCidrIp: 100.104.0.0/16
+          SourceCidrIp:
+            Fn::If:
+              - EnableAuthenticationConditions
+              - 0.0.0.0/0
+              - 100.104.0.0/16
           IpProtocol: tcp
           NicType: internet
   InstanceGroup:
@@ -404,6 +427,19 @@ Outputs:
               - Fn::GetAtt:
                   - InstanceGroup
                   - PrivateIps
+  comfyuiPublicAddress:
+    Label:
+      en: comfyui public address.
+      zh-cn: comfyui 公网访问页面。
+    Value:
+      Fn::Sub:
+        - http://${ServerAddress}:8188
+        - ServerAddress:
+            Fn::Select:
+              - 0
+              - Fn::GetAtt:
+                  - InstanceGroup
+                  - PublicIps
   comfyui_info:
     Lable:
       en: comfyui info
@@ -431,5 +467,6 @@ Metadata:
           - VSwitchId
           - VpcCidrBlock
           - VSwitchCidrBlock
+          - AuthenticationOption
         Label:
           default: 可用区配置
