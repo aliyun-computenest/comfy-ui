@@ -4,26 +4,16 @@ Conditions:
     Fn::Equals:
       - NewVPC
       - Ref: VpcOption
-  EnableAuthenticationConditions:
+  EnablePublicAccess:
     Fn::Equals:
-      - Enable
-      - Ref: AuthenticationOption
+      - True
+      - Ref: SupportPublicAccess
 Parameters:
-  AuthenticationOption:
-    Type: String
-    Label: 是否开启公网访问
-    AllowedValues:
-      - Enable
-      - Disable
-    AssociationPropertyMetadata:
-      ValueLabelMapping:
-        Enable:
-          zh-cn: 开启公网访问
-          en: Enable Public Access
-        Disable:
-          zh-cn: 关闭公网访问
-          en: Disable Public Access
-    Default: Enable
+  SupportPublicAccess:
+    Type: Boolean
+    Label:
+      zh-cn: 支持公网访问
+      en: Support Public Access
   VpcOption:
     Type: String
     AllowedValues:
@@ -163,22 +153,6 @@ Parameters:
           - ecs.ebmgn7vx
           - ecs.ebmgn7v
           - ecs.ebmgn7
-  InstancePassword:
-    NoEcho: true
-    Type: String
-    Description:
-      en: Server login password, Length 8-30, must contain three(Capital letters, lowercase letters, numbers, ()`~!@#$%^&*_-+=|{}[]:;'<>,.?/ Special symbol in)
-      zh-cn: 服务器登录密码,长度8-30，必须包含三项（大写字母、小写字母、数字、 ()`~!@#$%^&*_-+=|{}[]:;'<>,.?/ 中的特殊符号）
-    AllowedPattern: '^[a-zA-Z0-9-\(\)\`\~\!\@\#\$\%\^\&\*\_\-\+\=\|\{\}\[\]\:\;\<\>\,\.\?\/]*$'
-    Label:
-      en: Instance Password
-      zh-cn: 实例密码
-    ConstraintDescription:
-      en: Length 8-30, must contain three(Capital letters, lowercase letters, numbers, ()`~!@#$%^&*_-+=|{}[]:;'<>,.?/ Special symbol in)
-      zh-cn: 长度8-30，必须包含三项（大写字母、小写字母、数字、 ()`~!@#$%^&*_-+=|{}[]:;'<>,.?/ 中的特殊符号）
-    MinLength: 8
-    MaxLength: 30
-    AssociationProperty: ALIYUN::ECS::Instance::Password
   ZoneId:
     Type: String
     Label:
@@ -229,6 +203,19 @@ Parameters:
             - ExistingVPC
             - ${VpcOption}
 Resources:
+  RandomPassword:
+    Type: ALIYUN::RandomString
+    Properties:
+      length: 11
+      character_classes:
+        - class: "lowercase"
+          min: 4
+        - class: "uppercase"
+          min: 4
+        - class: "digits"
+          min: 2
+      character_sequences:
+        - sequence: "!@#$^*-+="
   # 新建vpc
   EcsVpc:
     Type: ALIYUN::ECS::VPC
@@ -266,7 +253,7 @@ Resources:
           Priority: 1
           SourceCidrIp:
             Fn::If:
-              - EnableAuthenticationConditions
+              - EnablePublicAccess
               - 0.0.0.0/0
               - 100.104.0.0/16
           IpProtocol: tcp
@@ -297,7 +284,7 @@ Resources:
         Ref: SecurityGroup
       ImageId: ecs_image-comfy-ui
       Password:
-        Ref: InstancePassword
+        Ref: RandomPassword
       InstanceType:
         Ref: EcsInstanceType
       SystemDiskCategory: cloud_essd
@@ -445,7 +432,18 @@ Outputs:
       en: comfyui info
       zh-cn: comfyui 信息
     Value: "支持Wan2.1图生视频，文生视频。支持文生图，图生图模型"
-
+  InstancePassword:
+    NoEcho: 'True'
+    Label:
+      en: Ecs Instance password
+      zh-cn: ECS实例密码
+    Description:
+      en: Initial instance password
+      zh-cn: ECS实例密码
+    Value:
+      Fn::GetAtt:
+        - RandomPassword
+        - value
 Metadata:
   ALIYUN::ROS::Interface:
     ParameterGroups:
@@ -467,6 +465,6 @@ Metadata:
           - VSwitchId
           - VpcCidrBlock
           - VSwitchCidrBlock
-          - AuthenticationOption
+          - SupportPublicAccess
         Label:
           default: 可用区配置
