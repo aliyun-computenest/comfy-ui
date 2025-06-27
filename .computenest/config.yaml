@@ -17,11 +17,6 @@ Service:
             Type: Custom
             Parameters:
               - EcsInstanceType
-          - Name: 变更ECS实例密码
-            Description: 变更ECS实例密码
-            Type: Custom
-            Parameters:
-              - InstancePassword
   DeployMetadata:
     SupplierDeployMetadata:
       SupplierTemplateConfigs:
