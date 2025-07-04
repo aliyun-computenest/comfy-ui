@@ -94,6 +94,14 @@ ComfyUI是 最强大的开源节点式生成式AI应用，支持创建图像、�
 ### 图生图功能
 访问模版，或自己导入工作流使用。![img2img.png](img%2Fimg2img.png)
 
+## 模型下载
+1. 推荐前往魔搭下载
+2. 模型存储路径为：/root/storage/models
+
+## 账号密码
+默认账号和密码为:
+1. 账号：admin
+2. 密码：admin
 
 ### 常见问题
 1. 出现某个节点类型不存在，通过manager安装缺少的节点，并重启。![img_1.png](img/issue1.png)![img.png](img/issue2.png)
