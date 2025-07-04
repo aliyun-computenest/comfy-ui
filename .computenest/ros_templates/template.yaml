@@ -284,7 +284,9 @@ Resources:
         Ref: SecurityGroup
       ImageId: ecs_image-comfy-ui
       Password:
-        Ref: RandomPassword
+        Fn::GetAtt:
+          - RandomPassword
+          - value
       InstanceType:
         Ref: EcsInstanceType
       SystemDiskCategory: cloud_essd
