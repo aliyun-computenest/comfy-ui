@@ -15,6 +15,7 @@ services:
       - /root/storage/user_scripts:/root/ComfyUI/user_scripts
       - /root/storage/user:/root/ComfyUI/user
       - /root/storage/input:/root/ComfyUI/input
+      - /root/storage/custom_nodes:/root/ComfyUI/custom_nodes
     deploy:
       resources:
         reservations:

@@ -61,6 +61,7 @@ clone_and_install https://github.com/pythongosssss/ComfyUI-Custom-Scripts.git
 clone_and_install https://github.com/bash-j/mikey_nodes.git
 clone_and_install https://github.com/kijai/ComfyUI-GIMM-VFI.git
 clone_and_install https://github.com/liusida/ComfyUI-Login.git
+rm -rf /root/ComfyUI/custom_nodes/login
 
 
 clone https://github.com/chrisgoringe/cg-use-everywhere.git
