@@ -307,6 +307,7 @@ Resources:
       CommandContent:
         Fn::Sub:
           - |
+            sed -i '/custom_nodes/d' /root/application/comfy/docker-compose.yaml
             file_path="/etc/systemd/system/stable-diffusion-comfy.service"
             if [ ! -f "$file_path" ]; then
             cat > $file_path <<EOF
