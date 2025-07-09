@@ -37,7 +37,7 @@ Service:
           - ap-southeast-1
         OutputConfigs:
           - OutputKey: comfyui_address
-            EnableWebProxy:
+            EnableWebProxy: true
         ServiceInstanceNameRule:
           Prefix: comfyui-
           UseDefaultValue: true
