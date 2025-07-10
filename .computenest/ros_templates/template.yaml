@@ -290,7 +290,7 @@ Resources:
       InstanceType:
         Ref: EcsInstanceType
       SystemDiskCategory: cloud_essd
-      SystemDiskSize: 200
+      SystemDiskSize: 250
       InternetMaxBandwidthOut: 5
       IoOptimized: optimized
       MaxAmount: 1
