@@ -52,7 +52,7 @@ Service:
           version: 0.3.40
 Artifact:
   DockerImage:
-    ArtifactType: DockerImage
+    ArtifactType: Dockerfile
     ArtifactName: docker_image-comfy-ui
     Description: comfy ui DockerImage
     ArtifactBuildProperty:
@@ -61,6 +61,11 @@ Artifact:
         Owner: LYH-RAIN
         RepoName: aliyun-computenest/comfy-ui
         Branch: main
+      DockerfilePath: "Dockerfile"
+    ArtifactProperty:
+      RegionId: ap-southeast-1
+      RepoName: "comfyui-acs-docker"
+      Tag: "0.0.1"
 
   EcsImage:
     ArtifactType: EcsImage
@@ -76,8 +81,8 @@ Artifact:
         Branch: main
       RegionId: ap-southeast-1
       CommandType: RunShellScript
-      SourceImageId: "m-t4n0mt2ukwl9ttpmctiq"
-#      SourceImageId: "m-t4nhy5y8tk3wxqezxvz9"国内
+      #SourceImageId: "m-t4n0mt2ukwl9ttpmctiq" 国外
+      SourceImageId: "m-t4nhy5y8tk3wxqezxvz9"
       CommandContent: |-
         mkdir -p /root/application
         if [ -e "/root/code/comfy" ]; then cp -r "/root/code/comfy" "/root/application/"; fi
