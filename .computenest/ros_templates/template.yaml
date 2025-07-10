@@ -455,12 +455,14 @@ Metadata:
           - PayPeriodUnit
           - PayPeriod
         Label:
-          default: 付费类型配置
+          zh-cn: 付费类型配置
+          en: "Payment Type Configuration"
       - Parameters:
           - EcsInstanceType
           - InstancePassword
         Label:
-          default: 资源配置
+          zh-cn: 资源配置
+          en: "Resource Configuration"
       - Parameters:
           - ZoneId
           - VpcOption
@@ -470,4 +472,5 @@ Metadata:
           - VSwitchCidrBlock
           - SupportPublicAccess
         Label:
-          default: 可用区配置
+          zh-cn: 可用区配置
+          en: "Availability Zone Configuration"
