@@ -51,6 +51,17 @@ Service:
         - name: comfyui
           version: 0.3.40
 Artifact:
+  DockerImage:
+    ArtifactType: DockerImage
+    ArtifactName: docker_image-comfy-ui
+    Description: comfy ui DockerImage
+    ArtifactBuildProperty:
+      CodeRepo:
+        Platform: github
+        Owner: LYH-RAIN
+        RepoName: aliyun-computenest/comfy-ui
+        Branch: main
+
   EcsImage:
     ArtifactType: EcsImage
     ArtifactName: ecs_image-comfy-ui
