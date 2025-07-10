@@ -52,7 +52,7 @@ Service:
           version: 0.3.40
 Artifact:
   DockerImage:
-    ArtifactType: Dockerfile
+    ArtifactType: AcrImage
     ArtifactName: docker_image-comfy-ui
     Description: comfy ui DockerImage
     ArtifactBuildProperty:
