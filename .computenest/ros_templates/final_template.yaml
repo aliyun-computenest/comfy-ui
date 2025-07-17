@@ -223,8 +223,8 @@ Resources:
       PodVSwitchIds:
         - Ref: EcsVSwitch
         - Ref: AcsVSwitch
-      ServiceDiscoveryTypes:
-        - CoreDNS
+      Addons:
+        - Name: managed-coredns
       DeleteOptions:
         - DeleteMode: delete
           ResourceType: SLS_Data
@@ -270,7 +270,7 @@ Resources:
         Ref: RandomPassword
       MaxAmount: 1
       InstanceChargeType: PostPaid
-      SystemDiskSize: 200
+      SystemDiskSize: 250
       SystemDiskCategory: cloud_essd
   RunAllCommands:
     Type: ALIYUN::ECS::RunCommand

@@ -8,7 +8,11 @@ Service:
       - Start
       - Stop
       - Restart
-    SupportBackup: true
+    - TemplateName: ACS集群版
+      SupportOperations:
+      - Start
+      - Stop
+      - Restart
     ModifyParametersConfig:
     - TemplateName: ECS单机版
       Operation:
@@ -17,6 +21,13 @@ Service:
         Type: Custom
         Parameters:
         - EcsInstanceType
+    - TemplateName: ACS集群版
+      Operation:
+      - Name: 变更集群配置
+        Description: 变更集群节点配置
+        Type: Custom
+        Parameters:
+        - NodeInstanceType
   DeployMetadata:
     ServiceInstanceNameRule:
       Prefix: comfyui-
@@ -30,7 +41,7 @@ Service:
         - ap-southeast-1
       - Name: ACS集群版
         Url: 'ros_templates/final_template.yaml'
-        ArchitectureDiagramUrl: 'resources/architecture/architecture.jpg'
+        ArchitectureDiagramUrl: 'resources/architecture/architecture-cluster.png'
         AllowedRegions:
         - ap-southeast-1
         - cn-hangzhou
@@ -39,19 +50,43 @@ Service:
       ArtifactRelation:
         ecs_image-comfy-ui:
           ArtifactId: ${Artifact.EcsImage.ArtifactId}
-          ArtifactVersion: ${Artifact.EcsImage.ArtifactVersion}
+          ArtifactVersion: draft
+      FileArtifactRelation:
+        '{{ computenest::file::kubectl }}':
+          ArtifactId: ${Artifact.KubectlFile.ArtifactId}
+          ArtifactVersion: draft
+        '{{ computenest::file::wanx-resource }}':
+          ArtifactId: ${Artifact.WanxResource.ArtifactId}
+          ArtifactVersion: draft
+        '{{ computenest::file::ossutil }}':
+          ArtifactId: ${Artifact.OssutilFile.ArtifactId}
+          ArtifactVersion: draft
     TemplateConfigs:
     - Name: ECS单机版
       Url: 'ros_templates/template.yaml'
       ArchitectureDiagramUrl: 'resources/architecture/architecture.jpg'
       AllowedRegions:
       - ap-southeast-1
+      - cn-beijing
+      - cn-wulanchabu
+      - cn-hangzhou
+      - cn-shanghai
+      - cn-shenzhen
+      - cn-heyuan
+      - cn-guangzhou
+      - cn-hongkong
+      - ap-northeast-1
+      - ap-northeast-2
+      - ap-southeast-1
+      - ap-southeast-5
+      - ap-southeast-7
+      - eu-central-1
       OutputConfigs:
       - OutputKey: comfyui_address
         EnableWebProxy: true
     - Name: ACS集群版
       Url: 'ros_templates/final_template.yaml'
-      ArchitectureDiagramUrl: 'resources/architecture/architecture-cluster.jpg'
+      ArchitectureDiagramUrl: 'resources/architecture/architecture-cluster.png'
       AllowedRegions:
       - ap-southeast-1
       - cn-hangzhou
@@ -63,12 +98,21 @@ Service:
   ServiceType: private
   ServiceInfo:
   - Locale: zh-CN
-    Name: ComfyUI 智能图像生成服务
-    ShortDescription: 基于 ComfyUI 的专业级图像生成服务，支持单机版和集群版部署
+    Name: ComfyUI社区版
+    ShortDescription: 最强大的开源节点式生成式AI应用，支持创建图像、视频及音频内容。依托前沿开源模型实现视频与图像生成。
     Image: resources/icons/service_logo.png
     Softwares:
     - name: comfyui
-      version: 0.3.40
+      version: 0.3.44
+  - Locale: en-US
+    Name: ComfyUI Community Edition
+    ShortDescription: Most powerful open-source node-based generation AI application,
+      supporting the creation of images, videos and audio content. Leveraging advanced
+      open-source models to generate videos and images.
+    Image: resources/icons/service_logo_en.png
+    Softwares:
+    - name: comfyui
+      version: 0.3.44
 Artifact:
   DockerImage:
     ArtifactType: AcrImage
@@ -82,12 +126,6 @@ Artifact:
         RepoName: aliyun-computenest/comfy-ui
         Branch: main
       DockerfilePath: "Dockerfile"
-    ArtifactBuildType: Dockerfile
-
-    ArtifactProperty:
-      RegionId: ap-southeast-1
-      RepoName: "comfyui-acs-docker-test"
-      Tag: "0.0.1"
 
   EcsImage:
     ArtifactType: EcsImage
@@ -95,25 +133,50 @@ Artifact:
     Description: ComfyUI ECS 镜像，预装 ComfyUI 环境
     SupportRegionIds:
     - ap-southeast-1
-    - cn-hangzhou
     - cn-beijing
+    - cn-wulanchabu
     - cn-shanghai
-    ArtifactBuildProperty:
-      CodeRepo:
-        Platform: github
-        Owner: LYH-RAIN
-        RepoName: aliyun-computenest/comfy-ui
-        Branch: main
+    - cn-shenzhen
+    - cn-guangzhou
+    - cn-hongkong
+    - ap-northeast-1
+    - ap-northeast-2
+    - ap-southeast-1
+    - ap-southeast-7
+    - eu-central-1
+    ArtifactProperty:
       RegionId: ap-southeast-1
+    ArtifactBuildProperty:
+      EnableGpu: true
+      RegionId: ap-southeast-1
+      SourceImageId: "aliyun/services/computenest/images/ai/video/wan_2_1"
+      SystemDiskSize: 250
       CommandType: RunShellScript
-      #SourceImageId: "m-t4n0mt2ukwl9ttpmctiq" 国外
-      SourceImageId: "m-t4nhy5y8tk3wxqezxvz9"
       Timeout: 7200
       CommandContent: |-
-        mkdir -p /root/application
-        if [ -e "/root/code/comfy" ]; then cp -r "/root/code/comfy" "/root/application/"; fi
-        if [ -e "/root/code/.env" ]; then cp -r "/root/code/.env" "/root/application/"; fi
+        git clone https://github.com/LYH-RAIN/aliyun-computenest/comfy-ui.git /root/application
         cd /root/application
         sed -i 's/pull_policy: always/pull_policy: if_not_present/g' comfy/docker-compose.yaml
         docker compose -f comfy/docker-compose.yaml build 2>&1 | stdbuf -oL grep -viE 'Downloading|sha256|extracting|KiB|Downloaded';
         docker compose -f comfy/docker-compose.yaml pull 2>&1 | stdbuf -oL grep -viE 'Downloading|sha256|extracting|KiB|Downloaded' || true;
+
+  KubectlFile:
+    ArtifactType: File
+    ArtifactName: kubectl_linux
+    Description: kubectl linux amd64
+    ArtifactProperty:
+      Url: resources/artifact_resources/file/kubectl
+
+  WanxResource:
+    ArtifactType: File
+    ArtifactName: wanx-resource
+    Description: 万相资源包
+    ArtifactProperty:
+      Url: resources/artifact_resources/file/wanx-resource.tar.gz
+
+  OssutilFile:
+    ArtifactType: File
+    ArtifactName: ossutil
+    Description: ossutil 2.0 工具包
+    ArtifactProperty:
+      Url: resources/artifact_resources/file/ossutil-2.1.0-linux-amd64.zip
