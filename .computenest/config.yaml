@@ -3,76 +3,101 @@ Service:
   DeployType: ros
   OperationMetadata:
     StatusOperationConfigs:
-      - TemplateName: ECS单机版
-        SupportOperations:
-          - Start
-          - Stop
-          - Restart
+    - TemplateName: ECS单机版
+      SupportOperations:
+      - Start
+      - Stop
+      - Restart
     SupportBackup: true
     ModifyParametersConfig:
-      - TemplateName: ECS单机版
-        Operation:
-          - Name: 变更ECS实例规格
-            Description: 变更ECS实例规格
-            Type: Custom
-            Parameters:
-              - EcsInstanceType
+    - TemplateName: ECS单机版
+      Operation:
+      - Name: 变更ECS实例规格
+        Description: 变更ECS实例规格
+        Type: Custom
+        Parameters:
+        - EcsInstanceType
   DeployMetadata:
+    ServiceInstanceNameRule:
+      Prefix: comfyui-
+      UseDefaultValue: true
     SupplierDeployMetadata:
       SupplierTemplateConfigs:
-        - Name: ECS单机版
-          Url: 'ros_templates/template.yaml'
-          ArchitectureDiagramUrl: 'resources/architecture/architecture.jpg'
-          AllowedRegions:
-            - ap-southeast-1
-      ArtifactRelation:
-        ecs_image-comfy-ui:
-          ArtifactId: ${Artifact.EcsImage.ArtifactId}
-          ArtifactVersion: draft
-    TemplateConfigs:
       - Name: ECS单机版
         Url: 'ros_templates/template.yaml'
         ArchitectureDiagramUrl: 'resources/architecture/architecture.jpg'
         AllowedRegions:
-          - ap-southeast-1
-        OutputConfigs:
-          - OutputKey: comfyui_address
-            EnableWebProxy: true
-        ServiceInstanceNameRule:
-          Prefix: comfyui-
-          UseDefaultValue: true
+        - ap-southeast-1
+      - Name: ACS集群版
+        Url: 'ros_templates/final_template.yaml'
+        ArchitectureDiagramUrl: 'resources/architecture/architecture.jpg'
+        AllowedRegions:
+        - ap-southeast-1
+        - cn-hangzhou
+        - cn-beijing
+        - cn-shanghai
+      ArtifactRelation:
+        ecs_image-comfy-ui:
+          ArtifactId: ${Artifact.EcsImage.ArtifactId}
+          ArtifactVersion: ${Artifact.EcsImage.ArtifactVersion}
+    TemplateConfigs:
+    - Name: ECS单机版
+      Url: 'ros_templates/template.yaml'
+      ArchitectureDiagramUrl: 'resources/architecture/architecture.jpg'
+      AllowedRegions:
+      - ap-southeast-1
+      OutputConfigs:
+      - OutputKey: comfyui_address
+        EnableWebProxy: true
+    - Name: ACS集群版
+      Url: 'ros_templates/final_template.yaml'
+      ArchitectureDiagramUrl: 'resources/architecture/architecture-cluster.jpg'
+      AllowedRegions:
+      - ap-southeast-1
+      - cn-hangzhou
+      - cn-beijing
+      - cn-shanghai
+      OutputConfigs:
+      - OutputKey: comfyui_address
+        EnableWebProxy: true
   ServiceType: private
   ServiceInfo:
-    # 英文版可以再配置Locale为en-US的服务信息
-    - Locale: zh-CN
-      ShortDescription: demo
-      Image: 'resources/icons/service_logo.png'
-      Softwares:
-        - name: comfyui
-          version: 0.3.40
+  - Locale: zh-CN
+    Name: ComfyUI 智能图像生成服务
+    ShortDescription: 基于 ComfyUI 的专业级图像生成服务，支持单机版和集群版部署
+    Image: resources/icons/service_logo.png
+    Softwares:
+    - name: comfyui
+      version: 0.3.40
 Artifact:
   DockerImage:
     ArtifactType: AcrImage
     ArtifactName: docker_image-comfy-ui
-    Description: comfy ui DockerImage
+    Description: ComfyUI Docker 镜像，用于容器化部署
     ArtifactBuildProperty:
+      SystemDiskSize: 100
       CodeRepo:
         Platform: github
         Owner: LYH-RAIN
         RepoName: aliyun-computenest/comfy-ui
         Branch: main
       DockerfilePath: "Dockerfile"
+    ArtifactBuildType: Dockerfile
+
     ArtifactProperty:
       RegionId: ap-southeast-1
-      RepoName: "comfyui-acs-docker"
+      RepoName: "comfyui-acs-docker-test"
       Tag: "0.0.1"
 
   EcsImage:
     ArtifactType: EcsImage
     ArtifactName: ecs_image-comfy-ui
-    Description: comfy ui EcsImage
+    Description: ComfyUI ECS 镜像，预装 ComfyUI 环境
     SupportRegionIds:
-        - ap-southeast-1
+    - ap-southeast-1
+    - cn-hangzhou
+    - cn-beijing
+    - cn-shanghai
     ArtifactBuildProperty:
       CodeRepo:
         Platform: github
@@ -83,6 +108,7 @@ Artifact:
       CommandType: RunShellScript
       #SourceImageId: "m-t4n0mt2ukwl9ttpmctiq" 国外
       SourceImageId: "m-t4nhy5y8tk3wxqezxvz9"
+      Timeout: 7200
       CommandContent: |-
         mkdir -p /root/application
         if [ -e "/root/code/comfy" ]; then cp -r "/root/code/comfy" "/root/application/"; fi
