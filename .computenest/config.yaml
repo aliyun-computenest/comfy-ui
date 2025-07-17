@@ -40,6 +40,16 @@ Service:
         ecs_image-comfy-ui:
           ArtifactId: ${Artifact.EcsImage.ArtifactId}
           ArtifactVersion: ${Artifact.EcsImage.ArtifactVersion}
+      FileArtifactRelation:
+        '{{ computenest::file::kubectl }}':
+          ArtifactId: ${Artifact.Artifact_2.ArtifactId}
+          ArtifactVersion: ${Artifact.Artifact_2.ArtifactVersion}
+        '{{ computenest::file::wanx-resource }}':
+          ArtifactId: ${Artifact.Artifact_3.ArtifactId}
+          ArtifactVersion: ${Artifact.Artifact_3.ArtifactVersion}
+        '{{ computenest::file::ossutil }}':
+          ArtifactId: ${Artifact.Artifact_4.ArtifactId}
+          ArtifactVersion: ${Artifact.Artifact_4.ArtifactVersion}
     TemplateConfigs:
     - Name: ECS单机版
       Url: 'ros_templates/template.yaml'
@@ -63,12 +73,19 @@ Service:
   ServiceType: private
   ServiceInfo:
   - Locale: zh-CN
-    Name: ComfyUI 智能图像生成服务
-    ShortDescription: 基于 ComfyUI 的专业级图像生成服务，支持单机版和集群版部署
+    Name: ComfyUI社区版
+    ShortDescription: 最强大的开源节点式生成式AI应用，支持创建图像、视频及音频内容。依托前沿开源模型实现视频与图像生成。
     Image: resources/icons/service_logo.png
     Softwares:
     - name: comfyui
       version: 0.3.40
+  - Locale: en-US
+    Name: ComfyUI Community Edition
+    ShortDescription: Most powerful open-source node-based generation AI application, supporting the creation of images, videos and audio content. Leveraging advanced open-source models to generate videos and images.
+    Image: resources/icons/service_logo.png
+    Softwares:
+      - name: comfyui
+        version: 0.3.40
 Artifact:
   DockerImage:
     ArtifactType: AcrImage
@@ -83,10 +100,9 @@ Artifact:
         Branch: main
       DockerfilePath: "Dockerfile"
     ArtifactBuildType: Dockerfile
-
     ArtifactProperty:
       RegionId: ap-southeast-1
-      RepoName: "comfyui-acs-docker-test"
+      RepoName: "comfyui-acs-docker"
       Tag: "0.0.1"
 
   EcsImage:
@@ -117,3 +133,106 @@ Artifact:
         sed -i 's/pull_policy: always/pull_policy: if_not_present/g' comfy/docker-compose.yaml
         docker compose -f comfy/docker-compose.yaml build 2>&1 | stdbuf -oL grep -viE 'Downloading|sha256|extracting|KiB|Downloaded';
         docker compose -f comfy/docker-compose.yaml pull 2>&1 | stdbuf -oL grep -viE 'Downloading|sha256|extracting|KiB|Downloaded' || true;
+  Artifact_2:
+    ArtifactType: File
+    ArtifactName: kubectl_linux
+    Description: kubectl linux amd64
+    ArtifactProperty:
+      Url: resources/artifact_resources/file/kubectl
+    SupportRegionIds:
+      - cn-qingdao
+      - cn-beijing
+      - cn-zhangjiakou
+      - cn-huhehaote
+      - cn-wulanchabu
+      - cn-hangzhou
+      - cn-shanghai
+      - cn-shenzhen
+      - cn-heyuan
+      - cn-guangzhou
+      - cn-chengdu
+      - cn-hongkong
+      - ap-northeast-1
+      - ap-southeast-1
+      - ap-southeast-2
+      - ap-southeast-3
+      - ap-southeast-5
+      - ap-southeast-6
+      - us-east-1
+      - us-west-1
+      - eu-west-1
+      - eu-central-1
+      - ap-south-1
+      - me-east-1
+      - cn-nanjing
+      - cn-fuzhou
+  Artifact_3:
+    ArtifactType: File
+    ArtifactName: wanx-resource
+    Description: 支持认证2支持认证2
+    ArtifactProperty:
+      Url: resources/artifact_resources/file/wanx-resource.tar.gz
+    SupportRegionIds:
+      - cn-qingdao
+      - cn-beijing
+      - cn-zhangjiakou
+      - cn-huhehaote
+      - cn-wulanchabu
+      - cn-hangzhou
+      - cn-shanghai
+      - cn-shenzhen
+      - cn-heyuan
+      - cn-guangzhou
+      - cn-chengdu
+      - cn-hongkong
+      - ap-northeast-1
+      - ap-southeast-1
+      - ap-southeast-3
+      - ap-southeast-5
+      - ap-southeast-6
+      - us-east-1
+      - us-west-1
+      - eu-west-1
+      - eu-central-1
+      - me-east-1
+      - cn-nanjing
+      - cn-fuzhou
+      - ap-southeast-7
+      - ap-northeast-2
+      - na-south-1
+      - cn-wuhan-lr
+  Artifact_4:
+    ArtifactType: File
+    ArtifactName: ossutil
+    Description: ossutil2.0zip
+    ArtifactProperty:
+      Url: resources/artifact_resources/file/ossutil-2.1.0-linux-amd64.zip
+    SupportRegionIds:
+      - cn-qingdao
+      - cn-beijing
+      - cn-zhangjiakou
+      - cn-huhehaote
+      - cn-wulanchabu
+      - cn-hangzhou
+      - cn-shanghai
+      - cn-shenzhen
+      - cn-heyuan
+      - cn-guangzhou
+      - cn-chengdu
+      - cn-hongkong
+      - ap-northeast-1
+      - ap-southeast-1
+      - ap-southeast-3
+      - ap-southeast-5
+      - ap-southeast-6
+      - us-east-1
+      - us-west-1
+      - eu-west-1
+      - eu-central-1
+      - me-east-1
+      - cn-nanjing
+      - cn-fuzhou
+      - ap-southeast-7
+      - ap-northeast-2
+      - na-south-1
+      - cn-wuhan-lr
