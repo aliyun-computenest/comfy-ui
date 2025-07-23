@@ -39,6 +39,17 @@ Service:
         ArchitectureDiagramUrl: 'resources/architecture/architecture.jpg'
         AllowedRegions:
         - ap-southeast-1
+        PredefinedParameters:
+        - Name: 试用套餐
+          Parameters:
+            EcsInstanceType:
+            - ecs.gn7i-c8g1.2xlarge
+            VpcOption: ExistingVPC
+          OrderList:
+          - EcsInstanceType
+          - VpcOption
+          TrialType: Trial
+          Type: Normal
       - Name: ACS集群版
         Url: 'ros_templates/final_template.yaml'
         ArchitectureDiagramUrl: 'resources/architecture/architecture-cluster.png'
@@ -69,18 +80,40 @@ Service:
       - ap-southeast-1
       - cn-beijing
       - cn-wulanchabu
-      - cn-hangzhou
       - cn-shanghai
       - cn-shenzhen
-      - cn-heyuan
       - cn-guangzhou
       - cn-hongkong
       - ap-northeast-1
       - ap-northeast-2
       - ap-southeast-1
-      - ap-southeast-5
       - ap-southeast-7
       - eu-central-1
+      PredefinedParameters:
+      - Name: 试用套餐
+        Parameters:
+          EcsInstanceType:
+          - ecs.gn7i-c8g1.2xlarge
+          VpcOption: ExistingVPC
+        OrderList:
+        - EcsInstanceType
+        - VpcOption
+        TrialType: Trial
+        Type: Normal
+      TrialHiddenParameterKeys:
+      - VpcId
+      - PayPeriod
+      - VSwitchId
+      - PayPeriodUnit
+      - PayType
+      CreateFromExistInstanceParameterKeys:
+      - VpcId
+      - PayPeriod
+      - VSwitchId
+      - VpcOption
+      - PayPeriodUnit
+      - PayType
+      DeployScene: ECS
       OutputConfigs:
       - OutputKey: comfyui_address
         EnableWebProxy: true
@@ -100,7 +133,8 @@ Service:
   - Locale: zh-CN
     Name: ComfyUI社区版
     ShortDescription: 最强大的开源节点式生成式AI应用，支持创建图像、视频及音频内容。依托前沿开源模型实现视频与图像生成。
-    Image: resources/icons/service_logo.png
+    Image: 
+      https://service-info-public.oss-cn-hangzhou.aliyuncs.com/1853370294850618/cn-hangzhou/service_logofc4ed98586634778b255.png
     Softwares:
     - name: comfyui
       version: 0.3.44
@@ -109,7 +143,8 @@ Service:
     ShortDescription: Most powerful open-source node-based generation AI application,
       supporting the creation of images, videos and audio content. Leveraging advanced
       open-source models to generate videos and images.
-    Image: resources/icons/service_logo_en.png
+    Image: 
+      https://service-info-public.oss-cn-hangzhou.aliyuncs.com/1853370294850618/cn-hangzhou/service_logo_en12e360df18994e46a9ae.png
     Softwares:
     - name: comfyui
       version: 0.3.44
@@ -133,6 +168,7 @@ Artifact:
     Description: ComfyUI ECS 镜像，预装 ComfyUI 环境
     SupportRegionIds:
     - ap-southeast-1
+    - cn-hangzhou
     - cn-beijing
     - cn-wulanchabu
     - cn-shanghai
