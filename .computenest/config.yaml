@@ -13,6 +13,11 @@ Service:
       - Start
       - Stop
       - Restart
+    - TemplateName: 选择已有ACK/ACS集群
+      SupportOperations:
+        - Start
+        - Stop
+        - Restart
     ModifyParametersConfig:
     - TemplateName: ECS单机版
       Operation:
@@ -28,6 +33,13 @@ Service:
         Type: Custom
         Parameters:
         - NodeInstanceType
+    - TemplateName: 选择已有ACK/ACS集群
+      Operation:
+        - Name: 变更集群配置
+          Description: 变更集群节点配置
+          Type: Custom
+          Parameters:
+            - NodeInstanceType
   DeployMetadata:
     ServiceInstanceNameRule:
       Prefix: comfyui-
@@ -58,9 +70,20 @@ Service:
         - cn-hangzhou
         - cn-beijing
         - cn-shanghai
+      - Name: 选择已有ACK/ACS集群
+        Url: 'ros_templates/final_template.yaml'
+        ArchitectureDiagramUrl: 'resources/architecture/architecture-cluster.png'
+        AllowedRegions:
+          - ap-southeast-1
+          - cn-hangzhou
+          - cn-beijing
+          - cn-shanghai
       ArtifactRelation:
         ecs_image-comfy-ui:
           ArtifactId: ${Artifact.EcsImage.ArtifactId}
+          ArtifactVersion: draft
+        ecs_image-comfy-ui-wanx22:
+          ArtifactId: ${Artifact.EcsImage-wanx22.ArtifactId}
           ArtifactVersion: draft
       FileArtifactRelation:
         '{{ computenest::file::kubectl }}':
@@ -196,6 +219,20 @@ Artifact:
         docker compose -f comfy/docker-compose.yaml build 2>&1 | stdbuf -oL grep -viE 'Downloading|sha256|extracting|KiB|Downloaded';
         docker compose -f comfy/docker-compose.yaml pull 2>&1 | stdbuf -oL grep -viE 'Downloading|sha256|extracting|KiB|Downloaded' || true;
 
+  EcsImage-wanx22:
+    ArtifactBuildProperty:
+      EnableGpu: true
+      RegionId: ap-southeast-1
+      SourceImageId: m-bp17u816k307yk4bbe2v
+      SystemDiskSize: 250
+      CommandType: RunShellScript
+      Timeout: 14400
+      CommandContent: |-
+        git clone https://github.com/LYH-RAIN/aliyun-computenest/comfy-ui.git /root/application
+        cd /root/application
+        sed -i 's/pull_policy: always/pull_policy: if_not_present/g' comfy/docker-compose.yaml
+        docker compose -f comfy/docker-compose.yaml build 2>&1 | stdbuf -oL grep -viE 'Downloading|sha256|extracting|KiB|Downloaded';
+        docker compose -f comfy/docker-compose.yaml pull 2>&1 | stdbuf -oL grep -viE 'Downloading|sha256|extracting|KiB|Downloaded' || true;
   KubectlFile:
     ArtifactType: File
     ArtifactName: kubectl_linux
