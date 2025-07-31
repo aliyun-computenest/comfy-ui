@@ -15,9 +15,9 @@ Service:
       - Restart
     - TemplateName: 选择已有ACK/ACS集群
       SupportOperations:
-        - Start
-        - Stop
-        - Restart
+      - Start
+      - Stop
+      - Restart
     ModifyParametersConfig:
     - TemplateName: ECS单机版
       Operation:
@@ -35,11 +35,11 @@ Service:
         - NodeInstanceType
     - TemplateName: 选择已有ACK/ACS集群
       Operation:
-        - Name: 变更集群配置
-          Description: 变更集群节点配置
-          Type: Custom
-          Parameters:
-            - NodeInstanceType
+      - Name: 变更集群配置
+        Description: 变更集群节点配置
+        Type: Custom
+        Parameters:
+        - NodeInstanceType
   DeployMetadata:
     ServiceInstanceNameRule:
       Prefix: comfyui-
@@ -71,19 +71,22 @@ Service:
         - cn-beijing
         - cn-shanghai
       - Name: 选择已有ACK/ACS集群
-        Url: 'ros_templates/final_template.yaml'
+        Url: 'ros_templates/exist_template.yaml'
         ArchitectureDiagramUrl: 'resources/architecture/architecture-cluster.png'
         AllowedRegions:
-          - ap-southeast-1
-          - cn-hangzhou
-          - cn-beijing
-          - cn-shanghai
+        - ap-southeast-1
+        - cn-hangzhou
+        - cn-beijing
+        - cn-shanghai
       ArtifactRelation:
         ecs_image-comfy-ui:
           ArtifactId: ${Artifact.EcsImage.ArtifactId}
           ArtifactVersion: draft
-        ecs_image-comfy-ui-wanx22:
-          ArtifactId: ${Artifact.EcsImage-wanx22.ArtifactId}
+        ecsImage-wanx22:
+          ArtifactId: ${Artifact.EcsImage2.ArtifactId}
+          ArtifactVersion: draft
+        docker_image-comfy-ui:
+          ArtifactId: ${Artifact.DockerImage.ArtifactId}
           ArtifactVersion: draft
       FileArtifactRelation:
         '{{ computenest::file::kubectl }}':
@@ -109,7 +112,6 @@ Service:
       - cn-hongkong
       - ap-northeast-1
       - ap-northeast-2
-      - ap-southeast-1
       - ap-southeast-7
       - eu-central-1
       PredefinedParameters:
@@ -151,6 +153,17 @@ Service:
       OutputConfigs:
       - OutputKey: comfyui_address
         EnableWebProxy: true
+    - Name: 选择已有ACK/ACS集群
+      Url: 'ros_templates/exist_template.yaml'
+      ArchitectureDiagramUrl: 'resources/architecture/architecture-cluster.png'
+      AllowedRegions:
+      - ap-southeast-1
+      - cn-hangzhou
+      - cn-beijing
+      - cn-shanghai
+      OutputConfigs:
+      - OutputKey: comfyui_address
+        EnableWebProxy: true
   ServiceType: private
   ServiceInfo:
   - Locale: zh-CN
@@ -174,9 +187,13 @@ Service:
 Artifact:
   DockerImage:
     ArtifactType: AcrImage
+    ArtifactBuildType: Dockerfile
     ArtifactName: docker_image-comfy-ui
     Description: ComfyUI Docker 镜像，用于容器化部署
+    ArtifactProperty:
+      RegionId: ap-southeast-1
     ArtifactBuildProperty:
+      RegionId: ap-southeast-1
       SystemDiskSize: 100
       CodeRepo:
         Platform: github
@@ -200,7 +217,6 @@ Artifact:
     - cn-hongkong
     - ap-northeast-1
     - ap-northeast-2
-    - ap-southeast-1
     - ap-southeast-7
     - eu-central-1
     ArtifactProperty:
@@ -213,22 +229,42 @@ Artifact:
       CommandType: RunShellScript
       Timeout: 7200
       CommandContent: |-
-        git clone https://github.com/LYH-RAIN/aliyun-computenest/comfy-ui.git /root/application
+        rm -rf /root/application
+        git clone https://github.com/aliyun-computenest/comfy-ui.git /root/application
         cd /root/application
         sed -i 's/pull_policy: always/pull_policy: if_not_present/g' comfy/docker-compose.yaml
         docker compose -f comfy/docker-compose.yaml build 2>&1 | stdbuf -oL grep -viE 'Downloading|sha256|extracting|KiB|Downloaded';
         docker compose -f comfy/docker-compose.yaml pull 2>&1 | stdbuf -oL grep -viE 'Downloading|sha256|extracting|KiB|Downloaded' || true;
 
-  EcsImage-wanx22:
+  EcsImage2:
+    ArtifactType: EcsImage
+    ArtifactName: ecsImage-wanx22
+    Description: ComfyUI wanx2.2 镜像，预装 ComfyUI 环境
+    SupportRegionIds:
+    - ap-southeast-1
+    - cn-hangzhou
+    - cn-beijing
+    - cn-wulanchabu
+    - cn-shanghai
+    - cn-shenzhen
+    - cn-guangzhou
+    - cn-hongkong
+    - ap-northeast-1
+    - ap-northeast-2
+    - ap-southeast-7
+    - eu-central-1
+    ArtifactProperty:
+      RegionId: ap-southeast-1
     ArtifactBuildProperty:
       EnableGpu: true
       RegionId: ap-southeast-1
-      SourceImageId: m-bp17u816k307yk4bbe2v
-      SystemDiskSize: 250
+      SourceImageId: m-t4ndzbkkeou8ee8j3xh4
+      SystemDiskSize: 450
       CommandType: RunShellScript
       Timeout: 14400
       CommandContent: |-
-        git clone https://github.com/LYH-RAIN/aliyun-computenest/comfy-ui.git /root/application
+        rm -rf /root/application
+        git clone https://github.com/aliyun-computenest/comfy-ui.git /root/application
         cd /root/application
         sed -i 's/pull_policy: always/pull_policy: if_not_present/g' comfy/docker-compose.yaml
         docker compose -f comfy/docker-compose.yaml build 2>&1 | stdbuf -oL grep -viE 'Downloading|sha256|extracting|KiB|Downloaded';

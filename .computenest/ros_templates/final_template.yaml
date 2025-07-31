@@ -46,6 +46,7 @@ Parameters:
     Default: WanX-2.1(I2V-14B,T2V-14B,VACE-1.3B and I2V-1.3B)
     AllowedValues:
       - WanX-2.1(I2V-14B,T2V-14B,VACE-1.3B and I2V-1.3B)
+      - WanX-2.2(I2V-14B,T2V-14B,ti2v-5B)
   GpuSeries:
     Type: String
     Label:
@@ -251,11 +252,11 @@ Resources:
           - '-'
           - - Ref: ALIYUN::StackName
             - jumpbox
-      ImageId: ecs_image-comfy-ui
-      #        Fn::FindInMap:
-      #          - ModelMapping
-      #          - ModelImageMap
-      #          - Ref: Model
+      ImageId:
+        Fn::FindInMap:
+          - ModelMapping
+          - ModelImageMap
+          - Ref: ModelSeries
       InstanceType: 'ecs.u1-c1m2.xlarge'
       ZoneId:
         Ref: EcsZoneId
@@ -549,6 +550,13 @@ Resources:
           - ClusterId
       Name: svc-public
 Mappings:
+  ModelMapping:
+    ModelImageMap:
+      'WanX-2.1(I2V-14B,T2V-14B,VACE-1.3B and I2V-1.3B)': ecs_image-comfy-ui
+      'WanX-2.2(I2V-14B,T2V-14B,ti2v-5B)': ecsImage-wanx22
+    ModelDiskSizeMap:
+      'WanX-2.1(I2V-14B,T2V-14B,VACE-1.3B and I2V-1.3B)': 250
+      'WanX-2.2(I2V-14B,T2V-14B,ti2v-5B)': 450
     PPU810E_CPUMap:
       '1': 10
       '2': 22
@@ -561,6 +569,8 @@ Mappings:
       '4': 450
       '8': 900
       '16': 1800
+    DockerMap:
+      ImageId: docker_image-comfy-ui
 Outputs:
   comfyui_address:
     Label: 内网地址
