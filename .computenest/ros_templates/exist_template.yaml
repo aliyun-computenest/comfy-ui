@@ -248,18 +248,16 @@ Resources:
 
             # --- 1. 安装基础工具 ---
             echo "Checking kubectl installation..."
-            if ! command -v kubectl &> /dev/null; then
+            if ! command -v kubectl &>/dev/null; then
               echo "Installing kubectl..."
-              wget {{ computenest::file::kubectl }} -O kubectl >> /tmp/deploy.log 2>&1
-              install -o root -g root -m 0755 kubectl /usr/bin/kubectl >> /tmp/deploy.log 2>&1
+              wget "{{ computenest::file::kubectl }}" -O kubectl >>/tmp/deploy.log 2>&1
+              install -o root -g root -m 0755 kubectl /usr/bin/kubectl >>/tmp/deploy.log 2>&1
               chmod +x /usr/bin/kubectl
-              echo "Configuring kubectl..."
-              mkdir -p ~/.kube
-              echo '${kubeConfig}' >> ~/.kube/config
-              sleep 10
-            else
-              echo "kubectl already installed."
             fi
+            echo "Ensuring kubeconfig exists..."
+            mkdir -p ~/.kube
+            [[ -s ~/.kube/config ]] || echo '${kubeConfig}' > ~/.kube/config
+            sleep 10
 
             echo "Checking ossutil installation..."
             if ! command -v ossutil &> /dev/null; then

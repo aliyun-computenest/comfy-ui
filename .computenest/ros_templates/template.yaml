@@ -418,20 +418,25 @@ Resources:
             fi
             systemctl daemon-reload
             systemctl start stable-diffusion-comfy
-            MAX_ATTEMPTS=30
-            INTERVAL=10
-            for ((i=1; i<=MAX_ATTEMPTS; i++))
-              do
-                LATEST_LOG=$(docker compose logs 2>&1 | tail -n 10)
-                if echo "$LATEST_LOG" | grep -q "To see the GUI go to"
-                  then
-                    echo "success"
-                    exit 0
-                  else
-                    sleep $INTERVAL
-              fi
-            done
 
+            # 定义变量 - 缩短间隔时间
+              MAX_ATTEMPTS=60  # 增加尝试次数
+              INTERVAL=2       # 缩短到2秒间隔              
+              # 修复最后的检查循环
+              cd /root/application
+              
+              echo "Waiting for ComfyUI to start..."
+              for ((i=1; i<=MAX_ATTEMPTS; i++)); do
+                # 检查所有日志，不只是最后10行
+                ALL_LOGS=$(docker compose -f comfy/docker-compose.yaml logs 2>&1)
+              
+                if echo "$ALL_LOGS" | grep -q "To see the GUI go to"; then
+                    echo "Success: ComfyUI is ready!"
+                    # 显示成功的具体信息
+                    echo "$ALL_LOGS" | grep "To see the GUI go to"
+                    exit 0
+                fi
+              done
           - RegionId:
               Ref: ALIYUN::Region
 Mappings:

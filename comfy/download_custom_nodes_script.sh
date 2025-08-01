@@ -76,7 +76,6 @@ clone https://github.com/WASasquatch/was-node-suite-comfyui.git
 clone https://github.com/cubiq/PuLID_ComfyUI.git
 clone https://github.com/Fannovel16/comfyui_controlnet_aux.git
 clone https://github.com/florestefano1975/comfyui-portrait-master.git
-clone https://github.com/Gourieff/ComfyUI-ReActor.git
 clone https://github.com/huchenlei/ComfyUI-layerdiffuse.git
 clone https://github.com/Kosinkadink/ComfyUI-Advanced-ControlNet.git
 clone https://github.com/ltdrdata/ComfyUI-Inspire-Pack.git
