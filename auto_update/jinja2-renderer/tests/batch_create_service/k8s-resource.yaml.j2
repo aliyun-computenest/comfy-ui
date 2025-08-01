@@ -1,0 +1,270 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: oss-secret
+  namespace: llm-model
+stringData:
+  akId: ${AccessKeyId}
+  akSecret: ${AccessKeySecret}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: acs-image-secret
+  namespace: llm-model
+type: kubernetes.io/dockerconfigjson
+data:
+  .dockerconfigjson: ewoJImF1dGhzIjogewoJCSJlZ3NsaW5nanVuLXJlZ2lzdHJ5LmNuLXd1bGFuY2hhYnUuY3IuYWxpeXVuY3MuY29tIjogewoJCQkiYXV0aCI6ICJiVzk1WVc5QU1Ua3dNekF4TlRBM05USXlPVEl3T1RwRGJuQkZVakEyTWxGdklRPT0iCgkJfQoJfQp9Cg==
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: llm-model
+provisioner: ossplugin.csi.alibabacloud.com
+parameters:
+  bucket: "${BucketName}"
+  url: "oss-${RegionId}-internal.aliyuncs.com"
+  path: "/llm-model"
+  otherOpts: "-o umask=022 -o max_stat_cache_size=0 -o allow_other"
+  csi.storage.k8s.io/node-publish-secret-name: oss-secret
+  csi.storage.k8s.io/node-publish-secret-namespace: llm-model
+reclaimPolicy: Retain
+volumeBindingMode: Immediate
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: llm-model
+  namespace: llm-model
+spec:
+  accessModes: [ "ReadWriteMany" ]
+  storageClassName: llm-model
+  resources:
+    requests:
+      storage: 2048Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: ${DeploymentName}
+{%- if not gpu_type_is_ppu %}
+    alibabacloud.com/compute-class: gpu
+    alibabacloud.com/gpu-model-series: {{ gpu_model_series }}
+{%- endif %}
+  name: ${DeploymentName}
+  namespace: llm-model
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ${DeploymentName}
+{%- if not gpu_type_is_ppu %}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+{%- endif %}
+  template:
+    metadata:
+      labels:
+        app: ${DeploymentName}
+        alibabacloud.com/compute-class: gpu
+{%- if gpu_type_is_ppu %}
+        alibabacloud.com/gpu-model-series: PPU810E
+        alibabacloud.com/compute-qos: default
+{%- else %}
+        alibabacloud.com/gpu-model-series: {{ gpu_model_series }}
+{%- endif %}
+    spec:
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+{%- if gpu_type_is_ppu %}
+      volumes:
+        - name: llm-model
+          persistentVolumeClaim:
+            claimName: llm-model
+        - name: cache-volume
+          emptyDir:
+            medium: Memory
+            sizeLimit: 500Gi
+        - name: ephemeral
+          emptyDir:
+            sizeLimit: 200Gi
+{%- else %}
+      volumes:
+        - name: llm-model
+          persistentVolumeClaim:
+            claimName: llm-model
+        - name: dshm
+          emptyDir:
+            medium: Memory
+            sizeLimit: 50Gi
+{%- endif %}
+{%- if not gpu_type_is_ppu %}
+      imagePullSecrets:
+        - name: acs-image-secret
+{%- endif %}
+      containers:
+        - command:
+            - sh
+            - -c
+            - |
+              # 创建日志目录和空文件
+              touch /var/log/app.log || exit 1
+
+{%- if is_deepseek_fp8_ppu_model %}
+              # DeepSeek 模型特殊处理：下载并安装特定版本的 vllm
+              wget -q https://aiacc-inference-public-v2.oss-cn-hangzhou.aliyuncs.com/llms_data/deepseek-quant/vllm-0.7.2%2Bcu126-cp310-cp310-linux_x86_64.whl > /var/log/app.log 2>&1 && \
+              pip install vllm-0.7.2+cu126-cp310-cp310-linux_x86_64.whl --no-deps --force-reinstall -i https://mirrors.aliyun.com/pypi/simple/ >> /var/log/app.log 2>&1
+
+              # 启动 DeepSeek vllm 服务（后台运行）
+              vllm serve /llm-model/${ModelName} \
+                --port 8000 \
+                --quantization moe_wna16 \
+                --trust-remote-code \
+                --served-model-name ${ModelName} \
+                --max-model-len 128000 \
+                --gpu-memory-utilization 0.98 \
+                --tensor-parallel-size ${GPUAmount} \
+                --enable-chunked-prefill \
+                --enforce-eager > /var/log/app.log 2>&1 & \
+{%- else %}
+              # 启动 vllm 服务（后台运行）
+              vllm serve /llm-model/${ModelName} \
+                --port 8000 \
+                --trust-remote-code \
+                --served-model-name ${ModelName} \
+                --max-model-len 32768 \
+                --gpu-memory-utilization 0.95 \
+                --tensor-parallel-size ${GPUAmount} \
+{%- if is_vl_model %}
+                --limit-mm-per-prompt image=5,video=1 \
+                --dtype bfloat16 \
+{%- endif %}
+{%- if is_fp8_model %}
+                --quantization fp8 \
+{%- endif %}
+{%- if gpu_type_is_ppu or is_vl_model %}
+                --enable-chunked-prefill > /var/log/app.log 2>&1 & \
+{%- else %}
+                --enable-chunked-prefill \
+                --enforce-eager > /var/log/app.log 2>&1 & \
+{%- endif %}
+{%- endif %}
+
+              # 尾随日志文件保持容器运行
+              tail -f /var/log/app.log
+{%- if gpu_type_is_ppu %}
+          image: acs-registry-vpc.${RegionId}.cr.aliyuncs.com/egslingjun/inference-xpu-pytorch:25.06-v1.5.2-vllm0.8.5-torch2.6-cu126-20250610
+{%- else %}
+          image: acs-registry-vpc.${RegionId}.cr.aliyuncs.com/egslingjun/inference-nv-pytorch:25.04-vllm0.8.5-pytorch2.6-cu124-20250429-test-serverless
+{%- endif %}
+          name: {% if is_vl_model %}vllm{% else %}llm-ds-r1{% endif %}
+          env:
+            - name: VLLM_API_KEY
+              value: ${VllmApiKey}
+{%- if not gpu_type_is_ppu or is_vl_model %}
+            - name: NCCL_SOCKET_IFNAME
+              value: eth0
+            - name: GLOO_SOCKET_IFNAME
+              value: eth0
+{%- endif %}
+          ports:
+            - containerPort: 8000
+          readinessProbe:
+            exec:
+              command: [ "sh", "-c", "grep -q 'Application startup complete.' /var/log/app.log" ]
+            initialDelaySeconds: 10
+            periodSeconds: 20
+{%- if is_deepseek_fp8_ppu_model %}
+            failureThreshold: 300
+{%- else %}
+            failureThreshold: 180
+{%- endif %}
+            timeoutSeconds: 20
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          resources:
+{%- if gpu_type_is_ppu %}
+            limits:
+              cpu: ${CPUAmount}
+              memory: ${Memory}
+              alibabacloud.com/ppu: ${GPUAmount}
+              ephemeral-storage: 200Gi
+            requests:
+              cpu: ${CPUAmount}
+              memory: ${Memory}
+              alibabacloud.com/ppu: ${GPUAmount}
+              ephemeral-storage: 200Gi
+{%- else %}
+            limits:
+              nvidia.com/gpu: ${GPUAmount}
+              cpu: "16"
+              memory: 128Gi
+{%- endif %}
+          volumeMounts:
+{%- if gpu_type_is_ppu %}
+            - name: llm-model
+              mountPath: /llm-model
+            - mountPath: /dev/shm
+              name: cache-volume
+            - mountPath: /ppu-data
+              name: ephemeral
+{%- else %}
+            - mountPath: /llm-model
+              name: llm-model
+            - mountPath: /dev/shm
+              name: dshm
+{%- endif %}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ${DeploymentName}
+  namespace: llm-model
+spec:
+  type: ClusterIP
+  selector:
+    app: ${DeploymentName}
+  ports:
+    - protocol: TCP
+      port: 8000
+      targetPort: 8000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-private
+  namespace: llm-model
+  annotations:
+    service.beta.kubernetes.io/alibaba-cloud-loadbalancer-address-type: "intranet"
+    service.beta.kubernetes.io/alibaba-cloud-loadbalancer-ip-version: ipv4
+spec:
+  type: LoadBalancer
+  selector:
+    app: ${Label}
+  ports:
+    - protocol: TCP
+      port: 8000
+      targetPort: 8000
+{%- if support_public_access %}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-public
+  namespace: llm-model
+  annotations:
+    service.beta.kubernetes.io/alibaba-cloud-loadbalancer-ip-version: ipv4
+    service.beta.kubernetes.io/alibaba-cloud-loadbalancer-address-type: internet
+spec:
+  type: LoadBalancer
+  selector:
+    app: ${Label}
+  ports:
+    - protocol: TCP
+      port: 8000
+      targetPort: 8000
+{%- endif %}

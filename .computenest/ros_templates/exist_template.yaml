@@ -217,7 +217,11 @@ Resources:
         Ref: RandomPassword
       MaxAmount: 1
       InstanceChargeType: PostPaid
-      SystemDiskSize: 250
+      SystemDiskSize:
+        Fn::FindInMap:
+          - ModelMapping
+          - ModelDiskSizeMap
+          - Ref: ModelSeries
       SystemDiskCategory: cloud_essd
   RunAllCommands:
     Type: ALIYUN::ECS::RunCommand

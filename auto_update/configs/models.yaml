@@ -1,0 +1,23 @@
+# 模型配置索引文件
+# 此文件列出所有可用的模型配置文件
+
+models:
+  - name: "wanx-2.1"
+    config_file: "models/wanx-2.1.yaml"
+    description: "WanX-2.1(I2V-14B,T2V-14B,VACE-1.3B and I2V-1.3B)"
+    enabled: true
+    
+  - name: "wanx-2.2"
+    config_file: "models/wanx-2.2.yaml"
+    description: "WanX-2.2(I2V-14B,T2V-14B,ti2v-5B)"
+    enabled: true
+    
+  - name: "wanx-2.3"
+    config_file: "models/wanx-2.3.yaml"
+    description: "WanX-2.3(I2V-14B,T2V-14B,ti2v-8B)"
+    enabled: true
+    
+  - name: "comfy-lotus"
+    config_file: "models/comfy-lotus.yaml"
+    description: "Comfy Lotus Model"
+    enabled: true

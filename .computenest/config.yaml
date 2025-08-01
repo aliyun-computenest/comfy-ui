@@ -3,81 +3,81 @@ Service:
   DeployType: ros
   OperationMetadata:
     StatusOperationConfigs:
-    - TemplateName: ECS单机版
-      SupportOperations:
-      - Start
-      - Stop
-      - Restart
-    - TemplateName: ACS集群版
-      SupportOperations:
-      - Start
-      - Stop
-      - Restart
-    - TemplateName: 选择已有ACK/ACS集群
-      SupportOperations:
-      - Start
-      - Stop
-      - Restart
+      - TemplateName: ECS单机版
+        SupportOperations:
+          - Start
+          - Stop
+          - Restart
+      - TemplateName: ACS集群版
+        SupportOperations:
+          - Start
+          - Stop
+          - Restart
+      - TemplateName: 选择已有ACK/ACS集群
+        SupportOperations:
+          - Start
+          - Stop
+          - Restart
     ModifyParametersConfig:
-    - TemplateName: ECS单机版
-      Operation:
-      - Name: 变更ECS实例规格
-        Description: 变更ECS实例规格
-        Type: Custom
-        Parameters:
-        - EcsInstanceType
-    - TemplateName: ACS集群版
-      Operation:
-      - Name: 变更集群配置
-        Description: 变更集群节点配置
-        Type: Custom
-        Parameters:
-        - NodeInstanceType
-    - TemplateName: 选择已有ACK/ACS集群
-      Operation:
-      - Name: 变更集群配置
-        Description: 变更集群节点配置
-        Type: Custom
-        Parameters:
-        - NodeInstanceType
+      - TemplateName: ECS单机版
+        Operation:
+          - Name: 变更ECS实例规格
+            Description: 变更ECS实例规格
+            Type: Custom
+            Parameters:
+              - EcsInstanceType
+      - TemplateName: ACS集群版
+        Operation:
+          - Name: 变更集群配置
+            Description: 变更集群节点配置
+            Type: Custom
+            Parameters:
+              - NodeInstanceType
+      - TemplateName: 选择已有ACK/ACS集群
+        Operation:
+          - Name: 变更集群配置
+            Description: 变更集群节点配置
+            Type: Custom
+            Parameters:
+              - NodeInstanceType
   DeployMetadata:
     ServiceInstanceNameRule:
       Prefix: comfyui-
       UseDefaultValue: true
     SupplierDeployMetadata:
       SupplierTemplateConfigs:
-      - Name: ECS单机版
-        Url: 'ros_templates/template.yaml'
-        ArchitectureDiagramUrl: 'resources/architecture/architecture.jpg'
-        AllowedRegions:
-        - ap-southeast-1
-        PredefinedParameters:
-        - Name: 试用套餐
-          Parameters:
-            EcsInstanceType:
-            - ecs.gn7i-c8g1.2xlarge
-            VpcOption: ExistingVPC
-          OrderList:
-          - EcsInstanceType
-          - VpcOption
-          TrialType: Trial
-          Type: Normal
-      - Name: ACS集群版
-        Url: 'ros_templates/final_template.yaml'
-        ArchitectureDiagramUrl: 'resources/architecture/architecture-cluster.png'
-        AllowedRegions:
-        - ap-southeast-1
-        - cn-hangzhou
-        - cn-beijing
-        - cn-shanghai
-      - Name: 选择已有ACK/ACS集群
-        Url: 'ros_templates/exist_template.yaml'
-        ArchitectureDiagramUrl: 'resources/architecture/architecture-cluster.png'
-        AllowedRegions:
-        - ap-southeast-1
-        - cn-hangzhou
-        - cn-beijing
-        - cn-shanghai
+        - Name: ECS单机版
+          Url: ros_templates/template.yaml
+          ArchitectureDiagramUrl: resources/architecture/architecture.jpg
+          AllowedRegions:
+            - ap-southeast-1
+          PredefinedParameters:
+            - Name: 试用套餐
+              Parameters:
+                EcsInstanceType:
+                  - ecs.gn7i-c8g1.2xlarge
+                VpcOption: ExistingVPC
+              OrderList:
+                - EcsInstanceType
+                - VpcOption
+              TrialType: Trial
+              Type: Normal
+        - Name: ACS集群版
+          Url: ros_templates/final_template.yaml
+          ArchitectureDiagramUrl: resources/architecture/architecture-cluster.png
+          AllowedRegions:
+            - ap-southeast-1
+            - cn-hangzhou
+            - cn-beijing
+            - cn-shanghai
+        - Name: 选择已有ACK/ACS集群
+          Url: ros_templates/exist_template.yaml
+          ArchitectureDiagramUrl: resources/architecture/architecture-cluster.png
+          AllowedRegions:
+            - ap-southeast-1
+            - cn-hangzhou
+            - cn-beijing
+            - cn-shanghai
       ArtifactRelation:
         ecs_image-comfy-ui:
           ArtifactId: ${Artifact.EcsImage.ArtifactId}
@@ -99,11 +99,113 @@ Service:
           ArtifactId: ${Artifact.OssutilFile.ArtifactId}
           ArtifactVersion: draft
     TemplateConfigs:
-    - Name: ECS单机版
-      Url: 'ros_templates/template.yaml'
-      ArchitectureDiagramUrl: 'resources/architecture/architecture.jpg'
-      AllowedRegions:
+      - Name: ECS单机版
+        Url: ros_templates/template.yaml
+        ArchitectureDiagramUrl: resources/architecture/architecture.jpg
+        AllowedRegions:
+          - ap-southeast-1
+          - cn-beijing
+          - cn-wulanchabu
+          - cn-shanghai
+          - cn-shenzhen
+          - cn-guangzhou
+          - cn-hongkong
+          - ap-northeast-1
+          - ap-northeast-2
+          - ap-southeast-7
+          - eu-central-1
+        PredefinedParameters:
+          - Name: 试用套餐
+            Parameters:
+              EcsInstanceType:
+                - ecs.gn7i-c8g1.2xlarge
+              VpcOption: ExistingVPC
+            OrderList:
+              - EcsInstanceType
+              - VpcOption
+            TrialType: Trial
+            Type: Normal
+        TrialHiddenParameterKeys:
+          - VpcId
+          - PayPeriod
+          - VSwitchId
+          - PayPeriodUnit
+          - PayType
+        CreateFromExistInstanceParameterKeys:
+          - VpcId
+          - PayPeriod
+          - VSwitchId
+          - VpcOption
+          - PayPeriodUnit
+          - PayType
+        DeployScene: ECS
+        OutputConfigs:
+          - OutputKey: comfyui_address
+            EnableWebProxy: true
+      - Name: ACS集群版
+        Url: ros_templates/final_template.yaml
+        ArchitectureDiagramUrl: resources/architecture/architecture-cluster.png
+        AllowedRegions:
+          - ap-southeast-1
+          - cn-hangzhou
+          - cn-beijing
+          - cn-shanghai
+        OutputConfigs:
+          - OutputKey: comfyui_address
+            EnableWebProxy: true
+      - Name: 选择已有ACK/ACS集群
+        Url: ros_templates/exist_template.yaml
+        ArchitectureDiagramUrl: resources/architecture/architecture-cluster.png
+        AllowedRegions:
+          - ap-southeast-1
+          - cn-hangzhou
+          - cn-beijing
+          - cn-shanghai
+        OutputConfigs:
+          - OutputKey: comfyui_address
+            EnableWebProxy: true
+  ServiceType: private
+  ServiceInfo:
+    - Locale: zh-CN
+      Name: ComfyUI社区版
+      ShortDescription: 最强大的开源节点式生成式AI应用，支持创建图像、视频及音频内容。依托前沿开源模型实现视频与图像生成。
+      Image: https://service-info-public.oss-cn-hangzhou.aliyuncs.com/1853370294850618/cn-hangzhou/service_logofc4ed98586634778b255.png
+      Softwares:
+        - name: comfyui
+          version: 0.3.44
+    - Locale: en-US
+      Name: ComfyUI Community Edition
+      ShortDescription: Most powerful open-source node-based generation AI application, supporting the creation of images, videos and audio content. Leveraging advanced open-source models to generate videos and images.
+      Image: https://service-info-public.oss-cn-hangzhou.aliyuncs.com/1853370294850618/cn-hangzhou/service_logo_en12e360df18994e46a9ae.png
+      Softwares:
+        - name: comfyui
+          version: 0.3.44
+Artifact:
+  DockerImage:
+    ArtifactType: AcrImage
+    ArtifactBuildType: Dockerfile
+    ArtifactName: docker_image-comfy-ui
+    Description: ComfyUI Docker 镜像，用于容器化部署
+    ArtifactProperty:
+      RegionId: ap-southeast-1
+      RepoName: comfy-ui
+      Tag: latest
+    ArtifactBuildProperty:
+      RegionId: ap-southeast-1
+      SystemDiskSize: 100
+      CodeRepo:
+        Platform: github
+        Owner: LYH-RAIN
+        RepoName: aliyun-computenest/comfy-ui
+        Branch: main
+      DockerfilePath: Dockerfile
+  EcsImage:
+    ArtifactType: EcsImage
+    ArtifactName: "ecs_image-comfy-ui"
+    Description: ComfyUI WanX-2.1(I2V-14B,T2V-14B,VACE-1.3B and I2V-1.3B) 镜像，预装 ComfyUI 环境
+    SupportRegionIds: &id001
       - ap-southeast-1
+      - cn-hangzhou
       - cn-beijing
       - cn-wulanchabu
       - cn-shanghai
@@ -114,111 +216,7 @@ Service:
       - ap-northeast-2
       - ap-southeast-7
       - eu-central-1
-      PredefinedParameters:
-      - Name: 试用套餐
-        Parameters:
-          EcsInstanceType:
-          - ecs.gn7i-c8g1.2xlarge
-          VpcOption: ExistingVPC
-        OrderList:
-        - EcsInstanceType
-        - VpcOption
-        TrialType: Trial
-        Type: Normal
-      TrialHiddenParameterKeys:
-      - VpcId
-      - PayPeriod
-      - VSwitchId
-      - PayPeriodUnit
-      - PayType
-      CreateFromExistInstanceParameterKeys:
-      - VpcId
-      - PayPeriod
-      - VSwitchId
-      - VpcOption
-      - PayPeriodUnit
-      - PayType
-      DeployScene: ECS
-      OutputConfigs:
-      - OutputKey: comfyui_address
-        EnableWebProxy: true
-    - Name: ACS集群版
-      Url: 'ros_templates/final_template.yaml'
-      ArchitectureDiagramUrl: 'resources/architecture/architecture-cluster.png'
-      AllowedRegions:
-      - ap-southeast-1
-      - cn-hangzhou
-      - cn-beijing
-      - cn-shanghai
-      OutputConfigs:
-      - OutputKey: comfyui_address
-        EnableWebProxy: true
-    - Name: 选择已有ACK/ACS集群
-      Url: 'ros_templates/exist_template.yaml'
-      ArchitectureDiagramUrl: 'resources/architecture/architecture-cluster.png'
-      AllowedRegions:
-      - ap-southeast-1
-      - cn-hangzhou
-      - cn-beijing
-      - cn-shanghai
-      OutputConfigs:
-      - OutputKey: comfyui_address
-        EnableWebProxy: true
-  ServiceType: private
-  ServiceInfo:
-  - Locale: zh-CN
-    Name: ComfyUI社区版
-    ShortDescription: 最强大的开源节点式生成式AI应用，支持创建图像、视频及音频内容。依托前沿开源模型实现视频与图像生成。
-    Image: 
-      https://service-info-public.oss-cn-hangzhou.aliyuncs.com/1853370294850618/cn-hangzhou/service_logofc4ed98586634778b255.png
-    Softwares:
-    - name: comfyui
-      version: 0.3.44
-  - Locale: en-US
-    Name: ComfyUI Community Edition
-    ShortDescription: Most powerful open-source node-based generation AI application,
-      supporting the creation of images, videos and audio content. Leveraging advanced
-      open-source models to generate videos and images.
-    Image: 
-      https://service-info-public.oss-cn-hangzhou.aliyuncs.com/1853370294850618/cn-hangzhou/service_logo_en12e360df18994e46a9ae.png
-    Softwares:
-    - name: comfyui
-      version: 0.3.44
-Artifact:
-  DockerImage:
-    ArtifactType: AcrImage
-    ArtifactBuildType: Dockerfile
-    ArtifactName: docker_image-comfy-ui
-    Description: ComfyUI Docker 镜像，用于容器化部署
-    ArtifactProperty:
-      RegionId: ap-southeast-1
-    ArtifactBuildProperty:
-      RegionId: ap-southeast-1
-      SystemDiskSize: 100
-      CodeRepo:
-        Platform: github
-        Owner: LYH-RAIN
-        RepoName: aliyun-computenest/comfy-ui
-        Branch: main
-      DockerfilePath: "Dockerfile"
 
-  EcsImage:
-    ArtifactType: EcsImage
-    ArtifactName: ecs_image-comfy-ui
-    Description: ComfyUI ECS 镜像，预装 ComfyUI 环境
-    SupportRegionIds:
-    - ap-southeast-1
-    - cn-hangzhou
-    - cn-beijing
-    - cn-wulanchabu
-    - cn-shanghai
-    - cn-shenzhen
-    - cn-guangzhou
-    - cn-hongkong
-    - ap-northeast-1
-    - ap-northeast-2
-    - ap-southeast-7
-    - eu-central-1
     ArtifactProperty:
       RegionId: ap-southeast-1
     ArtifactBuildProperty:
@@ -229,42 +227,25 @@ Artifact:
       CommandType: RunShellScript
       Timeout: 7200
       CommandContent: |-
-        rm -rf /root/application
-        git clone https://github.com/aliyun-computenest/comfy-ui.git /root/application
         cd /root/application
         sed -i 's/pull_policy: always/pull_policy: if_not_present/g' comfy/docker-compose.yaml
         docker compose -f comfy/docker-compose.yaml build 2>&1 | stdbuf -oL grep -viE 'Downloading|sha256|extracting|KiB|Downloaded';
         docker compose -f comfy/docker-compose.yaml pull 2>&1 | stdbuf -oL grep -viE 'Downloading|sha256|extracting|KiB|Downloaded' || true;
-
   EcsImage2:
     ArtifactType: EcsImage
-    ArtifactName: ecsImage-wanx22
-    Description: ComfyUI wanx2.2 镜像，预装 ComfyUI 环境
-    SupportRegionIds:
-    - ap-southeast-1
-    - cn-hangzhou
-    - cn-beijing
-    - cn-wulanchabu
-    - cn-shanghai
-    - cn-shenzhen
-    - cn-guangzhou
-    - cn-hongkong
-    - ap-northeast-1
-    - ap-northeast-2
-    - ap-southeast-7
-    - eu-central-1
+    ArtifactName: "ecsImage-wanx22"
+    Description: ComfyUI WanX-2.2(I2V-14B,T2V-14B,ti2v-5B) 镜像，预装 ComfyUI 环境
+    SupportRegionIds: *id001
     ArtifactProperty:
       RegionId: ap-southeast-1
     ArtifactBuildProperty:
       EnableGpu: true
       RegionId: ap-southeast-1
-      SourceImageId: m-t4ndzbkkeou8ee8j3xh4
+      SourceImageId: "m-t4ndzbkkeou8ee8j3xh4"
       SystemDiskSize: 450
       CommandType: RunShellScript
       Timeout: 14400
       CommandContent: |-
-        rm -rf /root/application
-        git clone https://github.com/aliyun-computenest/comfy-ui.git /root/application
         cd /root/application
         sed -i 's/pull_policy: always/pull_policy: if_not_present/g' comfy/docker-compose.yaml
         docker compose -f comfy/docker-compose.yaml build 2>&1 | stdbuf -oL grep -viE 'Downloading|sha256|extracting|KiB|Downloaded';
@@ -275,14 +256,12 @@ Artifact:
     Description: kubectl linux amd64
     ArtifactProperty:
       Url: resources/artifact_resources/file/kubectl
-
   WanxResource:
     ArtifactType: File
     ArtifactName: wanx-resource
     Description: 万相资源包
     ArtifactProperty:
       Url: resources/artifact_resources/file/wanx-resource.tar.gz
-
   OssutilFile:
     ArtifactType: File
     ArtifactName: ossutil

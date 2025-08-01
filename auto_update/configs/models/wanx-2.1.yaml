@@ -1,0 +1,37 @@
+# WanX-2.1 模型配置
+model_name: "WanX-2.1(I2V-14B,T2V-14B,VACE-1.3B and I2V-1.3B)"
+model_type: "WanX"
+display_name: "WanX-2.1(I2V-14B,T2V-14B,VACE-1.3B and I2V-1.3B)"
+disk_size: 250
+system_disk_size: 250  # 兼容批量生成系统
+deployment_name: "wanx21"
+model_image: "ecs_image-comfy-ui"
+artifact_name: "EcsImage"
+source_image_id: "aliyun/services/computenest/images/ai/video/wan_2_1"
+timeout: 7200
+gpu_type: "PPU"  # 批量生成系统使用
+support_min_gpu_amount: 1
+support_max_gpu_amount: 1
+gpu_configs:
+  - gpu_type: "WanX-2.1_PPU"
+    hardware: "PPU810E"
+    label: "P16EN"
+    zones:
+      - cn-wulanchabu-a
+      - cn-beijing-d
+      - cn-shanghai-f
+      - cn-hangzhou-b
+      - ap-southeast-1a
+      - ap-southeast-1b
+      - ap-southeast-1c
+  - gpu_type: "WanX-2.1_H20"
+    hardware: "H20"
+    label: "GU8TF"
+    zones:
+      - cn-hangzhou-b
+      - cn-beijing-d
+      - cn-shanghai-f
+      - cn-shanghai-o
+      - cn-wulanchabu-c
+type: "ecs"
+enabled: true

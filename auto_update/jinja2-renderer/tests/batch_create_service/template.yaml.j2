@@ -1,0 +1,613 @@
+ROSTemplateFormatVersion: '2015-09-01'
+Description:
+  en: Create acs Cluster And JumpBox Ecs, Deploy with kubectl -f yaml with new vpc
+  zh-cn: 创建acs集群和跳板机并使用kubectl部署(新建vpc)
+Conditions:
+{%- if SupportPPU %}
+  IfPPU:
+    Fn::Equals:
+      - Ref: GPUType
+      - '{{ ModelNameSuffix }}_PPU'
+{%- endif %}
+Parameters:
+  GPUType:
+    Type: String
+    Label:
+      en: GPUType
+      zh-cn: 选择GPU类型
+    Default: {{ ModelNameSuffix }}_{{ GPUType }}
+    AssociationPropertyMetadata:
+      AutoSelectFirst: true
+      ForceRadio: true
+  GPUAmount:
+    Type: String
+    Label:
+      en: GPU Amount
+      zh-cn: GPU数量
+    AllowedValues:
+{%- for i in range(SupportMinGPUAmount, SupportMaxGPUAmount + 1) %}
+{%- if i in [1, 2, 4, 8, 16] %}
+      - {{ i }}
+{%- endif %}
+{%- endfor %}
+    Default: {{ SupportMinGPUAmount }}
+  EcsZoneId:
+    Type: String
+    Label:
+      en: ECS Zone ID
+      zh-cn: ECS 可用区
+    AllowedValues:
+      - cn-hangzhou-b
+      - cn-hangzhou-g
+      - cn-hangzhou-h
+      - cn-hangzhou-i
+      - cn-hangzhou-j
+      - cn-hangzhou-k
+      - cn-beijing-c
+      - cn-beijing-d
+      - cn-beijing-e
+      - cn-beijing-f
+      - cn-beijing-g
+      - cn-beijing-h
+      - cn-beijing-i
+      - cn-beijing-j
+      - cn-beijing-k
+      - cn-beijing-l
+      - cn-shanghai-a
+      - cn-shanghai-b
+      - cn-shanghai-e
+      - cn-shanghai-f
+      - cn-shanghai-g
+      - cn-shanghai-m
+      - cn-shanghai-l
+      - cn-shanghai-n
+      - cn-wulanchabu-a
+      - cn-wulanchabu-b
+      - cn-wulanchabu-c
+      - cn-hongkong-b
+      - cn-hongkong-c
+      - cn-hongkong-d
+      - ap-southeast-1a
+      - ap-southeast-1b
+      - ap-southeast-1c
+    Description:
+      zh-cn: ECS跳板机可用区（同时也是ACS备可用区），该跳板机用于在ACS集群上执行kubectl部署命令，创建成功后如不需要可以手动释放
+      en: ECS jump box zone id, used to execute kubectl commands on ACS cluster, created successfully after no need to manually release
+    AssociationProperty: ALIYUN::ECS::Instance:ZoneId
+    AssociationPropertyMetadata:
+      ExclusiveTo:
+        - AcsZoneId
+  AcsZoneId:
+    Type: String
+    Label:
+      en: ACS Zone ID
+      zh-cn: ACS 可用区
+    AssociationProperty: ALIYUN::ECS::Instance:ZoneId
+    AssociationPropertyMetadata:
+      ExclusiveTo:
+        - EcsZoneId
+{%- if SupportPPU %}
+        - Condition:
+            Fn::Equals:
+              - ${GPUType}
+              - {{ ModelNameSuffix }}_PPU
+          Value:
+            - cn-wulanchabu-c
+            - cn-hangzhou-b
+            - cn-beijing-d
+            - cn-shanghai-f
+            - cn-shanghai-o
+{%- endif %}
+  LoginPassword:
+    NoEcho: true
+    Type: String
+    Description:
+      en: 'Length 8-32 characters, can contain size letters, Numbers and special symbols, including:! @ # $ % ^ & * ( ) _ + - ='
+      zh-cn: 长度8-32个字符,可包含大小字母、数字及特殊符号（包含：!@#$%^&*()_+-=）
+    Label:
+      en: Instance Password
+      zh-cn: 实例密码
+    ConstraintDescription:
+      en: '8-32 characters, can contain size letters, Numbers and special symbols, including:! @ # $ % ^ & * ( ) _ + - ='
+      zh-cn: 8-32个字符,可包含大小字母、数字及特殊符号（包含：!@#$%^&*()_+-=）
+    MinLength: 8
+    MaxLength: 32
+Resources:
+  Vpc:
+    Type: ALIYUN::ECS::VPC
+    Properties:
+      CidrBlock: 192.168.0.0/16
+  EcsVSwitch:
+    Type: ALIYUN::ECS::VSwitch
+    DependsOn: Vpc
+    Properties:
+      VpcId:
+        Ref: Vpc
+      CidrBlock: 192.168.0.0/24
+      ZoneId:
+        Ref: EcsZoneId
+  AcsVSwitch:
+    Type: ALIYUN::ECS::VSwitch
+    DependsOn: Vpc
+    Properties:
+      VpcId:
+        Ref: Vpc
+      CidrBlock: 192.168.1.0/24
+      ZoneId:
+        Ref: AcsZoneId
+  EcsSecurityGroup:
+    Type: ALIYUN::ECS::SecurityGroup
+    Properties:
+      VpcId:
+        Ref: Vpc
+      SecurityGroupIngress:
+        - PortRange: '22/22'
+          Priority: 1
+          SourceCidrIp: 0.0.0.0/0
+          IpProtocol: tcp
+          NicType: intranet
+      SecurityGroupEgress:
+        - PortRange: '-1/-1'
+          Priority: 1
+          IpProtocol: all
+          DestCidrIp: 0.0.0.0/0
+          NicType: intranet
+  OSSBucket:
+    Type: 'ALIYUN::OSS::Bucket'
+    Properties:
+      DeletionForce: true
+      BucketName:
+        Ref: ALIYUN::StackName
+  OSSRamUser:
+    DependsOn: OSSBucket
+    Type: ALIYUN::RAM::User
+    Properties:
+      UserName:
+        Ref: ALIYUN::StackName
+      Policies:
+        - PolicyName:
+            Ref: ALIYUN::StackName
+          PolicyDocument:
+            Statement:
+              - Action:
+                  - oss:*
+                Effect: Allow
+                Resource:
+                  - Fn::Sub:
+                      - "acs:oss:*:*:${BucketName}"
+                      - BucketName:
+                          Fn::GetAtt:
+                            - OSSBucket
+                            - Name
+                  - Fn::Sub:
+                      - "acs:oss:*:*:${BucketName}/*"
+                      - BucketName:
+                          Fn::GetAtt:
+                            - OSSBucket
+                            - Name
+            Version: '1'
+  AccessKey:
+    DependsOn: OSSRamUser
+    Type: ALIYUN::RAM::AccessKey
+    Properties:
+      UserName:
+        Ref: ALIYUN::StackName
+  AcsCluster:
+    Type: ALIYUN::ACS::Cluster
+    Properties:
+      Name:
+        Ref: ALIYUN::StackName
+      EndpointPublicAccess: false
+      ComputeClass: gpu
+      ServiceCidr: 10.0.0.0/16
+      ClusterSpec: ack.pro.small
+      LoggingType: sls
+      SnatEntry: true
+      VSwitchIds:
+        - Ref: EcsVSwitch
+        - Ref: AcsVSwitch
+      VpcId:
+        Ref: Vpc
+      ZoneIds:
+        - Ref: EcsZoneId
+        - Ref: AcsZoneId
+      PodVSwitchIds:
+        - Ref: EcsVSwitch
+        - Ref: AcsVSwitch
+      ServiceDiscoveryTypes:
+        - CoreDNS
+      DeleteOptions:
+        - DeleteMode: delete
+          ResourceType: SLS_Data
+        - DeleteMode: delete
+          ResourceType: SLS_ControlPlane
+  ClusterApplication:
+    Type: ALIYUN::CS::ClusterApplication
+    DependsOn:
+      - AcsCluster
+      - AccessKey
+    Properties:
+      YamlContent:
+        Fn::Sub:
+          - |
+            apiVersion: v1
+            kind: Secret
+            metadata:
+              name: oss-secret
+              namespace: llm-model
+            stringData:
+              akId: ${AccessKeyId}
+              akSecret: ${AccessKeySecret}
+          - AccessKeyId:
+              Fn::GetAtt:
+                - AccessKey
+                - AccessKeyId
+            AccessKeySecret:
+              Fn::GetAtt:
+                - AccessKey
+                - AccessKeySecret
+      ClusterId:
+        Fn::GetAtt:
+          - AcsCluster
+          - ClusterId
+      DefaultNamespace: llm-model
+  EcsInstanceJumpBox:
+    Type: ALIYUN::ECS::InstanceGroup
+    Properties:
+      InstanceName:
+        Fn::Join:
+          - '-'
+          - - Ref: ALIYUN::StackName
+            - jumpbox
+      ImageId: '{{ EcsImageName }}'
+      InstanceType: 'ecs.u1-c1m2.xlarge'
+      ZoneId:
+        Ref: EcsZoneId
+      VpcId:
+        Ref: Vpc
+      VSwitchId:
+        Ref: EcsVSwitch
+      SecurityGroupId:
+        Ref: EcsSecurityGroup
+      AllocatePublicIP: false
+      Password:
+        Ref: LoginPassword
+      MaxAmount: 1
+      InstanceChargeType: PostPaid
+      SystemDiskSize: {{ SystemDiskSize }}
+      SystemDiskCategory: cloud_essd
+  RunAllCommands:
+    Type: ALIYUN::ECS::RunCommand
+    DependsOn:
+      - EcsInstanceJumpBox
+      - AcsCluster
+      - OSSBucket
+      - RandomApiKey
+      - ClusterApplication
+    Properties:
+      Sync: true
+      Type: RunShellScript
+      InstanceIds:
+        - Fn::Select:
+            - 0
+            - Fn::GetAtt:
+                - EcsInstanceJumpBox
+                - InstanceIds
+      Timeout: '86400'
+      CommandContent:
+        Fn::Sub:
+          - |
+            #!/bin/bash
+            exec > >(cat >>/tmp/deploy.log) 2> >(tee -a /tmp/deploy.log >&2)
+            set -e
+
+            # 安装kubectl
+            echo "Installing kubectl..."
+            {% raw %}wget "{{ computenest::file::kubectl }}" -O kubectl >> /tmp/deploy.log 2>&1{% endraw %}
+            install -o root -g root -m 0755 kubectl /usr/bin/kubectl >> /tmp/deploy.log 2>&1
+            chmod +x /usr/bin/kubectl
+            mkdir -p ~/.kube
+            echo '${kubeConfig}' >> ~/.kube/config
+            sleep 10
+
+            # 配置OSS
+            echo "Configuring OSS..."
+            {% raw %}wget "{{ computenest::file::ossutil }}" -O ossutil.zip >> /tmp/deploy.log 2>&1{% endraw %}
+            unzip ossutil.zip >> /tmp/deploy.log 2>&1
+            cd ossutil-2.1.0-linux-amd64
+            chmod 755 ossutil >> /tmp/deploy.log 2>&1
+            mv -f ossutil /usr/local/bin/ && sudo ln -sf /usr/local/bin/ossutil /usr/bin/ossutil >> /tmp/deploy.log 2>&1
+            cd ..
+
+            cat >> /usr/bin/oss.cfg <<EOF
+            [Credentials]
+            endpoint = oss-${regionId}-internal.aliyuncs.com
+            accessKeyID = ${accessKeyId}
+            accessKeySecret = ${accessKeySecret}
+            region = ${regionId}
+            EOF
+
+            sysctl -w net.ipv4.tcp_window_scaling=1
+            sysctl -w net.core.rmem_max=16777216
+            sysctl -w net.core.wmem_max=16777216
+
+            ossutil --config-file /usr/bin/oss.cfg cp -r /root/llm-model/{{ ModelName }} oss://${bucketName}/llm-model/{{ ModelName }} --ignore-existing | tee download.log
+
+            # 下载YAML文件
+            echo "Downloading YAML templates..."
+            wget "{{ "{{ computenest::file::template-j2 }}" }}" -O model.yaml
+
+            # 部署模型
+            DEPLOYMENT="{{ DeploymentName }}"
+{%- if SupportPPU %}
+
+            if [[ "${model}" == *"PPU"* ]]; then
+                echo "配置PPU资源..."
+                sed -i "s|\${!CPUAmount}|${cpuAmount}|g" model.yaml
+                sed -i "s|\${!Memory}|${memory}Gi|g" model.yaml
+            fi
+{%- endif %}
+
+            sed -i "s|\${!ModelName}|{{ ModelName }}|g" model.yaml
+            sed -i "s|\${!DeploymentName}|{{ DeploymentName }}|g" model.yaml
+            sed -i "s|\${!VllmApiKey}|${vllmApiKey}|g" model.yaml
+            sed -i "s|\${!RegionId}|${regionId}|g" model.yaml
+            sed -i "s|\${!GPUAmount}|${gpuAmount}|g" model.yaml
+            sed -i "s|\${!Label}|{{ DeploymentName }}|g" model.yaml
+            sed -i "s|\${!RegionId}|${regionId}|g" model.yaml
+            sed -i "s|\${!BucketName}|${bucketName}|g" model.yaml
+            sed -i "s|\${!AccessKeyId}|${accessKeyId}|g" model.yaml
+            sed -i "s|\${!AccessKeySecret}|${accessKeySecret}|g" model.yaml
+            kubectl apply -f model.yaml --validate=false
+
+            # 监控部署状态
+            echo "Monitoring deployment: $DEPLOYMENT"
+            NAMESPACE="llm-model"
+            MAX_ATTEMPTS=300
+            INTERVAL=20
+            SUCCESS=false
+
+            for ((i=1; i<=MAX_ATTEMPTS; i++)); do
+              POD=$(kubectl get pods -n "$NAMESPACE" -l app="$DEPLOYMENT" -o jsonpath='{.items[0].metadata.name}')
+              if [ -z "$POD" ]; then
+                  echo "Waiting for pod creation... ($i/$MAX_ATTEMPTS)"
+              else
+                  READY=$(kubectl get pod "$POD" -n "$NAMESPACE" -o jsonpath='{.status.containerStatuses[0].ready}')
+                  PHASE=$(kubectl get pod "$POD" -n "$NAMESPACE" -o jsonpath='{.status.phase}')
+                  if [[ "$READY" == "true" && "$PHASE" == "Running" ]]; then
+                      echo "Pod $POD is ready!"
+                      SUCCESS=true
+                      break
+                  else
+                      echo "Pod $POD status: $PHASE (Attempt $i/$MAX_ATTEMPTS)"
+                  fi
+              fi
+              sleep $INTERVAL
+            done
+
+            if [ "$SUCCESS" != "true" ]; then
+                echo "部署失败" >&2
+                exit 1
+            fi
+
+            # 等待服务IP
+            MAX_ATTEMPTS=90
+            INTERVAL=10
+            SERVICE_NAME="svc-private"
+            PRIVATE_IP=""
+            for ((i=1; i<=MAX_ATTEMPTS; i++)); do
+              PRIVATE_IP=$(kubectl get service "$SERVICE_NAME" -n "$NAMESPACE" -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+              if [[ -n "$PRIVATE_IP" && "$PRIVATE_IP" != "<pending>" ]]; then
+                echo "Private Service IP: $PRIVATE_IP" >&2
+                break
+              else
+                echo "Waiting for IP... (Attempt $i/$MAX_ATTEMPTS)" >&2
+                sleep $INTERVAL
+              fi
+            done
+
+            # 测试服务连通性
+            set +e
+            echo "Testing service connectivity..."
+            MAX_ATTEMPTS=20
+            INTERVAL=30
+            SUCCESS=false
+            for ((i=1; i<=MAX_ATTEMPTS; i++)); do
+              RESPONSE=$(curl --max-time 10 -s -w "%{http_code}" \
+                -X POST "http://$PRIVATE_IP:8000/v1/chat/completions" \
+                -H "Content-Type: application/json" \
+                -H "Authorization: Bearer ${vllmApiKey}" \
+                -d '{"model": "{{ ModelName }}", "messages": [{"role": "user", "content": "你是什么？"}], "max_tokens": 1, "temperature": 0, "top_p": 0.9, "seed": 10, "stream": true}' \
+                2>>/tmp/deploy.log)
+
+              curl_exit_code=$?
+              if [ $curl_exit_code -ne 0 ]; then
+                echo "curl 命令失败，重试..." >&2
+                sleep $INTERVAL
+                continue
+              fi
+
+              HTTP_CODE=${!RESPONSE: -3}
+              RESPONSE_BODY=${!RESPONSE%???}
+
+              if [[ "$HTTP_CODE" == "200" && -n "$RESPONSE_BODY" ]]; then
+                echo "服务测试成功" >&2
+                SUCCESS=true
+                break
+              else
+                echo "尝试 $i/$MAX_ATTEMPTS 失败 (HTTP 状态码: $HTTP_CODE)" >&2
+              fi
+
+              if [[ $i -lt $MAX_ATTEMPTS ]]; then
+                sleep $INTERVAL
+              fi
+            done
+
+            set -e
+            if [ "$SUCCESS" != "true" ]; then
+              echo "服务连通性测试失败" >&2
+              exit 1
+            fi
+          - kubeConfig:
+              Fn::GetAtt:
+                - AcsCluster
+                - PrivateUserKubConfig
+            accessKeyId:
+              Fn::GetAtt:
+                - AccessKey
+                - AccessKeyId
+            accessKeySecret:
+              Fn::GetAtt:
+                - AccessKey
+                - AccessKeySecret
+            regionId:
+              Ref: ALIYUN::Region
+            bucketName:
+              Fn::GetAtt:
+                - OSSBucket
+                - Name
+            model:
+              Ref: GPUType
+            vllmApiKey:
+              Fn::Join:
+                - '-'
+                - - 'sk'
+                  - Fn::GetAtt:
+                      - RandomApiKey
+                      - value
+            gpuAmount:
+              Ref: GPUAmount
+{%- if SupportPPU %}
+            cpuAmount:
+              Fn::FindInMap:
+                - ModelMapping
+                - PPU810E_CPUMap
+                - Ref: GPUAmount
+            memory:
+              Fn::FindInMap:
+                - ModelMapping
+                - PPU810E_MemoryMap
+                - Ref: GPUAmount
+{%- endif %}
+  RandomApiKey:
+    Type: ALIYUN::RandomString
+    Properties:
+      length: 29
+      character_classes:
+        - class: lowercase
+          min: 1
+        - class: digits
+          min: 1
+  PrivateIngressResources:
+    Type: DATASOURCE::CS::ClusterApplicationResources
+    DependsOn:
+      - RunAllCommands
+    Properties:
+      Namespace: llm-model
+      Kind: Service
+      FirstMatch: True
+      ApiVersion: v1
+      JsonPath: $.status.loadBalancer.ingress[0].ip
+      ClusterId:
+        Fn::GetAtt:
+          - AcsCluster
+          - ClusterId
+      Name: svc-private
+  PublicIngressResources:
+    Type: DATASOURCE::CS::ClusterApplicationResources
+    DependsOn:
+      - RunAllCommands
+    Properties:
+      Namespace: llm-model
+      Kind: Service
+      FirstMatch: True
+      ApiVersion: v1
+      JsonPath: $.status.loadBalancer.ingress[0].ip
+      ClusterId:
+        Fn::GetAtt:
+          - AcsCluster
+          - ClusterId
+      Name: svc-public
+{%- if SupportPPU %}
+Mappings:
+  ModelMapping:
+    PPU810E_CPUMap:
+      '1': 10
+      '2': 22
+      '4': 46
+      '8': 92
+      '16': 184
+    PPU810E_MemoryMap:
+      '1': 80
+      '2': 225
+      '4': 450
+      '8': 900
+      '16': 1800
+{%- endif %}
+Outputs:
+  ApiKey:
+    NoEcho: true
+    Label: "API Key"
+    Value:
+      Fn::Join:
+        - '-'
+        - - 'sk'
+          - Fn::GetAtt:
+              - RandomApiKey
+              - value
+  内网地址:
+    Label: 内网地址
+    Value:
+      Fn::Sub:
+        - 'http://${PrivateIp}:8000/v1/'
+        - PrivateIp:
+            Fn::GetAtt:
+              - PrivateIngressResources
+              - Response
+  公网地址:
+    Label: 公网地址
+    Value:
+      Fn::Sub:
+        - 'http://${PublicIp}:8000/v1/'
+        - PublicIp:
+            Fn::GetAtt:
+              - PublicIngressResources
+              - Response
+  Api调用示例:
+    Label: Api调用示例
+    Description: 通过以下命令发送HTTP请求即可访问推理服务，内网访问需保证在同一VPC下。
+    Value:
+      Fn::Sub:
+        - 'curl -X POST "http://${IP}:8000/v1/chat/completions" -H "Content-Type: application/json" -H "Authorization: Bearer ${VllmApiKey}" --data ''{ "model": "{{ ModelName }}", "stream": true, "messages": [ { "role": "user", "content": "Tell me the recipe for tea" } ] }'''
+        - IP:
+            Fn::GetAtt:
+              - PublicIngressResources
+              - Response
+          VllmApiKey:
+            Fn::Join:
+              - '-'
+              - - 'sk'
+                - Fn::GetAtt:
+                    - RandomApiKey
+                    - value
+  模型名称:
+    Label:
+      zh-ch: 模型名称
+      en: Model Name
+    Value: "{{ ModelName }}"
+Metadata:
+  ALIYUN::ROS::Interface:
+    ParameterGroups:
+      - Parameters:
+          - GPUType
+          - GPUAmount
+        Label:
+          en: Model Config
+          zh-cn: 模型配置
+      - Parameters:
+          - AcsZoneId
+          - EcsZoneId
+          - LoginPassword
+        Label:
+          en: Basic Configuration
+          zh-cn: 资源配置

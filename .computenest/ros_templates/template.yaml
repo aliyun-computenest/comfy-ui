@@ -9,6 +9,15 @@ Conditions:
       - True
       - Ref: SupportPublicAccess
 Parameters:
+  ModelSeries:
+    Type: String
+    Label:
+      en: Model Series
+      zh-cn: 模型系列
+    Default: WanX-2.1(I2V-14B,T2V-14B,VACE-1.3B and I2V-1.3B)
+    AllowedValues:
+      - WanX-2.1(I2V-14B,T2V-14B,VACE-1.3B and I2V-1.3B)
+      - WanX-2.2(I2V-14B,T2V-14B,ti2v-5B)
   SupportPublicAccess:
     Type: Boolean
     Label:
@@ -282,7 +291,11 @@ Resources:
         Ref: ZoneId
       SecurityGroupId:
         Ref: SecurityGroup
-      ImageId: ecs_image-comfy-ui
+      ImageId:
+        Fn::FindInMap:
+          - ModelMapping
+          - ModelImageMap
+          - Ref: ModelSeries
       Password:
         Fn::GetAtt:
           - RandomPassword
@@ -290,9 +303,12 @@ Resources:
       InstanceType:
         Ref: EcsInstanceType
       SystemDiskCategory: cloud_essd
-      SystemDiskSize: 250
+      SystemDiskSize:
+        Fn::FindInMap:
+          - ModelMapping
+          - ModelDiskSizeMap
+          - Ref: ModelSeries
       InternetMaxBandwidthOut: 5
-      IoOptimized: optimized
       MaxAmount: 1
   RunInstallCommand:
     Type: ALIYUN::ECS::RunCommand
@@ -308,6 +324,7 @@ Resources:
         Fn::Sub:
           - |
             sed -i '/custom_nodes/d' /root/application/comfy/docker-compose.yaml
+            sed -i '/- \/root\/storage\/input:\/root\/ComfyUI\/input/a\      - ./disabled-plugins/ComfyUI-ReActor:/root/ComfyUI/custom_nodes/ComfyUI-ReActor:ro' /root/application/comfy/docker-compose.yaml
             file_path="/etc/systemd/system/stable-diffusion-comfy.service"
             if [ ! -f "$file_path" ]; then
             cat > $file_path <<EOF
@@ -401,8 +418,30 @@ Resources:
             fi
             systemctl daemon-reload
             systemctl start stable-diffusion-comfy
+            MAX_ATTEMPTS=30
+            INTERVAL=10
+            for ((i=1; i<=MAX_ATTEMPTS; i++))
+              do
+                LATEST_LOG=$(docker compose logs 2>&1 | tail -n 10)
+                if echo "$LATEST_LOG" | grep -q "To see the GUI go to"
+                  then
+                    echo "success"
+                    exit 0
+                  else
+                    sleep $INTERVAL
+              fi
+            done
+
           - RegionId:
               Ref: ALIYUN::Region
+Mappings:
+  ModelMapping:
+    ModelImageMap:
+      'WanX-2.1(I2V-14B,T2V-14B,VACE-1.3B and I2V-1.3B)': ecs_image-comfy-ui
+      'WanX-2.2(I2V-14B,T2V-14B,ti2v-5B)': ecsImage-wanx22
+    ModelDiskSizeMap:
+      'WanX-2.1(I2V-14B,T2V-14B,VACE-1.3B and I2V-1.3B)': 250
+      'WanX-2.2(I2V-14B,T2V-14B,ti2v-5B)': 450
 Outputs:
   comfyui_address:
     Label:
@@ -458,8 +497,8 @@ Metadata:
           zh-cn: 付费类型配置
           en: "Payment Type Configuration"
       - Parameters:
+          - ModelSeries
           - EcsInstanceType
-          - InstancePassword
         Label:
           zh-cn: 资源配置
           en: "Resource Configuration"

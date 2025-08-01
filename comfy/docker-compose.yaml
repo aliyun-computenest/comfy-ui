@@ -15,7 +15,6 @@ services:
       - /root/storage/user_scripts:/root/ComfyUI/user_scripts
       - /root/storage/user:/root/ComfyUI/user
       - /root/storage/input:/root/ComfyUI/input
-      - /root/storage/custom_nodes:/root/ComfyUI/custom_nodessed -i '18d' /Users/liuyuhang/IdeaProjects/real/github2/stable-diffusion-comfy/comfy/docker-compose.yaml
     deploy:
       resources:
         reservations:
