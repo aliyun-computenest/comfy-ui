@@ -1,5 +1,5 @@
 # 使用原始镜像作为基础
-FROM compute-nest-registry.cn-hangzhou.cr.aliyuncs.com/computenest/wanx-acs:latest
+FROM mirrors-ssl.aliyuncs.com/compute-nest-registry.cn-hangzhou.cr.aliyuncs.com/computenest/wanx-acs:latest
 
 # 设置工作目录
 WORKDIR /workspace/pytorch
@@ -11,10 +11,11 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 # 复制并执行自定义节点安装脚本
-COPY download_custom_nodes_script.sh /tmp/
-RUN chmod +x /tmp/download_custom_nodes_script.sh && \
+COPY download_custom_nodes_script.sh /workspace/pytorch
+RUN chmod +x /workspace/pytorch/download_custom_nodes_script.sh && \
     cd /root && \
-    /tmp/download_custom_nodes_script.sh
+    /workspace/pytorch/download_custom_nodes_script.sh \
+
 RUN pip install --no-cache-dir \
     opencv-python-headless \
     scikit-learn \

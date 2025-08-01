@@ -73,7 +73,6 @@ clone https://github.com/rgthree/rgthree-comfy.git
 clone https://github.com/shiimizu/ComfyUI_smZNodes.git
 clone https://github.com/WASasquatch/was-node-suite-comfyui.git
 
-clone https://github.com/cubiq/PuLID_ComfyUI.git
 clone https://github.com/Fannovel16/comfyui_controlnet_aux.git
 clone https://github.com/florestefano1975/comfyui-portrait-master.git
 clone https://github.com/huchenlei/ComfyUI-layerdiffuse.git
@@ -84,7 +83,6 @@ clone https://github.com/twri/sdxl_prompt_styler.git
 
 # Video
 clone https://github.com/Fannovel16/ComfyUI-Frame-Interpolation.git
-clone https://github.com/Kosinkadink/ComfyUI-AnimateDiff-Evolved.git
 clone https://github.com/Kosinkadink/ComfyUI-VideoHelperSuite.git
 clone https://github.com/melMass/comfy_mtb.git
 

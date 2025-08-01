@@ -309,12 +309,13 @@ Resources:
               install -o root -g root -m 0755 kubectl /usr/bin/kubectl >> /tmp/deploy.log 2>&1
               chmod +x /usr/bin/kubectl
               echo "Configuring kubectl..."
-              mkdir -p ~/.kube
-              echo '${kubeConfig}' >> ~/.kube/config
-              sleep 10
+
             else
               echo "kubectl already installed."
             fi
+              mkdir -p ~/.kube
+              echo '${kubeConfig}' >> ~/.kube/config
+              sleep 10
             
             echo "Checking ossutil installation..."
             if ! command -v ossutil &> /dev/null; then
