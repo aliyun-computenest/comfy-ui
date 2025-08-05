@@ -1,0 +1,132 @@
+Service:
+  DeployType: ros
+  DeployMetadata:
+    SupplierDeployMetadata:
+      ArtifactRelation:
+        ecs_image-comfy-ui:
+          ArtifactId: ${Artifact.Artifact_1.ArtifactId}
+          ArtifactVersion: ${Artifact.Artifact_1.ArtifactVersion}
+        ecsImage-wanx22:
+          ArtifactId: ${Artifact.EcsImage2.ArtifactId}
+          ArtifactVersion: draft
+      SupplierTemplateConfigs:
+      - Name: ECS-Single
+        Url: ros_templates/template.yaml
+        PredefinedParameters: []
+        AllowedRegions:
+        - ap-southeast-1
+    TemplateConfigs:
+    - Name: ECS-Single
+      Url: 'ros_templates/template.yaml'
+
+      AllowedRegions:
+      - ap-southeast-1
+      PredefinedParameters: []
+      ArchitectureDiagramUrl: resources/architecture/architecture_ECS-Single.jpg
+      DeployScene: ECS
+      OutputConfigs:
+      - OutputKey: comfyui_address
+        EnableWebProxy: true
+    NetworkMetadata:
+      EnablePrivateVpcConnection: false
+      EnableReversePrivateVpcConnection: false
+    ServiceInstanceNameRule:
+      Prefix: comfyui-
+      UseDefaultValue: true
+    EnableManuallyPay: true
+    ResourcePayMode: ManuallyPay
+  OperationMetadata:
+    SupportBackup: false
+    PrometheusConfigMap:
+      ECS-Single:
+        EnablePrometheus: false
+    ModifyParametersConfig:
+    - TemplateName: ECS-Single
+      Operation:
+      - Name: Modify Ecs Instance Type
+        Description: Modify Ecs Instance Type
+        Type: Custom
+        SupportPredefinedParameters: false
+        EnableLogging: false
+        Parameters:
+        - EcsInstanceType
+  ServiceType: private
+  ServiceInfo:
+  - Agreements: []
+    Image: resources/icons/service_logo_zh-CN.png
+    Locale: zh-CN
+    Name: ComfyUI社区版
+    ShortDescription: 最强大的开源节点式生成式AI应用，支持创建图像、视频及音频内容。依托前沿开源模型实现视频与图像生成。
+    Softwares:
+    - Name: comfyui
+      Version: 0.3.44
+  - Agreements: []
+    Image: resources/icons/service_logo_en-US.png
+    Locale: en-US
+    Name: ComfyUI Community Edition
+    ShortDescription: The most powerful open-source node-based generative AI application,
+      supporting the creation of images, videos, and audio content. Leveraging cutting-edge
+      open-source models to achieve video and image generation.
+    Softwares:
+    - Name: comfyui
+      Version: 0.3.48
+  ShareType: Public
+  ApprovalType: Manual
+Artifact:
+  EcsImage:
+    ArtifactType: EcsImage
+    ArtifactName: ecs_image-comfy-ui
+    Description: ComfyUI ECS 镜像，预装 ComfyUI 环境
+    SupportRegionIds:
+    - ap-southeast-1
+    ArtifactBuildProperty:
+      CodeRepo:
+        Platform: github
+        Owner: LYH-RAIN
+        RepoName: aliyun-computenest/comfy-ui
+        Branch: main
+      RegionId: ap-southeast-1
+      CommandType: RunShellScript
+      SourceImageId: "m-t4n0mt2ukwl9ttpmctiq"
+      Timeout: 7200
+      EnableGpu: true
+      SystemDiskSize: 250
+      CommandContent: |-
+        mkdir -p /root/application
+        if [ -e "/root/code/comfy" ]; then cp -r "/root/code/comfy" "/root/application/"; fi
+        if [ -e "/root/code/.env" ]; then cp -r "/root/code/.env" "/root/application/"; fi
+        cd /root/application
+        sed -i 's/pull_policy: always/pull_policy: if_not_present/g' comfy/docker-compose.yaml
+        docker compose -f comfy/docker-compose.yaml build 2>&1 | stdbuf -oL grep -viE 'Downloading|sha256|extracting|KiB|Downloaded';
+        docker compose -f comfy/docker-compose.yaml pull 2>&1 | stdbuf -oL grep -viE 'Downloading|sha256|extracting|KiB|Downloaded' || true;
+  EcsImage2:
+    ArtifactType: EcsImage
+    ArtifactName: "ecsImage-wanx22"
+    Description: ComfyUI WanX-2.2(I2V-14B,T2V-14B,ti2v-5B) 镜像，预装 ComfyUI 环境
+    SupportRegionIds:
+    - ap-southeast-1
+    - cn-hangzhou
+    - cn-beijing
+    - cn-wulanchabu
+    - cn-shanghai
+    - cn-shenzhen
+    - cn-guangzhou
+    - cn-hongkong
+    - ap-northeast-1
+    - ap-northeast-2
+    - ap-southeast-7
+    - eu-central-1
+    ArtifactProperty:
+      RegionId: ap-southeast-1
+    ArtifactBuildProperty:
+      EnableGpu: true
+      RegionId: ap-southeast-1
+      SourceImageId: "m-t4nf4f7uvrdnqf76vela"
+      SystemDiskSize: 450
+      CommandType: RunShellScript
+      Timeout: 14400
+      CommandContent: |-
+        cd /root/application
+        sed -i 's/pull_policy: always/pull_policy: if_not_present/g' comfy/docker-compose.yaml
+        docker compose -f comfy/docker-compose.yaml build 2>&1 | stdbuf -oL grep -viE 'Downloading|sha256|extracting|KiB|Downloaded';
+        docker compose -f comfy/docker-compose.yaml pull 2>&1 | stdbuf -oL grep -viE 'Downloading|sha256|extracting|KiB|Downloaded' || true;
