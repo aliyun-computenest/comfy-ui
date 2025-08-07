@@ -3,9 +3,12 @@ Service:
   DeployMetadata:
     SupplierDeployMetadata:
       ArtifactRelation:
+        docker_image-comfy-ui:
+          ArtifactId: ${Artifact.DockerImage.ArtifactId}
+          ArtifactVersion: draft
         ecs_image-comfy-ui:
-          ArtifactId: ${Artifact.Artifact_1.ArtifactId}
-          ArtifactVersion: ${Artifact.Artifact_1.ArtifactVersion}
+          ArtifactId: ${Artifact.EcsImage1.ArtifactId}
+          ArtifactVersion: ${Artifact.EcsImage1.ArtifactVersion}
         ecsImage-wanx22:
           ArtifactId: ${Artifact.EcsImage2.ArtifactId}
           ArtifactVersion: draft
@@ -59,7 +62,7 @@ Service:
     ShortDescription: 最强大的开源节点式生成式AI应用，支持创建图像、视频及音频内容。依托前沿开源模型实现视频与图像生成。
     Softwares:
     - Name: comfyui
-      Version: 0.3.44
+      Version: 0.3.48
   - Agreements: []
     Image: resources/icons/service_logo_en-US.png
     Locale: en-US
@@ -73,12 +76,32 @@ Service:
   ShareType: Public
   ApprovalType: Manual
 Artifact:
+  DockerImage:
+    ArtifactType: AcrImage
+    ArtifactBuildType: Dockerfile
+    ArtifactName: docker_image-comfy-ui
+    Description: ComfyUI Docker 镜像，用于容器化部署
+    ArtifactProperty:
+      RegionId: ap-southeast-1
+      RepoName: comfy-ui
+      Tag: latest
+    ArtifactBuildProperty:
+      RegionId: ap-southeast-1
+      SystemDiskSize: 100
+      CodeRepo:
+        Platform: github
+        Owner: LYH-RAIN
+        RepoName: aliyun-computenest/comfy-ui
+        Branch: main
+      DockerfilePath: Dockerfile
   EcsImage:
     ArtifactType: EcsImage
     ArtifactName: ecs_image-comfy-ui
     Description: ComfyUI ECS 镜像，预装 ComfyUI 环境
     SupportRegionIds:
     - ap-southeast-1
+    ArtifactProperty:
+      RegionId: ap-southeast-1  # ✅ 添加
     ArtifactBuildProperty:
       CodeRepo:
         Platform: github
@@ -129,7 +152,6 @@ Artifact:
         mkdir -p /root/application
         if [ -e "/root/code/comfy" ]; then cp -r "/root/code/comfy" "/root/application/"; fi
         if [ -e "/root/code/.env" ]; then cp -r "/root/code/.env" "/root/application/"; fi
-        cd /root/application
         cd /root/application
         sed -i 's/pull_policy: always/pull_policy: if_not_present/g' comfy/docker-compose.yaml
         docker compose -f comfy/docker-compose.yaml build 2>&1 | stdbuf -oL grep -viE 'Downloading|sha256|extracting|KiB|Downloaded';
