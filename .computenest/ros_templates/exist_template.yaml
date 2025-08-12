@@ -73,6 +73,7 @@ Parameters:
     AllowedValues:
       - WanX-2.1(I2V-14B,T2V-14B,VACE-1.3B and I2V-1.3B)
       - WanX-2.2(I2V-14B,T2V-14B,TI2v-5B)
+      - Qwen-Image(VL-Chat-7B)
   GpuSeries:
     Type: String
     Label:
@@ -339,7 +340,7 @@ Resources:
             echo "支持的GPU系列: GU8TF, P16EN"
               exit 1
               ;;
-              esac            
+              esac 
             cat ${!CONFIG_FILE} && kubectl apply -f ${!CONFIG_FILE} --validate=false
             echo "Monitoring deployment: $DEPLOYMENT"
             NAMESPACE="default"
@@ -510,9 +511,11 @@ Mappings:
     ModelImageMap:
       'WanX-2.1(I2V-14B,T2V-14B,VACE-1.3B and I2V-1.3B)': ecs_image-comfy-ui
       'WanX-2.2(I2V-14B,T2V-14B,TI2v-5B)': ecsImage-wanx22
+      'Qwen-Image(VL-Chat-7B)': ecs_image-qwen-image
     ModelDiskSizeMap:
       'WanX-2.1(I2V-14B,T2V-14B,VACE-1.3B and I2V-1.3B)': 250
       'WanX-2.2(I2V-14B,T2V-14B,TI2v-5B)': 450
+      'Qwen-Image(VL-Chat-7B)': 300
 
 Outputs:
   comfyui_address:

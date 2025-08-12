@@ -18,6 +18,7 @@ Parameters:
     AllowedValues:
       - WanX-2.1(I2V-14B,T2V-14B,VACE-1.3B and I2V-1.3B)
       - WanX-2.2(I2V-14B,T2V-14B,TI2v-5B)
+      - Qwen-Image
   SupportPublicAccess:
     Type: Boolean
     Label:
@@ -323,11 +324,50 @@ Resources:
       CommandContent:
         Fn::Sub:
           - |
-            sed -i '/custom_nodes/d' /root/application/comfy/docker-compose.yaml
-            sed -i '/- \/root\/storage\/input:\/root\/ComfyUI\/input/a\      - ./disabled-plugins/ComfyUI-ReActor:/root/ComfyUI/custom_nodes/ComfyUI-ReActor:ro' /root/application/comfy/docker-compose.yaml
+            # 添加调试信息
+            echo "=== Debug: Checking docker-compose.yaml locations ==="         
+            # 检查并设置docker-compose文件路径
+            COMPOSE_FILE_PATH=""
+            WORKING_DIR=""
+            COMPOSE_FILE=""
+            
+            if [ -f "/root/application/comfy/docker-compose.yaml" ]; then
+                echo "Found docker-compose.yaml in /root/application/comfy/"
+                COMPOSE_FILE_PATH="/root/application/comfy/docker-compose.yaml"
+                WORKING_DIR="/root/application"
+                COMPOSE_FILE="comfy/docker-compose.yaml"
+            elif [ -f "/root/comfy-ui/comfy/docker-compose.yaml" ]; then
+                echo "Found docker-compose.yaml in /root/comfy-ui/comfy/"
+                COMPOSE_FILE_PATH="/root/comfy-ui/comfy/docker-compose.yaml"
+                WORKING_DIR="/root/comfy-ui"
+                COMPOSE_FILE="comfy/docker-compose.yaml"
+            else
+                echo "Error: docker-compose.yaml not found in expected locations"
+                echo "Checked locations:"
+                echo "  - /root/application/comfy/docker-compose.yaml"
+                echo "  - /root/comfy-ui/comfy/docker-compose.yaml"
+                exit 1
+            fi
+            
+            echo "Selected configuration:"
+            echo "  COMPOSE_FILE_PATH: $COMPOSE_FILE_PATH"
+            echo "  WORKING_DIR: $WORKING_DIR"
+            echo "  COMPOSE_FILE: $COMPOSE_FILE"
+            
+            # 验证工作目录存在
+            if [ ! -d "$WORKING_DIR" ]; then
+                echo "Error: Working directory $WORKING_DIR does not exist"
+                exit 1
+            fi
+            
+            # 修改sed命令以使用检测到的路径
+            sed -i '/custom_nodes/d' "$COMPOSE_FILE_PATH"
+            sed -i '/- \/root\/storage\/input:\/root\/ComfyUI\/input/a\      - ./disabled-plugins/ComfyUI-ReActor:/root/ComfyUI/custom_nodes/ComfyUI-ReActor:ro' "$COMPOSE_FILE_PATH"
+            
             file_path="/etc/systemd/system/stable-diffusion-comfy.service"
             if [ ! -f "$file_path" ]; then
-            cat > $file_path <<EOF
+                echo "Creating systemd service file..."
+                cat > $file_path <<EOF
             [Unit]
             Description=Docker Compose Application Service
             Requires=docker.service
@@ -336,107 +376,140 @@ Resources:
             [Service]
             Type=oneshot
             RemainAfterExit=yes
-            WorkingDirectory=/root/application
-            ExecStart=/bin/bash -c '/usr/bin/docker compose -f comfy/docker-compose.yaml up -d && /usr/local/bin/check-container-status'
-
-            ExecStop=/usr/bin/docker compose down
+            WorkingDirectory=$WORKING_DIR
+            ExecStart=/bin/bash -c 'cd $WORKING_DIR && /usr/bin/docker compose -f $COMPOSE_FILE up -d && /usr/local/bin/check-container-status'
+            ExecStop=/bin/bash -c 'cd $WORKING_DIR && /usr/bin/docker compose -f $COMPOSE_FILE down'
             TimeoutStartSec=0
 
             [Install]
             WantedBy=multi-user.target
             EOF
-            # 创建状态检查脚本
-            cat > /usr/local/bin/check-container-status <<'EOF'
+                
+                # 创建状态检查脚本
+                cat > /usr/local/bin/check-container-status <<'EOF'
             #!/bin/bash
-            COMPOSE_FILE="comfy/docker-compose.yaml"
+            # 动态检测compose文件路径
+            if [ -f "/root/application/comfy/docker-compose.yaml" ]; then
+                COMPOSE_FILE="comfy/docker-compose.yaml"
+                WORKING_DIR="/root/application"
+            elif [ -f "/root/comfy-ui/comfy/docker-compose.yaml" ]; then
+                COMPOSE_FILE="comfy/docker-compose.yaml"
+                WORKING_DIR="/root/comfy-ui"
+            else
+                echo "Error: docker-compose.yaml not found in expected locations"
+                exit 1
+            fi
+
+            echo "check-container-status: Using WORKING_DIR=$WORKING_DIR, COMPOSE_FILE=$COMPOSE_FILE"
+
+            cd "$WORKING_DIR" || {
+                echo "Error: Cannot change to directory $WORKING_DIR"
+                exit 1
+            }
+
             MAX_WAIT_TIME=3600
             CHECK_INTERVAL=10
-            
+
             if ! command -v docker compose &> /dev/null; then
-            echo "Error: docker compose is not installed"
-            exit 1
+                echo "Error: docker compose is not installed"
+                exit 1
             fi
-            
+
             SERVICES=$(docker compose -f "$COMPOSE_FILE" config --services 2>/dev/null)
             if [ -z "$SERVICES" ]; then
-            echo "Error: No services found"
-            exit 1
+                echo "Error: No services found in $COMPOSE_FILE"
+                exit 1
             fi
-            
+
             WAIT_TIME=0
-            TIMEOUT_REACHED=false
-            
+
             while [ $WAIT_TIME -le $MAX_WAIT_TIME ]; do
-            ALL_HEALTHY=true
-            for SERVICE in $SERVICES; do
-            CONTAINER_ID=$(docker compose -f "$COMPOSE_FILE" ps -q "$SERVICE")
-            
-            if [ -z "$CONTAINER_ID" ]; then
-            echo "[$SERVICE] Not running"
-            ALL_HEALTHY=false
-            continue
-            fi
-            
-            INSPECT_OUTPUT=$(docker inspect --format \
-            '{{.State.Status}} {{if .State.Health}}{{.State.Health.Status}}{{else}}no-healthcheck{{end}}' \
-            "$CONTAINER_ID" 2>/dev/null)
-            
-            STATUS=$(echo "$INSPECT_OUTPUT" | awk '{print $1}')
-            HEALTH_STATUS=$(echo "$INSPECT_OUTPUT" | awk '{print $2}')
-            
-            case "$HEALTH_STATUS" in
-            "healthy") ;;
-            "unhealthy"|"starting")
-            echo "[$SERVICE] Unhealthy: $HEALTH_STATUS"
-            ALL_HEALTHY=false
-            ;;
-            "no-healthcheck")
-            [ "$STATUS" != "running" ] && ALL_HEALTHY=false
-            ;;
-            *)
-            echo "[$SERVICE] Unknown status: $HEALTH_STATUS"
-            ALL_HEALTHY=false
-            ;;
-            esac
+                ALL_HEALTHY=true
+                for SERVICE in $SERVICES; do
+                    CONTAINER_ID=$(docker compose -f "$COMPOSE_FILE" ps -q "$SERVICE")
+                    
+                    if [ -z "$CONTAINER_ID" ]; then
+                        echo "[$SERVICE] Not running"
+                        ALL_HEALTHY=false
+                        continue
+                    fi
+                    
+                    INSPECT_OUTPUT=$(docker inspect --format \
+                        '{{.State.Status}} {{if .State.Health}}{{.State.Health.Status}}{{else}}no-healthcheck{{end}}' \
+                        "$CONTAINER_ID" 2>/dev/null)
+                    
+                    STATUS=$(echo "$INSPECT_OUTPUT" | awk '{print $1}')
+                    HEALTH_STATUS=$(echo "$INSPECT_OUTPUT" | awk '{print $2}')
+                    
+                    case "$HEALTH_STATUS" in
+                        "healthy") ;;
+                        "unhealthy"|"starting")
+                            echo "[$SERVICE] Unhealthy: $HEALTH_STATUS"
+                            ALL_HEALTHY=false
+                            ;;
+                        "no-healthcheck")
+                            [ "$STATUS" != "running" ] && ALL_HEALTHY=false
+                            ;;
+                        *)
+                            echo "[$SERVICE] Unknown status: $HEALTH_STATUS"
+                            ALL_HEALTHY=false
+                            ;;
+                    esac
+                done
+                
+                $ALL_HEALTHY && exit 0
+                [ $WAIT_TIME -ge $MAX_WAIT_TIME ] && break
+                
+                sleep $CHECK_INTERVAL
+                WAIT_TIME=$((WAIT_TIME + CHECK_INTERVAL))
             done
-            
-            $ALL_HEALTHY && exit 0
-            [ $WAIT_TIME -ge $MAX_WAIT_TIME ] && break
-            
-            sleep $CHECK_INTERVAL
-            WAIT_TIME=$((WAIT_TIME + CHECK_INTERVAL))
-            done
-            
+
             echo "Timeout reached! Abnormal services:" >&2
             docker compose -f "$COMPOSE_FILE" ps --all
             exit 1
             EOF
-            
-            chmod +x /usr/local/bin/check-container-status
-            systemctl enable stable-diffusion-comfy
-            
+                
+                chmod +x /usr/local/bin/check-container-status
+                systemctl enable stable-diffusion-comfy
+                echo "Systemd service created and enabled"
+            else
+                echo "Systemd service file already exists"
             fi
+            
             systemctl daemon-reload
+            echo "Starting stable-diffusion-comfy service..."
             systemctl start stable-diffusion-comfy
-
-            # 定义变量 - 缩短间隔时间
-              MAX_ATTEMPTS=60  # 增加尝试次数
-              INTERVAL=2       # 缩短到2秒间隔              
-              # 修复最后的检查循环
-              cd /root/application
-              
-              echo "Waiting for ComfyUI to start..."
-              for ((i=1; i<=MAX_ATTEMPTS; i++)); do
-                # 检查所有日志，不只是最后10行
-                ALL_LOGS=$(docker compose -f comfy/docker-compose.yaml logs 2>&1)
-              
+            
+            # 检查服务状态
+            sleep 2
+            systemctl status stable-diffusion-comfy --no-pager || true
+            
+            # 等待ComfyUI启动
+            MAX_ATTEMPTS=60
+            INTERVAL=2
+            
+            echo "Waiting for ComfyUI to start..."
+            cd "$WORKING_DIR"
+            
+            for ((i=1; i<=MAX_ATTEMPTS; i++)); do
+                echo "Attempt $i/$MAX_ATTEMPTS..."
+                ALL_LOGS=$(docker compose -f "$COMPOSE_FILE" logs 2>&1)
+                
                 if echo "$ALL_LOGS" | grep -q "To see the GUI go to"; then
                     echo "Success: ComfyUI is ready!"
-                    # 显示成功的具体信息
                     echo "$ALL_LOGS" | grep "To see the GUI go to"
                     exit 0
                 fi
-              done
+                
+                sleep $INTERVAL
+            done
+            
+            echo "Timeout waiting for ComfyUI to start"
+            echo "Final service status:"
+            systemctl status stable-diffusion-comfy --no-pager || true
+            echo "Final docker compose status:"
+            docker compose -f "$COMPOSE_FILE" ps || true
+            exit 1
           - RegionId:
               Ref: ALIYUN::Region
 Mappings:
@@ -444,9 +517,11 @@ Mappings:
     ModelImageMap:
       'WanX-2.1(I2V-14B,T2V-14B,VACE-1.3B and I2V-1.3B)': ecs_image-comfy-ui
       'WanX-2.2(I2V-14B,T2V-14B,TI2v-5B)': ecsImage-wanx22
+      'Qwen-Image': ecs_image-qwen-image
     ModelDiskSizeMap:
       'WanX-2.1(I2V-14B,T2V-14B,VACE-1.3B and I2V-1.3B)': 250
       'WanX-2.2(I2V-14B,T2V-14B,TI2v-5B)': 450
+      'Qwen-Image': 250
 Outputs:
   comfyui_address:
     Label:
