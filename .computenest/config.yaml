@@ -292,7 +292,6 @@ ImageBuilder:
     VSwitchId: vsw-rj9wfxe0xx54ns5jkf1vx
     ZoneId: us-west-1b
     SecurityGroupId: sg-rj9iptmngm2nd6fxtnnt
-    TargetImageName: ecs_image-qwen-image
     SystemDiskSize: 250
     InstanceType: ecs.gn6i-c4g1.xlarge
     CommandType: RunShellScript
