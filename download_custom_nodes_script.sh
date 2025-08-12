@@ -40,9 +40,13 @@ function clone () {
       set -e ;
 }
 
-
 cd /workspace/pytorch
-clone https://github.com/comfyanonymous/ComfyUI.git
+if [ -d "ComfyUI" ]; then
+    cd ComfyUI && git pull origin main && cd ..
+else
+    clone https://github.com/comfyanonymous/ComfyUI.git
+fi
+
 cd /workspace/pytorch/ComfyUI
 pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
 cd /workspace/pytorch/ComfyUI/custom_nodes
