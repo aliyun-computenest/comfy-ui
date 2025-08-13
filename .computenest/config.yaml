@@ -51,6 +51,9 @@ Service:
         ArchitectureDiagramUrl: resources/architecture/architecture.jpg
         AllowedRegions:
         - ap-southeast-1
+        - cn-hangzhou
+        - cn-beijing
+        - cn-shanghai
         PredefinedParameters:
         - Name: 试用套餐
           Parameters:
@@ -88,9 +91,6 @@ Service:
         ecs_image-qwen-image:
           ArtifactId: ${Artifact.EcsImageQwen.ArtifactId}
           ArtifactVersion: draft
-        docker_image-comfy-ui:
-          ArtifactId: ${Artifact.DockerImage.ArtifactId}
-          ArtifactVersion: draft
       FileArtifactRelation:
         '{{ computenest::file::kubectl }}':
           ArtifactId: ${Artifact.KubectlFile.ArtifactId}
@@ -107,16 +107,9 @@ Service:
       ArchitectureDiagramUrl: resources/architecture/architecture.jpg
       AllowedRegions:
       - ap-southeast-1
+      - cn-hangzhou
       - cn-beijing
-      - cn-wulanchabu
       - cn-shanghai
-      - cn-shenzhen
-      - cn-guangzhou
-      - cn-hongkong
-      - ap-northeast-1
-      - ap-northeast-2
-      - ap-southeast-7
-      - eu-central-1
       PredefinedParameters:
       - Name: 试用套餐
         Parameters:
@@ -187,108 +180,40 @@ Service:
     Softwares:
     - name: comfyui
       version: 0.3.44
-Artifact:
-  DockerImage:
-    ArtifactType: AcrImage
-    ArtifactBuildType: Dockerfile
-    ArtifactName: docker_image-comfy-ui
-    Description: ComfyUI Docker 镜像，用于容器化部署
-    ArtifactProperty:
-      RegionId: ap-southeast-1
-      RepoName: comfy-ui
-      Tag: latest
-    ArtifactBuildProperty:
-      RegionId: ap-southeast-1
-      SystemDiskSize: 100
-      CodeRepo:
-        Platform: github
-        Owner: LYH-RAIN
-        RepoName: aliyun-computenest/comfy-ui
-        Branch: main
-      DockerfilePath: Dockerfile
-  EcsImage:
-    ArtifactType: EcsImage
-    ArtifactName: "ecs_image-comfy-ui"
-    Description: ComfyUI WanX-2.1(I2V-14B,T2V-14B,VACE-1.3B and I2V-1.3B) 镜像，预装 ComfyUI
-      环境
-    SupportRegionIds: &id001
-    - ap-southeast-1
-    - cn-hangzhou
-    - cn-beijing
-    - cn-wulanchabu
-    - cn-shanghai
-    - cn-shenzhen
-    - cn-guangzhou
-    - cn-hongkong
-    - ap-northeast-1
-    - ap-northeast-2
-    - ap-southeast-7
-    - eu-central-1
-    ArtifactProperty:
-      RegionId: ap-southeast-1
-    ArtifactBuildProperty:
-      EnableGpu: true
-      RegionId: ap-southeast-1
-      SourceImageId: "aliyun/services/computenest/images/ai/video/wan_2_1"
-      SystemDiskSize: 250
-      CommandType: RunShellScript
-      Timeout: 7200
-      CommandContent: |-
-        cd /root/application
-        sed -i 's/pull_policy: always/pull_policy: if_not_present/g' comfy/docker-compose.yaml
-        docker compose -f comfy/docker-compose.yaml build --no-cache 2>&1 | stdbuf -oL grep -viE 'Downloading|sha256|extracting|KiB|Downloaded';
-        docker compose -f comfy/docker-compose.yaml pull 2>&1 | stdbuf -oL grep -viE 'Downloading|sha256|extracting|KiB|Downloaded' || true;
-  EcsImage2:
-    ArtifactType: EcsImage
-    ArtifactName: "ecsImage-wanx22"
-    Description: ComfyUI WanX-2.2(I2V-14B,T2V-14B,ti2v-5B) 镜像，预装 ComfyUI 环境
-    SupportRegionIds: *id001
-    ArtifactProperty:
-      RegionId: ap-southeast-1
-    ArtifactBuildProperty:
-      EnableGpu: true
-      RegionId: ap-southeast-1
-      SourceImageId: "m-t4ndzbkkeou8ee8j3xh4"
-      SystemDiskSize: 450
-      CommandType: RunShellScript
-      Timeout: 14400
-      CommandContent: |-
-        cd /root/application
-        sed -i 's/pull_policy: always/pull_policy: if_not_present/g' comfy/docker-compose.yaml
-        docker compose -f comfy/docker-compose.yaml build --no-cache 2>&1 | stdbuf -oL grep -viE 'Downloading|sha256|extracting|KiB|Downloaded';
-        docker compose -f comfy/docker-compose.yaml pull 2>&1 | stdbuf -oL grep -viE 'Downloading|sha256|extracting|KiB|Downloaded' || true;
-  EcsImageQwen:
-    ArtifactType: EcsImage
-    ArtifactName: "ecs_image-qwen-image"
-    Description: ComfyUI Qwen-Image 镜像，预装 ComfyUI 和 Qwen-Image 模型环境
-    SupportRegionIds:
-    - us-west-1
-    ArtifactProperty:
-      RegionId: ${ImageBuilder.QwenImageBuilder.RegionId}
-      ImageId: ${ImageBuilder.QwenImageBuilder.SourceImageId}
-  KubectlFile:
-    ArtifactType: File
-    ArtifactName: kubectl_linux
-    Description: kubectl linux amd64
-    ArtifactProperty:
-      Url: resources/artifact_resources/file/kubectl
-  WanxResource:
-    ArtifactType: File
-    ArtifactName: wanx-resource
-    Description: 万相资源包
-    ArtifactProperty:
-      Url: resources/artifact_resources/file/wanx-resource.tar.gz
-  OssutilFile:
-    ArtifactType: File
-    ArtifactName: ossutil
-    Description: ossutil 2.0 工具包
-    ArtifactProperty:
-      Url: resources/artifact_resources/file/ossutil-2.1.0-linux-amd64.zip
-
 ImageBuilder:
-  QwenImageBuilder:
+  EcsImageComfyUI:
+    RegionId: ap-southeast-1
+    SourceImageId: m-t4n2o7cpjhicq9i0vivn
+    SystemDiskSize: 250
+    InstanceType: ecs.gn7i-c8g1.2xlarge
+    InternetMaxBandwidthOut: 100
+    CommandType: RunShellScript
+    Timeout: 7200
+    CommandContent: |-
+      git clone https://github.com/aliyun-computenest/comfy-ui.git
+      cd comfy-ui/
+      sed -i 's/pull_policy: always/pull_policy: if_not_present/g' comfy/docker-compose.yaml
+      docker compose -f comfy/docker-compose.yaml build --no-cache 2>&1 | stdbuf -oL grep -viE 'Downloading|sha256|extracting|KiB|Downloaded';
+      docker compose -f comfy/docker-compose.yaml pull 2>&1 | stdbuf -oL grep -viE 'Downloading|sha256|extracting|KiB|Downloaded' || true;
+
+  EcsImageWanx22:
+    RegionId: ap-southeast-1
+    SourceImageId: m-t4n31aqxq7nspdkha3ae
+    SystemDiskSize: 450
+    InstanceType: ecs.gn7i-c8g1.2xlarge
+    InternetMaxBandwidthOut: 100
+    CommandType: RunShellScript
+    Timeout: 14400
+    CommandContent: |-
+      git clone https://github.com/aliyun-computenest/comfy-ui.git
+      cd comfy-ui/
+      sed -i 's/pull_policy: always/pull_policy: if_not_present/g' comfy/docker-compose.yaml
+      docker compose -f comfy/docker-compose.yaml build --no-cache 2>&1 | stdbuf -oL grep -viE 'Downloading|sha256|extracting|KiB|Downloaded';
+      docker compose -f comfy/docker-compose.yaml pull 2>&1 | stdbuf -oL grep -viE 'Downloading|sha256|extracting|KiB|Downloaded' || true;
+
+  EcsImageQwen:
     RegionId: us-west-1
-    SourceImageId: m-rj9hztrcp8hos70lyxns
+    SourceImageId: "m-rj9hztrcp8hos70lyxns"
     VSwitchId: vsw-rj9wfxe0xx54ns5jkf1vx
     ZoneId: us-west-1b
     SecurityGroupId: sg-rj9iptmngm2nd6fxtnnt
@@ -305,3 +230,62 @@ ImageBuilder:
       sed -i 's/pull_policy: always/pull_policy: if_not_present/g' comfy/docker-compose.yaml
       docker compose -f comfy/docker-compose.yaml build --no-cache 2>&1 | stdbuf -oL grep -viE 'Downloading|sha256|extracting|KiB|Downloaded';
       docker compose -f comfy/docker-compose.yaml pull 2>&1 | stdbuf -oL grep -viE 'Downloading|sha256|extracting|KiB|Downloaded' || true;
+
+Artifact:
+  EcsImage:
+    ArtifactType: EcsImage
+    ArtifactName: "ecs_image-comfy-ui"
+    Description: ComfyUI WanX-2.1(I2V-14B,T2V-14B,VACE-1.3B and I2V-1.3B) 镜像，预装 ComfyUI
+      环境
+    SupportRegionIds:
+    - ap-southeast-1
+    - cn-hangzhou
+    - cn-beijing
+    - cn-shanghai
+    ArtifactProperty:
+      RegionId: ${ImageBuilder.EcsImageComfyUI.RegionId}
+      ImageId: ${ImageBuilder.EcsImageComfyUI.SourceImageId}
+
+  EcsImage2:
+    ArtifactType: EcsImage
+    ArtifactName: "ecsImage-wanx22"
+    Description: ComfyUI WanX-2.2(I2V-14B,T2V-14B,ti2v-5B) 镜像，预装 ComfyUI 环境
+    SupportRegionIds:
+    - ap-southeast-1
+    - cn-hangzhou
+    - cn-beijing
+    - cn-shanghai
+    ArtifactProperty:
+      RegionId: ${ImageBuilder.EcsImageWanx22.RegionId}
+      ImageId: ${ImageBuilder.EcsImageWanx22.SourceImageId}
+
+  EcsImageQwen:
+    ArtifactType: EcsImage
+    ArtifactName: "ecs_image-qwen-image"
+    Description: ComfyUI Qwen-Image 镜像，预装 ComfyUI 和 Qwen-Image 模型环境
+    SupportRegionIds:
+    - us-west-1
+    ArtifactProperty:
+      RegionId: ${ImageBuilder.EcsImageQwen.RegionId}
+      ImageId: ${ImageBuilder.EcsImageQwen.SourceImageId}
+
+  KubectlFile:
+    ArtifactType: File
+    ArtifactName: kubectl_linux
+    Description: kubectl linux amd64
+    ArtifactProperty:
+      Url: resources/artifact_resources/file/kubectl
+
+  WanxResource:
+    ArtifactType: File
+    ArtifactName: wanx-resource
+    Description: 万相资源包
+    ArtifactProperty:
+      Url: resources/artifact_resources/file/wanx-resource.tar.gz
+
+  OssutilFile:
+    ArtifactType: File
+    ArtifactName: ossutil
+    Description: ossutil 2.0 工具包
+    ArtifactProperty:
+      Url: resources/artifact_resources/file/ossutil-2.1.0-linux-amd64.zip
