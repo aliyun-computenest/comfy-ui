@@ -7,10 +7,13 @@ Service:
           ArtifactId: ${Artifact.DockerImage.ArtifactId}
           ArtifactVersion: draft
         ecs_image-comfy-ui:
-          ArtifactId: ${Artifact.EcsImage1.ArtifactId}
-          ArtifactVersion: ${Artifact.EcsImage1.ArtifactVersion}
+          ArtifactId: ${Artifact.EcsImage.ArtifactId}
+          ArtifactVersion: draft
         ecsImage-wanx22:
           ArtifactId: ${Artifact.EcsImage2.ArtifactId}
+          ArtifactVersion: draft
+        ecs_image-qwen-image:
+          ArtifactId: ${Artifact.EcsImageQwen.ArtifactId}
           ArtifactVersion: draft
       SupplierTemplateConfigs:
       - Name: ECS-Single
@@ -62,7 +65,7 @@ Service:
     ShortDescription: 最强大的开源节点式生成式AI应用，支持创建图像、视频及音频内容。依托前沿开源模型实现视频与图像生成。
     Softwares:
     - Name: comfyui
-      Version: 0.3.48
+      Version: 0.3.49
   - Agreements: []
     Image: resources/icons/service_logo_en-US.png
     Locale: en-US
@@ -72,7 +75,7 @@ Service:
       open-source models to achieve video and image generation.
     Softwares:
     - Name: comfyui
-      Version: 0.3.48
+      Version: 0.3.49
   ShareType: Public
   ApprovalType: Manual
 Artifact:
@@ -94,65 +97,119 @@ Artifact:
         RepoName: aliyun-computenest/comfy-ui
         Branch: main
       DockerfilePath: Dockerfile
+  EcsImageQwen:
+    ArtifactType: EcsImage
+    ArtifactName: "ecs_image-qwen-image"
+    Description: ComfyUI Qwen-Image 镜像，预装 ComfyUI 和 Qwen-Image 模型环境
+    SupportRegionIds:
+      - ap-southeast-1
+      - cn-beijing
+      - cn-wulanchabu
+      - cn-shanghai
+      - cn-shenzhen
+      - cn-guangzhou
+      - cn-hongkong
+      - cn-hangzhou
+      - ap-northeast-1
+      - ap-northeast-2
+      - ap-southeast-7
+      - eu-central-1
+      - us-west-1
+    ArtifactProperty:
+      RegionId: ${ImageBuilder.EcsImageQwen.RegionId}
+      ImageId: ${ImageBuilder.EcsImageQwen.SourceImageId}
   EcsImage:
     ArtifactType: EcsImage
-    ArtifactName: ecs_image-comfy-ui
-    Description: ComfyUI ECS 镜像，预装 ComfyUI 环境
+    ArtifactName: "ecs_image-comfy-ui"
+    Description: ComfyUI WanX-2.1(I2V-14B,T2V-14B,VACE-1.3B and I2V-1.3B) 镜像，预装 ComfyUI
+      环境
     SupportRegionIds:
-    - ap-southeast-1
+      - ap-southeast-1
+      - cn-beijing
+      - cn-wulanchabu
+      - cn-shanghai
+      - cn-shenzhen
+      - cn-guangzhou
+      - cn-hongkong
+      - cn-hangzhou
+      - ap-northeast-1
+      - ap-northeast-2
+      - ap-southeast-7
+      - eu-central-1
+      - us-west-1
     ArtifactProperty:
-      RegionId: ap-southeast-1  # ✅ 添加
-    ArtifactBuildProperty:
-      CodeRepo:
-        Platform: github
-        Owner: LYH-RAIN
-        RepoName: aliyun-computenest/comfy-ui
-        Branch: main
-      RegionId: ap-southeast-1
-      CommandType: RunShellScript
-      SourceImageId: "m-t4n0mt2ukwl9ttpmctiq"
-      Timeout: 7200
-      EnableGpu: true
-      SystemDiskSize: 250
-      CommandContent: |-
-        mkdir -p /root/application
-        if [ -e "/root/code/comfy" ]; then cp -r "/root/code/comfy" "/root/application/"; fi
-        if [ -e "/root/code/.env" ]; then cp -r "/root/code/.env" "/root/application/"; fi
-        cd /root/application
-        sed -i 's/pull_policy: always/pull_policy: if_not_present/g' comfy/docker-compose.yaml
-        docker compose -f comfy/docker-compose.yaml build 2>&1 | stdbuf -oL grep -viE 'Downloading|sha256|extracting|KiB|Downloaded';
-        docker compose -f comfy/docker-compose.yaml pull 2>&1 | stdbuf -oL grep -viE 'Downloading|sha256|extracting|KiB|Downloaded' || true;
+      RegionId: ${ImageBuilder.EcsImageComfyUI.RegionId}
+      ImageId: ${ImageBuilder.EcsImageComfyUI.SourceImageId}
+
   EcsImage2:
     ArtifactType: EcsImage
     ArtifactName: "ecsImage-wanx22"
     Description: ComfyUI WanX-2.2(I2V-14B,T2V-14B,ti2v-5B) 镜像，预装 ComfyUI 环境
     SupportRegionIds:
-    - ap-southeast-1
-    - cn-hangzhou
-    - cn-beijing
-    - cn-wulanchabu
-    - cn-shanghai
-    - cn-shenzhen
-    - cn-guangzhou
-    - cn-hongkong
-    - ap-northeast-1
-    - ap-northeast-2
-    - ap-southeast-7
-    - eu-central-1
+      - ap-southeast-1
+      - cn-beijing
+      - cn-wulanchabu
+      - cn-shanghai
+      - cn-shenzhen
+      - cn-guangzhou
+      - cn-hongkong
+      - cn-hangzhou
+      - ap-northeast-1
+      - ap-northeast-2
+      - ap-southeast-7
+      - eu-central-1
+      - us-west-1
     ArtifactProperty:
-      RegionId: ap-southeast-1
-    ArtifactBuildProperty:
-      EnableGpu: true
-      RegionId: ap-southeast-1
-      SourceImageId: "m-t4nf4f7uvrdnqf76vela"
-      SystemDiskSize: 450
-      CommandType: RunShellScript
-      Timeout: 14400
-      CommandContent: |-
-        mkdir -p /root/application
-        if [ -e "/root/code/comfy" ]; then cp -r "/root/code/comfy" "/root/application/"; fi
-        if [ -e "/root/code/.env" ]; then cp -r "/root/code/.env" "/root/application/"; fi
-        cd /root/application
-        sed -i 's/pull_policy: always/pull_policy: if_not_present/g' comfy/docker-compose.yaml
-        docker compose -f comfy/docker-compose.yaml build 2>&1 | stdbuf -oL grep -viE 'Downloading|sha256|extracting|KiB|Downloaded';
-        docker compose -f comfy/docker-compose.yaml pull 2>&1 | stdbuf -oL grep -viE 'Downloading|sha256|extracting|KiB|Downloaded' || true;
+      RegionId: ${ImageBuilder.EcsImageWanx22.RegionId}
+      ImageId: ${ImageBuilder.EcsImageWanx22.SourceImageId}
+
+ImageBuilder:
+  EcsImageComfyUI:
+    RegionId: ap-southeast-1
+    SourceImageId: m-t4n0mt2ukwl9ttpmctiq
+    SystemDiskSize: 250
+    InstanceType: ecs.gn7i-c8g1.2xlarge
+    InternetMaxBandwidthOut: 100
+    CommandType: RunShellScript
+    Timeout: 7200
+    CommandContent: |-
+      git clone https://github.com/aliyun-computenest/comfy-ui.git
+      cd comfy-ui/
+      sed -i 's/pull_policy: always/pull_policy: if_not_present/g' comfy/docker-compose.yaml
+      docker compose -f comfy/docker-compose.yaml build --no-cache 2>&1 | stdbuf -oL grep -viE 'Downloading|sha256|extracting|KiB|Downloaded';
+      docker compose -f comfy/docker-compose.yaml pull 2>&1 | stdbuf -oL grep -viE 'Downloading|sha256|extracting|KiB|Downloaded' || true;
+
+  EcsImageWanx22:
+    RegionId: ap-southeast-1
+    SourceImageId: m-t4nf4f7uvrdnqf76vela
+    SystemDiskSize: 450
+    InstanceType: ecs.gn7i-c8g1.2xlarge
+    InternetMaxBandwidthOut: 100
+    CommandType: RunShellScript
+    Timeout: 14400
+    CommandContent: |-
+      git clone https://github.com/aliyun-computenest/comfy-ui.git
+      cd comfy-ui/
+      sed -i 's/pull_policy: always/pull_policy: if_not_present/g' comfy/docker-compose.yaml
+      docker compose -f comfy/docker-compose.yaml build --no-cache 2>&1 | stdbuf -oL grep -viE 'Downloading|sha256|extracting|KiB|Downloaded';
+      docker compose -f comfy/docker-compose.yaml pull 2>&1 | stdbuf -oL grep -viE 'Downloading|sha256|extracting|KiB|Downloaded' || true;
+
+  EcsImageQwen:
+    RegionId: us-west-1
+    SourceImageId: "m-rj9axgjjjs8f4cnyf6v5"
+    VSwitchId: vsw-rj9943r8xl6u3owwszf37
+    ZoneId: us-west-1b
+    SecurityGroupId: sg-rj98kma81aco4ks4gl16
+    SystemDiskSize: 250
+    InstanceType: ecs.gn6i-c4g1.xlarge
+    CommandType: RunShellScript
+    InternetMaxBandwidthOut: 100
+    Timeout: 10800
+    Tags: []
+    CommandContent: |-
+      #!/bin/bash
+      git clone https://github.com/aliyun-computenest/comfy-ui.git
+      cd comfy-ui/
+      sed -i 's/pull_policy: always/pull_policy: if_not_present/g' comfy/docker-compose.yaml
+      docker compose -f comfy/docker-compose.yaml build --no-cache 2>&1 | stdbuf -oL grep -viE 'Downloading|sha256|extracting|KiB|Downloaded';
+      docker compose -f comfy/docker-compose.yaml pull 2>&1 | stdbuf -oL grep -viE 'Downloading|sha256|extracting|KiB|Downloaded' || true;
