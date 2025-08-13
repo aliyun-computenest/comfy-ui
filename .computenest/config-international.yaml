@@ -3,9 +3,6 @@ Service:
   DeployMetadata:
     SupplierDeployMetadata:
       ArtifactRelation:
-        docker_image-comfy-ui:
-          ArtifactId: ${Artifact.DockerImage.ArtifactId}
-          ArtifactVersion: draft
         ecs_image-comfy-ui:
           ArtifactId: ${Artifact.EcsImage.ArtifactId}
           ArtifactVersion: draft
@@ -79,24 +76,24 @@ Service:
   ShareType: Public
   ApprovalType: Manual
 Artifact:
-  DockerImage:
-    ArtifactType: AcrImage
-    ArtifactBuildType: Dockerfile
-    ArtifactName: docker_image-comfy-ui
-    Description: ComfyUI Docker 镜像，用于容器化部署
-    ArtifactProperty:
-      RegionId: ap-southeast-1
-      RepoName: comfy-ui
-      Tag: latest
-    ArtifactBuildProperty:
-      RegionId: ap-southeast-1
-      SystemDiskSize: 100
-      CodeRepo:
-        Platform: github
-        Owner: LYH-RAIN
-        RepoName: aliyun-computenest/comfy-ui
-        Branch: main
-      DockerfilePath: Dockerfile
+#  DockerImage:
+#    ArtifactType: AcrImage
+#    ArtifactBuildType: Dockerfile
+#    ArtifactName: docker_image-comfy-ui
+#    Description: ComfyUI Docker 镜像，用于容器化部署
+#    ArtifactProperty:
+#      RegionId: ap-southeast-1
+#      RepoName: comfy-ui
+#      Tag: latest
+#    ArtifactBuildProperty:
+#      RegionId: ap-southeast-1
+#      SystemDiskSize: 100
+#      CodeRepo:
+#        Platform: github
+#        Owner: LYH-RAIN
+#        RepoName: aliyun-computenest/comfy-ui
+#        Branch: main
+#      DockerfilePath: Dockerfile
   EcsImageQwen:
     ArtifactType: EcsImage
     ArtifactName: "ecs_image-qwen-image"
