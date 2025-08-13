@@ -50,10 +50,17 @@ Service:
         Url: ros_templates/template.yaml
         ArchitectureDiagramUrl: resources/architecture/architecture.jpg
         AllowedRegions:
-        - ap-southeast-1
-        - cn-hangzhou
-        - cn-beijing
-        - cn-shanghai
+          - ap-southeast-1
+          - cn-beijing
+          - cn-wulanchabu
+          - cn-shanghai
+          - cn-shenzhen
+          - cn-guangzhou
+          - cn-hongkong
+          - ap-northeast-1
+          - ap-northeast-2
+          - ap-southeast-7
+          - eu-central-1
         PredefinedParameters:
         - Name: 试用套餐
           Parameters:
@@ -256,6 +263,7 @@ Artifact:
       - ap-northeast-2
       - ap-southeast-7
       - eu-central-1
+      - us-west-1
     ArtifactProperty:
       RegionId: ${ImageBuilder.EcsImageComfyUI.RegionId}
       ImageId: ${ImageBuilder.EcsImageComfyUI.SourceImageId}
@@ -276,6 +284,7 @@ Artifact:
       - ap-northeast-2
       - ap-southeast-7
       - eu-central-1
+      - us-west-1
     ArtifactProperty:
       RegionId: ${ImageBuilder.EcsImageWanx22.RegionId}
       ImageId: ${ImageBuilder.EcsImageWanx22.SourceImageId}
