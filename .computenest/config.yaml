@@ -32,14 +32,14 @@ Service:
         Description: 变更集群节点配置
         Type: Custom
         Parameters:
-        - NodeInstanceType
+        - EcsInstanceType
     - TemplateName: 选择已有ACK/ACS集群
       Operation:
       - Name: 变更集群配置
         Description: 变更集群节点配置
         Type: Custom
         Parameters:
-        - NodeInstanceType
+        - EcsInstanceType
   DeployMetadata:
     ServiceInstanceNameRule:
       Prefix: comfyui-
@@ -106,10 +106,17 @@ Service:
       Url: ros_templates/template.yaml
       ArchitectureDiagramUrl: resources/architecture/architecture.jpg
       AllowedRegions:
-      - ap-southeast-1
-      - cn-hangzhou
-      - cn-beijing
-      - cn-shanghai
+        - ap-southeast-1
+        - cn-beijing
+        - cn-wulanchabu
+        - cn-shanghai
+        - cn-shenzhen
+        - cn-guangzhou
+        - cn-hongkong
+        - ap-northeast-1
+        - ap-northeast-2
+        - ap-southeast-7
+        - eu-central-1
       PredefinedParameters:
       - Name: 试用套餐
         Parameters:
@@ -238,10 +245,17 @@ Artifact:
     Description: ComfyUI WanX-2.1(I2V-14B,T2V-14B,VACE-1.3B and I2V-1.3B) 镜像，预装 ComfyUI
       环境
     SupportRegionIds:
-    - ap-southeast-1
-    - cn-hangzhou
-    - cn-beijing
-    - cn-shanghai
+      - ap-southeast-1
+      - cn-beijing
+      - cn-wulanchabu
+      - cn-shanghai
+      - cn-shenzhen
+      - cn-guangzhou
+      - cn-hongkong
+      - ap-northeast-1
+      - ap-northeast-2
+      - ap-southeast-7
+      - eu-central-1
     ArtifactProperty:
       RegionId: ${ImageBuilder.EcsImageComfyUI.RegionId}
       ImageId: ${ImageBuilder.EcsImageComfyUI.SourceImageId}
@@ -251,10 +265,17 @@ Artifact:
     ArtifactName: "ecsImage-wanx22"
     Description: ComfyUI WanX-2.2(I2V-14B,T2V-14B,ti2v-5B) 镜像，预装 ComfyUI 环境
     SupportRegionIds:
-    - ap-southeast-1
-    - cn-hangzhou
-    - cn-beijing
-    - cn-shanghai
+      - ap-southeast-1
+      - cn-beijing
+      - cn-wulanchabu
+      - cn-shanghai
+      - cn-shenzhen
+      - cn-guangzhou
+      - cn-hongkong
+      - ap-northeast-1
+      - ap-northeast-2
+      - ap-southeast-7
+      - eu-central-1
     ArtifactProperty:
       RegionId: ${ImageBuilder.EcsImageWanx22.RegionId}
       ImageId: ${ImageBuilder.EcsImageWanx22.SourceImageId}
@@ -264,7 +285,18 @@ Artifact:
     ArtifactName: "ecs_image-qwen-image"
     Description: ComfyUI Qwen-Image 镜像，预装 ComfyUI 和 Qwen-Image 模型环境
     SupportRegionIds:
-    - us-west-1
+      - ap-southeast-1
+      - cn-beijing
+      - cn-wulanchabu
+      - cn-shanghai
+      - cn-shenzhen
+      - cn-guangzhou
+      - cn-hongkong
+      - ap-northeast-1
+      - ap-northeast-2
+      - ap-southeast-7
+      - eu-central-1
+      - us-west-1
     ArtifactProperty:
       RegionId: ${ImageBuilder.EcsImageQwen.RegionId}
       ImageId: ${ImageBuilder.EcsImageQwen.SourceImageId}
