@@ -48,7 +48,7 @@ Service:
           OrderList:
           - EcsInstanceType
           - VpcOption
-          TrialType: Trial
+          TrialType: TrialOnly
           Type: Normal
       - Name: ACS集群版
         Url: ros_templates/final_template.yaml
