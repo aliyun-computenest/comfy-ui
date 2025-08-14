@@ -56,7 +56,7 @@ Service:
   ServiceType: private
   ServiceInfo:
   - Agreements: []
-    Image: resources/icons/service_logo_zh-CN.png
+    Image: resources/icons/service_logo.png
     Locale: zh-CN
     Name: ComfyUI社区版
     ShortDescription: 最强大的开源节点式生成式AI应用，支持创建图像、视频及音频内容。依托前沿开源模型实现视频与图像生成。
@@ -64,7 +64,7 @@ Service:
     - Name: comfyui
       Version: 0.3.49
   - Agreements: []
-    Image: resources/icons/service_logo_en-US.png
+    Image: resources/icons/service_logo_en.png
     Locale: en-US
     Name: ComfyUI Community Edition
     ShortDescription: The most powerful open-source node-based generative AI application,
