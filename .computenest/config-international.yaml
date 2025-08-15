@@ -25,7 +25,7 @@ Service:
       AllowedRegions:
       - ap-southeast-1
       PredefinedParameters: []
-      ArchitectureDiagramUrl: resources/architecture/architecture_ECS-Single.jpg
+      ArchitectureDiagramUrl: resources/architecture/architecture.jpg
       DeployScene: ECS
       OutputConfigs:
       - OutputKey: comfyui_address
