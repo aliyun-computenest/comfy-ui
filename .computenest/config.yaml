@@ -175,7 +175,7 @@ Service:
 ImageBuilder:
   EcsImageComfyUI:
     RegionId: ap-southeast-1
-    SourceImageId: m-t4n2o7cpjhicq9i0vivn
+    SourceImageId: m-t4naf7w95vrx5stifbd9
     SystemDiskSize: 250
     InstanceType: ecs.gn7i-c8g1.2xlarge
     InternetMaxBandwidthOut: 100
