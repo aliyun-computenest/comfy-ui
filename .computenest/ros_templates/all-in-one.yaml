@@ -1,0 +1,702 @@
+ROSTemplateFormatVersion: '2015-09-01'
+Description:
+  en: Deploy ComfyUI with model download on ECS.
+  zh-cn: 在ECS上部署ComfyUI并下载模型
+
+Mappings:
+  ModelMapping:
+    ModelNameMap:
+      'WanX-2.1(I2V-14B,T2V-14B,VACE-1.3B and I2V-1.3B)': Wan2.1
+      'WanX-2.2(I2V-14B,T2V-14B,TI2v-5B)': Wanx2.2
+      'Qwen-Image': Qwen-Image
+    ModelDiskSizeMap:
+      'WanX-2.1(I2V-14B,T2V-14B,VACE-1.3B and I2V-1.3B)': 250
+      'WanX-2.2(I2V-14B,T2V-14B,TI2v-5B)': 450
+      'Qwen-Image': 250
+    ModelWaitTimeMap:
+      'WanX-2.1(I2V-14B,T2V-14B,VACE-1.3B and I2V-1.3B)': 1800
+      'WanX-2.2(I2V-14B,T2V-14B,TI2v-5B)': 2400
+      'Qwen-Image': 1200
+
+Conditions:
+  CreateVpcConditions:
+    Fn::Equals:
+      - NewVPC
+      - Ref: VpcOption
+  EnablePublicAccess:
+    Fn::Equals:
+      - True
+      - Ref: SupportPublicAccess
+
+Parameters:
+  ModelSeries:
+    Type: String
+    Label:
+      en: Model Series
+      zh-cn: 模型系列
+    Default: WanX-2.1(I2V-14B,T2V-14B,VACE-1.3B and I2V-1.3B)
+    AllowedValues:
+      - WanX-2.1(I2V-14B,T2V-14B,VACE-1.3B and I2V-1.3B)
+      - WanX-2.2(I2V-14B,T2V-14B,TI2v-5B)
+      - Qwen-Image
+    AssociationPropertyMetadata:
+      ValueLabelMapping:
+        'WanX-2.1(I2V-14B,T2V-14B,VACE-1.3B and I2V-1.3B)': WanX-2.1(I2V-14B,T2V-14B,VACE-1.3B and I2V-1.3B)
+        'WanX-2.2(I2V-14B,T2V-14B,TI2v-5B)': WanX-2.2(I2V-14B,T2V-14B,TI2v-5B)
+        'Qwen-Image': Qwen-Image
+    Description:
+      zh-cn: 选择要部署的模型系列，不同模型需要的实例规格和磁盘空间不同。
+      en: Select the model series to deploy. Different models require different instance specifications and disk space.
+
+  SupportPublicAccess:
+    Type: Boolean
+    Label:
+      zh-cn: 支持公网访问
+      en: Support Public Access
+    Default: false
+
+  VpcOption:
+    Type: String
+    AllowedValues:
+      - NewVPC
+      - ExistingVPC
+    AssociationPropertyMetadata:
+      ValueLabelMapping:
+        NewVPC:
+          zh-cn: 新建专有网络
+          en: New VPC
+        ExistingVPC:
+          zh-cn: 已有专有网络
+          en: Existing VPC
+    Label:
+      en: Select Existing or New VPC
+      zh-cn: 选择已有/新建的专有网络
+    Required: true
+    Default: NewVPC
+
+  VpcCidrBlock:
+    Type: String
+    Label:
+      en: VPC CIDR IPv4 Block
+      zh-cn: 专有网络IPv4网段
+    Description:
+      zh-cn: VPC的ip地址段范围，<br>您可以使用以下的ip地址段或其子网:<br><font color='green'>[10.0.0.0/8]</font><br><font color='green'>[172.16.0.0/12]</font><br><font color='green'>[192.168.0.0/16]</font>
+      en: 'The ip address range of the VPC in the CidrBlock form; <br>You can use the following ip address ranges and their subnets: <br><font color=''green''>[10.0.0.0/8]</font><br><font color=''green''>[172.16.0.0/12]</font><br><font color=''green''>[192.168.0.0/16]</font>'
+    Default: 192.168.0.0/16
+    Required:
+      Fn::Equals:
+        - NewVPC
+        - ${VpcOption}
+    AssociationProperty: ALIYUN::VPC::VPC::CidrBlock
+    AssociationPropertyMetadata:
+      Visible:
+        Condition:
+          Fn::Equals:
+            - NewVPC
+            - ${VpcOption}
+
+  VSwitchCidrBlock:
+    Type: String
+    Label:
+      en: VSwitch CIDR Block
+      zh-cn: 交换机子网网段
+    Description:
+      zh-cn: 必须属于VPC的子网段。
+      en: Must belong to the subnet segment of VPC.
+    Default: 192.168.1.0/24
+    Required:
+      Fn::Equals:
+        - NewVPC
+        - ${VpcOption}
+    AssociationProperty: ALIYUN::VPC::VSwitch::CidrBlock
+    AssociationPropertyMetadata:
+      VpcCidrBlock: VpcCidrBlock
+      Visible:
+        Condition:
+          Fn::Equals:
+            - NewVPC
+            - ${VpcOption}
+
+  PayType:
+    Type: String
+    Label:
+      en: ECS Instance Charge Type
+      zh-cn: 付费类型
+    Default: PostPaid
+    AllowedValues:
+      - PostPaid
+      - PrePaid
+    AssociationProperty: ChargeType
+    AssociationPropertyMetadata:
+      LocaleKey: InstanceChargeType
+
+  PayPeriodUnit:
+    Type: String
+    Label:
+      en: Pay Period Unit
+      zh-cn: 购买资源时长周期
+    Default: Month
+    AllowedValues:
+      - Month
+      - Year
+    AssociationProperty: PayPeriodUnit
+    AssociationPropertyMetadata:
+      Visible:
+        Condition:
+          Fn::Not:
+            Fn::Equals:
+              - ${PayType}
+              - PostPaid
+
+  PayPeriod:
+    Type: Number
+    Label:
+      en: Period
+      zh-cn: 购买资源时长
+    Default: 1
+    AllowedValues:
+      - 1
+      - 2
+      - 3
+      - 4
+      - 5
+      - 6
+      - 7
+      - 8
+      - 9
+    AssociationProperty: PayPeriod
+    AssociationPropertyMetadata:
+      Visible:
+        Condition:
+          Fn::Not:
+            Fn::Equals:
+              - ${PayType}
+              - PostPaid
+
+  EcsInstanceType:
+    Type: String
+    Label:
+      en: Instance Type
+      zh-cn: 实例类型
+    Description:
+      zh-cn: 如当前地域的实例规格不足或无可购买规格，请切换到北京、上海等大地域查看。
+      en: If the instance specifications in the current region are insufficient or no specifications are available for purchase, please switch to larger regions such as Beijing and Shanghai to view.
+    AssociationProperty: ALIYUN::ECS::Instance::InstanceType
+    AssociationPropertyMetadata:
+      InstanceChargeType: ${PayType}
+      ZoneId: ${ZoneId}
+      Constraints:
+        InstanceTypeFamily:
+          - ecs.gn7i
+          - ecs.gn7e
+          - ecs.gn7s
+          - ecs.gn7
+          - ecs.gn7r
+          - ecs.gn6i
+          - ecs.gn6e
+          - ecs.gn6v
+          - ecs.ebmgn8v
+          - ecs.ebmgn8is
+          - ecs.ebmgn7ex
+          - ecs.ebmgn7e
+          - ecs.ebmgn7ix
+          - ecs.ebmgn7i
+          - ecs.ebmgn7vx
+          - ecs.ebmgn7v
+          - ecs.ebmgn7
+
+  ZoneId:
+    Type: String
+    Label:
+      en: Zone ID
+      zh-cn: 可用区ID
+    AssociationProperty: ALIYUN::ECS::Instance::ZoneId
+    AssociationPropertyMetadata:
+      DefaultValueStrategy: random
+      InstanceChargeType: ${PayType}
+      SystemDiskCategory: cloud_essd
+      InstanceType: ${EcsInstanceType}
+
+  VpcId:
+    Type: String
+    Label:
+      en: VPC ID
+      zh-cn: 专有网络VPC实例ID
+    AssociationProperty: 'ALIYUN::ECS::VPC::VPCId'
+    Required:
+      Fn::Equals:
+        - ExistingVPC
+        - ${VpcOption}
+    Default: ''
+    AssociationPropertyMetadata:
+      AutoSelectFirst: true
+      Visible:
+        Condition:
+          Fn::Equals:
+            - ExistingVPC
+            - ${VpcOption}
+
+  VSwitchId:
+    Type: String
+    Label:
+      en: VSwitch ID
+      zh-cn: 交换机实例ID
+    Default: ''
+    AssociationProperty: 'ALIYUN::ECS::VSwitch::VSwitchId'
+    Required:
+      Fn::Equals:
+        - ExistingVPC
+        - ${VpcOption}
+    AssociationPropertyMetadata:
+      AutoSelectFirst: true
+      VpcId: ${VpcId}
+      ZoneId: ${ZoneId}
+      Visible:
+        Condition:
+          Fn::Equals:
+            - ExistingVPC
+            - ${VpcOption}
+
+Resources:
+  RandomPassword:
+    Type: ALIYUN::RandomString
+    Properties:
+      length: 11
+      character_classes:
+        - class: "lowercase"
+          min: 4
+        - class: "uppercase"
+          min: 4
+        - class: "digits"
+          min: 2
+      character_sequences:
+        - sequence: "!@#$^*-+="
+
+  # 新建vpc
+  EcsVpc:
+    Type: ALIYUN::ECS::VPC
+    Condition: CreateVpcConditions
+    Properties:
+      VpcName:
+        Ref: ALIYUN::StackName
+      CidrBlock:
+        Ref: VpcCidrBlock
+
+  # 新建vswitch
+  EcsVSwitch:
+    Condition: CreateVpcConditions
+    Type: ALIYUN::ECS::VSwitch
+    Properties:
+      VSwitchName:
+        Ref: ALIYUN::StackName
+      VpcId:
+        Ref: EcsVpc
+      ZoneId:
+        Ref: ZoneId
+      CidrBlock:
+        Ref: VSwitchCidrBlock
+
+  SecurityGroup:
+    Type: ALIYUN::ECS::SecurityGroup
+    Properties:
+      SecurityGroupName:
+        Ref: ALIYUN::StackName
+      VpcId:
+        Fn::If:
+          - CreateVpcConditions
+          - Ref: EcsVpc
+          - Ref: VpcId
+      SecurityGroupIngress:
+        - PortRange: 8188/8188
+          Priority: 1
+          SourceCidrIp:
+            Fn::If:
+              - EnablePublicAccess
+              - 0.0.0.0/0
+              - 100.104.0.0/16
+          IpProtocol: tcp
+          NicType: internet
+
+  InstanceGroup:
+    Type: ALIYUN::ECS::InstanceGroup
+    Properties:
+      InstanceName:
+        Fn::Join:
+          - '-'
+          - - Ref: ALIYUN::StackName
+            - 'comfyui'
+      # 付费类型
+      InstanceChargeType:
+        Ref: PayType
+      PeriodUnit:
+        Ref: PayPeriodUnit
+      Period:
+        Ref: PayPeriod
+      VpcId:
+        Fn::If:
+          - CreateVpcConditions
+          - Ref: EcsVpc
+          - Ref: VpcId
+      VSwitchId:
+        'Fn::If':
+          - CreateVpcConditions
+          - Ref: EcsVSwitch
+          - Ref: VSwitchId
+      ZoneId:
+        Ref: ZoneId
+      SecurityGroupId:
+        Ref: SecurityGroup
+      ImageId: all-in-one
+      Password:
+        Fn::GetAtt:
+          - RandomPassword
+          - value
+      InstanceType:
+        Ref: EcsInstanceType
+      NetworkType: vpc
+      SystemDiskCategory: cloud_essd
+      SystemDiskSize:
+        Fn::FindInMap:
+          - ModelMapping
+          - ModelDiskSizeMap
+          - Ref: ModelSeries
+      InternetMaxBandwidthOut:
+        Fn::If:
+          - EnablePublicAccess
+          - 5
+          - 0
+      IoOptimized: optimized
+      MaxAmount: 1
+
+  RunInstallCommand:
+    DependsOn:
+      - InstanceGroup
+    Type: ALIYUN::ECS::RunCommand
+    Properties:
+      InstanceIds:
+        Fn::GetAtt:
+          - InstanceGroup
+          - InstanceIds
+      Type: RunShellScript
+      Sync: true
+      Timeout: 3600
+      CommandContent:
+        Fn::Sub:
+          - |
+            # 下载模型数据的函数
+            download_model_data() {
+              # 检查模型目录是否已存在且不为空
+              local model_dir="/root/model-data"
+              if [ -d "$model_dir" ] && [ "$(ls -A "$model_dir" 2>/dev/null)" ]; then
+                  echo "模型目录 $model_dir 已存在且不为空，跳过下载"
+                  return 0
+              fi
+
+              mkdir -p /root/model-data
+              cd /root
+            
+              # 根据模型系列下载对应的模型文件
+              local model_file="model.tar.zst"
+            
+              echo "[$(date '+%Y-%m-%d %H:%M:%S')] 开始下载模型文件: $model_file"
+              ossutil cp oss://computenest-artifacts-${RegionId}/model-data/${ModelSeries}/$model_file $model_file --region ${RegionId} --endpoint oss-${RegionId}-internal.aliyuncs.com --mode Anonymous
+            
+              if [ $? -ne 0 ]; then
+                  echo "模型文件下载失败"
+                  exit 1
+              fi
+            
+              echo "[$(date '+%Y-%m-%d %H:%M:%S')] 开始解压模型文件..."
+              zstd -d -c $model_file | pv | tar -xvf -
+            
+              if [ $? -ne 0 ]; then
+                  echo "模型文件解压失败"
+                  exit 1
+              fi
+            
+              echo "[$(date '+%Y-%m-%d %H:%M:%S')] 模型文件解压完毕"
+              rm $model_file
+            }
+
+            # 下载模型文件
+            download_model_data
+
+            # 添加调试信息
+            echo "=== Debug: Checking docker-compose.yaml locations ==="         
+            # 检查并设置docker-compose文件路径
+            COMPOSE_FILE_PATH=""
+            WORKING_DIR=""
+            COMPOSE_FILE=""
+            
+            if [ -f "/root/application/comfy/docker-compose.yaml" ]; then
+                echo "Found docker-compose.yaml in /root/application/comfy/"
+                COMPOSE_FILE_PATH="/root/application/comfy/docker-compose.yaml"
+                WORKING_DIR="/root/application"
+                COMPOSE_FILE="comfy/docker-compose.yaml"
+            elif [ -f "/root/comfy-ui/comfy/docker-compose.yaml" ]; then
+                echo "Found docker-compose.yaml in /root/comfy-ui/comfy/"
+                COMPOSE_FILE_PATH="/root/comfy-ui/comfy/docker-compose.yaml"
+                WORKING_DIR="/root/comfy-ui"
+                COMPOSE_FILE="comfy/docker-compose.yaml"
+            else
+                echo "Error: docker-compose.yaml not found in expected locations"
+                echo "Checked locations:"
+                echo "  - /root/application/comfy/docker-compose.yaml"
+                echo "  - /root/comfy-ui/comfy/docker-compose.yaml"
+                exit 1
+            fi
+            
+            echo "Selected configuration:"
+            echo "  COMPOSE_FILE_PATH: $COMPOSE_FILE_PATH"
+            echo "  WORKING_DIR: $WORKING_DIR"
+            echo "  COMPOSE_FILE: $COMPOSE_FILE"
+            
+            # 验证工作目录存在
+            if [ ! -d "$WORKING_DIR" ]; then
+                echo "Error: Working directory $WORKING_DIR does not exist"
+                exit 1
+            fi
+            
+            # 修改sed命令以使用检测到的路径
+            sed -i '/custom_nodes/d' "$COMPOSE_FILE_PATH"
+            sed -i '/- \/root\/storage\/input:\/root\/ComfyUI\/input/a\      - ./disabled-plugins/ComfyUI-ReActor:/root/ComfyUI/custom_nodes/ComfyUI-ReActor:ro' "$COMPOSE_FILE_PATH"
+            
+            file_path="/etc/systemd/system/stable-diffusion-comfy.service"
+            if [ ! -f "$file_path" ]; then
+                echo "Creating systemd service file..."
+                cat > $file_path <<EOF
+            [Unit]
+            Description=Docker Compose Application Service
+            Requires=docker.service
+            After=docker.service
+
+            [Service]
+            Type=oneshot
+            RemainAfterExit=yes
+            WorkingDirectory=$WORKING_DIR
+            ExecStart=/bin/bash -c 'cd $WORKING_DIR && /usr/bin/docker compose -f $COMPOSE_FILE up -d && /usr/local/bin/check-container-status'
+            ExecStop=/bin/bash -c 'cd $WORKING_DIR && /usr/bin/docker compose -f $COMPOSE_FILE down'
+            TimeoutStartSec=0
+
+            [Install]
+            WantedBy=multi-user.target
+            EOF
+            
+                # 创建状态检查脚本
+                cat > /usr/local/bin/check-container-status <<'EOF'
+            #!/bin/bash
+            # 动态检测compose文件路径
+            if [ -f "/root/application/comfy/docker-compose.yaml" ]; then
+                COMPOSE_FILE="comfy/docker-compose.yaml"
+                WORKING_DIR="/root/application"
+            elif [ -f "/root/comfy-ui/comfy/docker-compose.yaml" ]; then
+                COMPOSE_FILE="comfy/docker-compose.yaml"
+                WORKING_DIR="/root/comfy-ui"
+            else
+                echo "Error: docker-compose.yaml not found in expected locations"
+                exit 1
+            fi
+
+            echo "check-container-status: Using WORKING_DIR=$WORKING_DIR, COMPOSE_FILE=$COMPOSE_FILE"
+
+            cd "$WORKING_DIR" || {
+                echo "Error: Cannot change to directory $WORKING_DIR"
+                exit 1
+            }
+
+            MAX_WAIT_TIME=${WaitTime}
+            CHECK_INTERVAL=10
+
+            if ! command -v docker compose &> /dev/null; then
+                echo "Error: docker compose is not installed"
+                exit 1
+            fi
+
+            SERVICES=$(docker compose -f "$COMPOSE_FILE" config --services 2>/dev/null)
+            if [ -z "$SERVICES" ]; then
+                echo "Error: No services found in $COMPOSE_FILE"
+                exit 1
+            fi
+
+            WAIT_TIME=0
+
+            while [ $WAIT_TIME -le $MAX_WAIT_TIME ]; do
+                ALL_HEALTHY=true
+                for SERVICE in $SERVICES; do
+                    CONTAINER_ID=$(docker compose -f "$COMPOSE_FILE" ps -q "$SERVICE")
+            
+                    if [ -z "$CONTAINER_ID" ]; then
+                        echo "[$SERVICE] Not running"
+                        ALL_HEALTHY=false
+                        continue
+                    fi
+            
+                    INSPECT_OUTPUT=$(docker inspect --format \
+                        '{{.State.Status}} {{if .State.Health}}{{.State.Health.Status}}{{else}}no-healthcheck{{end}}' \
+                        "$CONTAINER_ID" 2>/dev/null)
+            
+                    STATUS=$(echo "$INSPECT_OUTPUT" | awk '{print $1}')
+                    HEALTH_STATUS=$(echo "$INSPECT_OUTPUT" | awk '{print $2}')
+            
+                    case "$HEALTH_STATUS" in
+                        "healthy") ;;
+                        "unhealthy"|"starting")
+                            echo "[$SERVICE] Unhealthy: $HEALTH_STATUS"
+                            ALL_HEALTHY=false
+                            ;;
+                        "no-healthcheck")
+                            [ "$STATUS" != "running" ] && ALL_HEALTHY=false
+                            ;;
+                        *)
+                            echo "[$SERVICE] Unknown status: $HEALTH_STATUS"
+                            ALL_HEALTHY=false
+                            ;;
+                    esac
+                done
+            
+                $ALL_HEALTHY && exit 0
+                [ $WAIT_TIME -ge $MAX_WAIT_TIME ] && break
+            
+                sleep $CHECK_INTERVAL
+                WAIT_TIME=$((WAIT_TIME + CHECK_INTERVAL))
+            done
+
+            echo "Timeout reached! Abnormal services:" >&2
+            docker compose -f "$COMPOSE_FILE" ps --all
+            exit 1
+            EOF
+            
+                chmod +x /usr/local/bin/check-container-status
+                systemctl enable stable-diffusion-comfy
+                echo "Systemd service created and enabled"
+            else
+                echo "Systemd service file already exists"
+            fi
+            
+            systemctl daemon-reload
+            echo "Starting stable-diffusion-comfy service..."
+            systemctl start stable-diffusion-comfy
+            
+            # 检查服务状态
+            sleep 2
+            systemctl status stable-diffusion-comfy --no-pager || true
+            
+            # 等待ComfyUI启动
+            MAX_ATTEMPTS=60
+            INTERVAL=2
+            
+            echo "Waiting for ComfyUI to start..."
+            cd "$WORKING_DIR"
+            
+            for ((i=1; i<=MAX_ATTEMPTS; i++)); do
+                echo "Attempt $i/$MAX_ATTEMPTS..."
+                ALL_LOGS=$(docker compose -f "$COMPOSE_FILE" logs 2>&1)
+            
+                if echo "$ALL_LOGS" | grep -q "To see the GUI go to"; then
+                    echo "Success: ComfyUI is ready!"
+                    echo "$ALL_LOGS" | grep "To see the GUI go to"
+                    exit 0
+                fi
+            
+                sleep $INTERVAL
+            done
+            
+            echo "Timeout waiting for ComfyUI to start"
+            echo "Final service status:"
+            systemctl status stable-diffusion-comfy --no-pager || true
+            echo "Final docker compose status:"
+            docker compose -f "$COMPOSE_FILE" ps || true
+            exit 1
+          - ModelSeries:
+              Ref: ModelSeries
+            RegionId:
+              Ref: ALIYUN::Region
+            WaitTime:
+              Fn::FindInMap:
+                - ModelMapping
+                - ModelWaitTimeMap
+                - Ref: ModelSeries
+
+Outputs:
+  模型系列:
+    Label:
+      zh-cn: 模型系列
+      en: Model Series
+    Value:
+      Ref: ModelSeries
+
+  comfyui_address:
+    Label:
+      en: ComfyUI Internal Address
+      zh-cn: ComfyUI 内网访问地址
+    Value:
+      Fn::Sub:
+        - http://${ServerAddress}:8188
+        - ServerAddress:
+            Fn::Select:
+              - 0
+              - Fn::GetAtt:
+                  - InstanceGroup
+                  - PrivateIps
+
+  comfyuiPublicAddress:
+    Label:
+      en: ComfyUI Public Address
+      zh-cn: ComfyUI 公网访问地址
+    Value:
+      Fn::If:
+        - EnablePublicAccess
+        - Fn::Sub:
+            - http://${ServerAddress}:8188
+            - ServerAddress:
+                Fn::Select:
+                  - 0
+                  - Fn::GetAtt:
+                      - InstanceGroup
+                      - PublicIps
+        - Fn::Select:
+            - 0
+            - Fn::GetAtt:
+                - InstanceGroup
+                - PublicIps
+
+  InstancePassword:
+    NoEcho: 'True'
+    Label:
+      en: ECS Instance Password
+      zh-cn: ECS实例密码
+    Description:
+      en: Initial instance password
+      zh-cn: ECS实例密码
+    Value:
+      Fn::GetAtt:
+        - RandomPassword
+        - value
+
+Metadata:
+  ALIYUN::ROS::Interface:
+    ParameterGroups:
+      - Parameters:
+          - ModelSeries
+          - EcsInstanceType
+        Label:
+          zh-cn: 资源配置
+          en: Resource Configuration
+      - Parameters:
+          - PayType
+          - PayPeriodUnit
+          - PayPeriod
+        Label:
+          zh-cn: 付费类型配置
+          en: Payment Type Configuration
+      - Parameters:
+          - ZoneId
+          - VpcOption
+          - VpcId
+          - VSwitchId
+          - VpcCidrBlock
+          - VSwitchCidrBlock
+          - SupportPublicAccess
+        Label:
+          zh-cn: 网络配置
+          en: Network Configuration
