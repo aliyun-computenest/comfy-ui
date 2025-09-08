@@ -67,6 +67,7 @@ clone_and_install https://github.com/jakechai/ComfyUI-JakeUpgrade.git
 clone_and_install https://github.com/Jonseed/ComfyUI-Detail-Daemon.git
 clone_and_install https://github.com/cubiq/ComfyUI_IPAdapter_plus.git
 clone_and_install https://github.com/spinagon/ComfyUI-seamless-tiling.git
+clone_and_install https://github.com/visualbruno/ComfyUI-Hunyuan3d-2-1.git
 rm -rf /root/ComfyUI/login
 
 
