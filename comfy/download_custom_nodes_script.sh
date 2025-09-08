@@ -68,6 +68,8 @@ clone_and_install https://github.com/Jonseed/ComfyUI-Detail-Daemon.git
 clone_and_install https://github.com/cubiq/ComfyUI_IPAdapter_plus.git
 clone_and_install https://github.com/spinagon/ComfyUI-seamless-tiling.git
 clone_and_install https://github.com/visualbruno/ComfyUI-Hunyuan3d-2-1.git
+clone_and_install https://github.com/smthemex/ComfyUI_PartPacker.git
+clone_and_install https://github.com/NVlabs/PartPacker.git
 rm -rf /root/ComfyUI/login
 
 
