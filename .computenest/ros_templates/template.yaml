@@ -142,27 +142,62 @@ Parameters:
       en: Instance Type
       zh-cn: 实例类型
     AssociationProperty: ALIYUN::ECS::Instance::InstanceType
-    AssociationPropertyMetadata:
-      InstanceChargeType: ${PayType}
-      Constraints:
-        InstanceTypeFamily:
-          - ecs.gn7i
-          - ecs.gn7e
-          - ecs.gn7s
-          - ecs.gn7
-          - ecs.gn7r
-          - ecs.gn6i
-          - ecs.gn6e
-          - ecs.gn6v
-          - ecs.ebmgn8v
-          - ecs.ebmgn8is
-          - ecs.ebmgn7ex
-          - ecs.ebmgn7e
-          - ecs.ebmgn7ix
-          - ecs.ebmgn7i
-          - ecs.ebmgn7vx
-          - ecs.ebmgn7v
-          - ecs.ebmgn7
+    AllowedValues:
+      - ecs.gn8t.4xlarge
+      - ecs.gn8t-2x.8xlarge
+      - ecs.gn8t-4x.16xlarge
+      - ecs.gn8t-8x.32xlarge
+      - ecs.ebmgn8t.32xlarge
+      - ecs.ebmgn8ts.32xlarge
+      - ecs.ebmgn8te.32xlarge
+      - ecs.gn7i-c8g1.2xlarge
+      - ecs.gn7i-c16g1.4xlarge
+      - ecs.gn7i-c32g1.8xlarge
+      - ecs.gn7i-c48g1.12xlarge
+      - ecs.gn7i-c56g1.14xlarge
+      - ecs.gn7i-c32g1.16xlarge
+      - ecs.gn7i-c32g1.32xlarge
+      - ecs.gn7i-c56g1.14xlarge
+      - ecs.gn7i-c48g1.12xlarge
+      - ecs.gn7i-c48e.12xlarge
+      - ecs.gn8is.2xlarge
+      - ecs.gn8is.4xlarge
+      - ecs.gn8is-2x.8xlarge
+      - ecs.gn8is-4x.16xlarge
+      - ecs.gn8is-8x.32xlarge
+      - ecs.gn7i-8x.16xlarge
+      - ecs.gn7i-4x.8xlarge
+      - ecs.gn7i-2x.8xlarge
+      - ecs.gn7i-8x.32xlarge
+      - ecs.gn7i-4x.16xlarge
+      - ecs.gn7e-c16g1.4xlarge
+      - ecs.gn7e-c16g1.16xlarge
+      - ecs.gn7e-c16g1.32xlarge
+      - ecs.gn7e-c16g1.8xlarge
+      - ecs.gn7s-c8g1.2xlarge
+      - ecs.gn7s-c32g1.16xlarge
+      - ecs.gn7s-c32g1.8xlarge
+      - ecs.gn7s-c32g1.32xlarge
+      - ecs.gn7s-c48g1.12xlarge
+      - ecs.gn7s-c16g1.4xlarge
+      - ecs.gn7s-c56g1.14xlarge
+      - ecs.gn8ia.4xlarge
+      - ecs.gn8ia.8xlarge
+      - ecs.gn8ia.16xlarge
+      - ecs.gn8ia-2x.8xlarge
+      - ecs.gn8v.4xlarge
+      - ecs.gn8v.6xlarge
+      - ecs.gn8v-tee.4xlarge
+      - ecs.gn8v-tee.6xlarge
+      - ecs.gn8v-2x.8xlarge
+      - ecs.gn8v-2x.12xlarge
+      - ecs.gn8v-4x.8xlarge
+      - ecs.gn8v-4x.24xlarge
+      - ecs.gn8v-8x.16xlarge
+      - ecs.gn8v-8x.48xlarge
+      - ecs.gn8v-tee-8x.16xlarge
+      - ecs.gn8v-tee-8x.48xlarge
+      - ecs.ebmgn9t.48xlarge
   ZoneId:
     Type: String
     Label:

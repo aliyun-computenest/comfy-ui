@@ -9,14 +9,40 @@ Mappings:
       'WanX-2.1(I2V-14B,T2V-14B,VACE-1.3B and I2V-1.3B)': Wan2.1
       'WanX-2.2(I2V-14B,T2V-14B,TI2v-5B)': Wanx2.2
       'Qwen-Image': Qwen-Image
+      'Wanx2.2-fun_camera': Wanx2.2-fun_camera
+      'Wanx2.2-fun_control': Wanx2.2-fun_control
+      'Wanx2.2-fun_inpaint': Wanx2.2-fun_inpaint
+      'Wanx2.2-s2v': Wanx2.2-s2v
+      'HunyuanVideo': HunyuanVideo
+      'Qwen-Image-Edit': Qwen-Image-Edit
+      'Hunyuan3D-2.1': hunyuan2.1
+      'Hunyuan3D-2': hunyuan2.2
+
     ModelDiskSizeMap:
       'WanX-2.1(I2V-14B,T2V-14B,VACE-1.3B and I2V-1.3B)': 250
       'WanX-2.2(I2V-14B,T2V-14B,TI2v-5B)': 450
       'Qwen-Image': 250
+      'Wanx2.2-fun_camera': 300  # 建议值，需要根据实际模型大小调整
+      'Wanx2.2-fun_control': 300
+      'Wanx2.2-fun_inpaint': 300
+      'Wanx2.2-s2v': 400
+      'HunyuanVideo': 500
+      'Qwen-Image-Edit': 350
+      'Hunyuan3D-2.1': 100
+      'Hunyuan3D-2': 100
     ModelWaitTimeMap:
       'WanX-2.1(I2V-14B,T2V-14B,VACE-1.3B and I2V-1.3B)': 1800
       'WanX-2.2(I2V-14B,T2V-14B,TI2v-5B)': 2400
       'Qwen-Image': 1200
+      'Wanx2.2-fun_camera': 1800
+      'Wanx2.2-fun_control': 1800
+      'Wanx2.2-fun_inpaint': 1800
+      'Wanx2.2-s2v': 2400
+      'HunyuanVideo': 3000
+      'Qwen-Image-Edit': 1500
+      'Hunyuan3D-2.1': 1200
+      'Hunyuan3D-2': 1200
+
 
 Conditions:
   CreateVpcConditions:
@@ -39,14 +65,31 @@ Parameters:
       - WanX-2.1(I2V-14B,T2V-14B,VACE-1.3B and I2V-1.3B)
       - WanX-2.2(I2V-14B,T2V-14B,TI2v-5B)
       - Qwen-Image
+      - Wanx2.2-fun_camera
+      - Wanx2.2-fun_control
+      - Wanx2.2-fun_inpaint
+      - Wanx2.2-s2v
+      - HunyuanVideo
+      - Qwen-Image-Edit
+      - Hunyuan3D-2.1
+      - Hunyuan3D-2
     AssociationPropertyMetadata:
       ValueLabelMapping:
-        'WanX-2.1(I2V-14B,T2V-14B,VACE-1.3B and I2V-1.3B)': WanX-2.1(I2V-14B,T2V-14B,VACE-1.3B and I2V-1.3B)
-        'WanX-2.2(I2V-14B,T2V-14B,TI2v-5B)': WanX-2.2(I2V-14B,T2V-14B,TI2v-5B)
-        'Qwen-Image': Qwen-Image
+        'WanX-2.1(I2V-14B,T2V-14B,VACE-1.3B and I2V-1.3B)': 'WanX-2.1 (图像到视频/文本到视频)'
+        'WanX-2.2(I2V-14B,T2V-14B,TI2v-5B)': 'WanX-2.2 (图像到视频/文本到视频)'
+        'Qwen-Image': 'Qwen-Image'
+        'Wanx2.2-fun_camera': 'WanX-2.2 Fun Camera'
+        'Wanx2.2-fun_control': 'WanX-2.2 Fun Control'
+        'Wanx2.2-fun_inpaint': 'WanX-2.2 Fun Inpaint (首尾帧)'
+        'Wanx2.2-s2v': 'WanX-2.2 S2V'
+        'HunyuanVideo': 'HunyuanVideo (混元视频)'
+        'Qwen-Image-Edit': 'Qwen-Image-Edit (图像编辑)'
+        'Hunyuan3D-2.1': 'Hunyuan3D-2.1'
+        'Hunyuan3D-2': 'Hunyuan3D-2.0'
     Description:
-      zh-cn: 选择要部署的模型系列，不同模型需要的实例规格和磁盘空间不同。
-      en: Select the model series to deploy. Different models require different instance specifications and disk space.
+      zh-cn: 选择要部署的模型系列，不同模型需要的实例规格和磁盘空间不同。新增模型包括WanX-2.2系列的趣味功能、HunyuanVideo视频生成和Qwen-Image系列的编辑功能。
+      en: Select the model series to deploy. Different models require different instance specifications and disk space. New models include WanX-2.2 fun series, HunyuanVideo for video generation, and Qwen-Image editing series.
+
 
   SupportPublicAccess:
     Type: Boolean
@@ -178,32 +221,63 @@ Parameters:
     Label:
       en: Instance Type
       zh-cn: 实例类型
-    Description:
-      zh-cn: 如当前地域的实例规格不足或无可购买规格，请切换到北京、上海等大地域查看。
-      en: If the instance specifications in the current region are insufficient or no specifications are available for purchase, please switch to larger regions such as Beijing and Shanghai to view.
     AssociationProperty: ALIYUN::ECS::Instance::InstanceType
-    AssociationPropertyMetadata:
-      InstanceChargeType: ${PayType}
-      ZoneId: ${ZoneId}
-      Constraints:
-        InstanceTypeFamily:
-          - ecs.gn7i
-          - ecs.gn7e
-          - ecs.gn7s
-          - ecs.gn7
-          - ecs.gn7r
-          - ecs.gn6i
-          - ecs.gn6e
-          - ecs.gn6v
-          - ecs.ebmgn8v
-          - ecs.ebmgn8is
-          - ecs.ebmgn7ex
-          - ecs.ebmgn7e
-          - ecs.ebmgn7ix
-          - ecs.ebmgn7i
-          - ecs.ebmgn7vx
-          - ecs.ebmgn7v
-          - ecs.ebmgn7
+    AllowedValues:
+      - ecs.gn8t.4xlarge
+      - ecs.gn8t-2x.8xlarge
+      - ecs.gn8t-4x.16xlarge
+      - ecs.gn8t-8x.32xlarge
+      - ecs.ebmgn8t.32xlarge
+      - ecs.ebmgn8ts.32xlarge
+      - ecs.ebmgn8te.32xlarge
+      - ecs.gn7i-c8g1.2xlarge
+      - ecs.gn7i-c16g1.4xlarge
+      - ecs.gn7i-c32g1.8xlarge
+      - ecs.gn7i-c48g1.12xlarge
+      - ecs.gn7i-c56g1.14xlarge
+      - ecs.gn7i-c32g1.16xlarge
+      - ecs.gn7i-c32g1.32xlarge
+      - ecs.gn7i-c56g1.14xlarge
+      - ecs.gn7i-c48g1.12xlarge
+      - ecs.gn7i-c48e.12xlarge
+      - ecs.gn8is.2xlarge
+      - ecs.gn8is.4xlarge
+      - ecs.gn8is-2x.8xlarge
+      - ecs.gn8is-4x.16xlarge
+      - ecs.gn8is-8x.32xlarge
+      - ecs.gn7i-8x.16xlarge
+      - ecs.gn7i-4x.8xlarge
+      - ecs.gn7i-2x.8xlarge
+      - ecs.gn7i-8x.32xlarge
+      - ecs.gn7i-4x.16xlarge
+      - ecs.gn7e-c16g1.4xlarge
+      - ecs.gn7e-c16g1.16xlarge
+      - ecs.gn7e-c16g1.32xlarge
+      - ecs.gn7e-c16g1.8xlarge
+      - ecs.gn7s-c8g1.2xlarge
+      - ecs.gn7s-c32g1.16xlarge
+      - ecs.gn7s-c32g1.8xlarge
+      - ecs.gn7s-c32g1.32xlarge
+      - ecs.gn7s-c48g1.12xlarge
+      - ecs.gn7s-c16g1.4xlarge
+      - ecs.gn7s-c56g1.14xlarge
+      - ecs.gn8ia.4xlarge
+      - ecs.gn8ia.8xlarge
+      - ecs.gn8ia.16xlarge
+      - ecs.gn8ia-2x.8xlarge
+      - ecs.gn8v.4xlarge
+      - ecs.gn8v.6xlarge
+      - ecs.gn8v-tee.4xlarge
+      - ecs.gn8v-tee.6xlarge
+      - ecs.gn8v-2x.8xlarge
+      - ecs.gn8v-2x.12xlarge
+      - ecs.gn8v-4x.8xlarge
+      - ecs.gn8v-4x.24xlarge
+      - ecs.gn8v-8x.16xlarge
+      - ecs.gn8v-8x.48xlarge
+      - ecs.gn8v-tee-8x.16xlarge
+      - ecs.gn8v-tee-8x.48xlarge
+      - ecs.ebmgn9t.48xlarge
 
   ZoneId:
     Type: String
@@ -384,6 +458,9 @@ Resources:
         Fn::Sub:
           - |
             # 下载模型数据的函数
+            yum install -y zstd --disablerepo=nvidia-container-toolkit --disablerepo=nvidia-container-toolkit-experimental -q
+            yum install -y pv --disablerepo=nvidia-container-toolkit --disablerepo=nvidia-container-toolkit-experimental -q
+  
             download_model_data() {
               # 检查模型目录是否已存在且不为空
               local model_dir="/root/model-data"
@@ -391,7 +468,7 @@ Resources:
                   echo "模型目录 $model_dir 已存在且不为空，跳过下载"
                   return 0
               fi
-
+  
               mkdir -p /root/model-data
               cd /root
             
@@ -407,8 +484,8 @@ Resources:
               fi
             
               echo "[$(date '+%Y-%m-%d %H:%M:%S')] 开始解压模型文件..."
-              zstd -d -c $model_file | pv | tar -xvf -
-            
+              zstd -d -c $model_file | pv | tar -xvf - --strip-components=1
+
               if [ $? -ne 0 ]; then
                   echo "模型文件解压失败"
                   exit 1
@@ -417,39 +494,29 @@ Resources:
               echo "[$(date '+%Y-%m-%d %H:%M:%S')] 模型文件解压完毕"
               rm $model_file
             }
-
+  
             # 下载模型文件
             download_model_data
-
+  
             # 添加调试信息
             echo "=== Debug: Checking docker-compose.yaml locations ==="         
-            # 检查并设置docker-compose文件路径
-            COMPOSE_FILE_PATH=""
-            WORKING_DIR=""
-            COMPOSE_FILE=""
+            # 设置固定的docker-compose文件路径
+            COMPOSE_FILE_PATH="/root/ossutil-2.1.2-linux-amd64/comfy-ui/comfy/docker-compose.yaml"
+            WORKING_DIR="/root/ossutil-2.1.2-linux-amd64/comfy-ui"
+            COMPOSE_FILE="comfy/docker-compose.yaml"
             
-            if [ -f "/root/application/comfy/docker-compose.yaml" ]; then
-                echo "Found docker-compose.yaml in /root/application/comfy/"
-                COMPOSE_FILE_PATH="/root/application/comfy/docker-compose.yaml"
-                WORKING_DIR="/root/application"
-                COMPOSE_FILE="comfy/docker-compose.yaml"
-            elif [ -f "/root/comfy-ui/comfy/docker-compose.yaml" ]; then
-                echo "Found docker-compose.yaml in /root/comfy-ui/comfy/"
-                COMPOSE_FILE_PATH="/root/comfy-ui/comfy/docker-compose.yaml"
-                WORKING_DIR="/root/comfy-ui"
-                COMPOSE_FILE="comfy/docker-compose.yaml"
-            else
-                echo "Error: docker-compose.yaml not found in expected locations"
-                echo "Checked locations:"
-                echo "  - /root/application/comfy/docker-compose.yaml"
-                echo "  - /root/comfy-ui/comfy/docker-compose.yaml"
-                exit 1
-            fi
-            
-            echo "Selected configuration:"
+            echo "Using fixed configuration:"
             echo "  COMPOSE_FILE_PATH: $COMPOSE_FILE_PATH"
             echo "  WORKING_DIR: $WORKING_DIR"
             echo "  COMPOSE_FILE: $COMPOSE_FILE"
+            
+            # 验证docker-compose文件是否存在
+            if [ ! -f "$COMPOSE_FILE_PATH" ]; then
+                echo "Error: docker-compose.yaml not found at $COMPOSE_FILE_PATH"
+                echo "Listing contents of parent directory:"
+                ls -la "/root/ossutil-2.1.2-linux-amd64/comfy-ui/" || echo "Directory not found"
+                exit 1
+            fi
             
             # 验证工作目录存在
             if [ ! -d "$WORKING_DIR" ]; then
@@ -457,7 +524,7 @@ Resources:
                 exit 1
             fi
             
-            # 修改sed命令以使用检测到的路径
+            # 修改docker-compose配置
             sed -i '/custom_nodes/d' "$COMPOSE_FILE_PATH"
             sed -i '/- \/root\/storage\/input:\/root\/ComfyUI\/input/a\      - ./disabled-plugins/ComfyUI-ReActor:/root/ComfyUI/custom_nodes/ComfyUI-ReActor:ro' "$COMPOSE_FILE_PATH"
             
@@ -469,7 +536,7 @@ Resources:
             Description=Docker Compose Application Service
             Requires=docker.service
             After=docker.service
-
+  
             [Service]
             Type=oneshot
             RemainAfterExit=yes
@@ -477,7 +544,7 @@ Resources:
             ExecStart=/bin/bash -c 'cd $WORKING_DIR && /usr/bin/docker compose -f $COMPOSE_FILE up -d && /usr/local/bin/check-container-status'
             ExecStop=/bin/bash -c 'cd $WORKING_DIR && /usr/bin/docker compose -f $COMPOSE_FILE down'
             TimeoutStartSec=0
-
+  
             [Install]
             WantedBy=multi-user.target
             EOF
@@ -485,41 +552,33 @@ Resources:
                 # 创建状态检查脚本
                 cat > /usr/local/bin/check-container-status <<'EOF'
             #!/bin/bash
-            # 动态检测compose文件路径
-            if [ -f "/root/application/comfy/docker-compose.yaml" ]; then
-                COMPOSE_FILE="comfy/docker-compose.yaml"
-                WORKING_DIR="/root/application"
-            elif [ -f "/root/comfy-ui/comfy/docker-compose.yaml" ]; then
-                COMPOSE_FILE="comfy/docker-compose.yaml"
-                WORKING_DIR="/root/comfy-ui"
-            else
-                echo "Error: docker-compose.yaml not found in expected locations"
-                exit 1
-            fi
-
+            # 使用固定的compose文件路径
+            COMPOSE_FILE="comfy/docker-compose.yaml"
+            WORKING_DIR="/root/ossutil-2.1.2-linux-amd64/comfy-ui"
+  
             echo "check-container-status: Using WORKING_DIR=$WORKING_DIR, COMPOSE_FILE=$COMPOSE_FILE"
-
+  
             cd "$WORKING_DIR" || {
                 echo "Error: Cannot change to directory $WORKING_DIR"
                 exit 1
             }
-
+  
             MAX_WAIT_TIME=${WaitTime}
             CHECK_INTERVAL=10
-
+  
             if ! command -v docker compose &> /dev/null; then
                 echo "Error: docker compose is not installed"
                 exit 1
             fi
-
+  
             SERVICES=$(docker compose -f "$COMPOSE_FILE" config --services 2>/dev/null)
             if [ -z "$SERVICES" ]; then
                 echo "Error: No services found in $COMPOSE_FILE"
                 exit 1
             fi
-
+  
             WAIT_TIME=0
-
+  
             while [ $WAIT_TIME -le $MAX_WAIT_TIME ]; do
                 ALL_HEALTHY=true
                 for SERVICE in $SERVICES; do
@@ -560,7 +619,7 @@ Resources:
                 sleep $CHECK_INTERVAL
                 WAIT_TIME=$((WAIT_TIME + CHECK_INTERVAL))
             done
-
+  
             echo "Timeout reached! Abnormal services:" >&2
             docker compose -f "$COMPOSE_FILE" ps --all
             exit 1
@@ -608,7 +667,10 @@ Resources:
             docker compose -f "$COMPOSE_FILE" ps || true
             exit 1
           - ModelSeries:
-              Ref: ModelSeries
+              Fn::FindInMap:
+                - ModelMapping
+                - ModelNameMap
+                - Ref: ModelSeries
             RegionId:
               Ref: ALIYUN::Region
             WaitTime:
@@ -616,6 +678,7 @@ Resources:
                 - ModelMapping
                 - ModelWaitTimeMap
                 - Ref: ModelSeries
+
 
 Outputs:
   模型系列:

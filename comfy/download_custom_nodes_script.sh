@@ -62,6 +62,11 @@ clone_and_install https://github.com/bash-j/mikey_nodes.git
 clone_and_install https://github.com/kijai/ComfyUI-GIMM-VFI.git
 clone_and_install https://github.com/liusida/ComfyUI-Login.git
 clone_and_install https://github.com/city96/ComfyUI-GGUF.git
+clone_and_install https://github.com/niknah/ComfyUI-Hunyuan-3D-2.git
+clone_and_install https://github.com/jakechai/ComfyUI-JakeUpgrade.git
+clone_and_install https://github.com/Jonseed/ComfyUI-Detail-Daemon.git
+clone_and_install https://github.com/cubiq/ComfyUI_IPAdapter_plus.git
+clone_and_install https://github.com/spinagon/ComfyUI-seamless-tiling.git
 rm -rf /root/ComfyUI/login
 
 
