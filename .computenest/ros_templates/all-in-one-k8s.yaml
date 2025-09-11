@@ -1,0 +1,1485 @@
+ROSTemplateFormatVersion: '2015-09-01'
+Description:
+  en: Support create ACS/ACK, existing ACS/ACK, support new VPC and existing VPC, one-click deployment ComfyUI
+  zh-cn: 支持创建ACS/ACK，已有ACS、ACK，支持新建VPC和已有VPC，一键部署ComfyUI
+
+Conditions:
+  IsPublicEnabled:
+    Fn::Equals:
+      - Ref: SupportPublicAccess
+      - true
+  IfPPU:
+    Fn::Equals:
+      - Ref: GpuSeries
+      - PPU
+  IfH20:
+    Fn::Equals:
+      - Ref: GpuSeries
+      - H20
+  CreateNewOSS:
+    Fn::Equals:
+      - Ref: CreateOSS
+      - true
+  SupportDualZones:
+    # 新建ACS集群或者新建ACK集群且输入的secondZoneId不为空
+    Fn::Or:
+      - Fn::Equals:
+          - NewAcs
+          - Ref: CsOptions
+      - Fn::And:
+          - Fn::Equals:
+              - NewAck
+              - Ref: CsOptions
+          - Fn::Not:
+              Fn::Equals:
+                - Ref: SecondZoneId
+                - null
+  CreateClusterCondition:
+    Fn::Or:
+      - Fn::Equals:
+          - NewAck
+          - Ref: CsOptions
+      - Fn::Equals:
+          - NewAcs
+          - Ref: CsOptions
+  CreateNewAckCluster:
+    Fn::Equals:
+      - Ref: CsOptions
+      - NewAck
+  ExistAcsOrNewAcsCondition:
+    Fn::Or:
+      - Fn::Equals:
+          - Ref: CsOptions
+          - NewAcs
+      - Fn::And:
+          - Fn::Equals:
+              - Ref: CsOptions
+              - ExistCs
+          - Fn::Equals:
+              - Ref: ClusterType
+              - ACS
+  ExistCsCondition:
+    Fn::Equals:
+      - Ref: CsOptions
+      - ExistCs
+  FlannelPluginCondition:
+    Fn::Equals:
+      - Ref: AckNetworkPlugin
+      - flannel
+
+Locals:
+  # 通用配置
+  CommonLabels:
+    Value:
+      app: comfyui
+
+  # 容器配置
+  ContainerConfig:
+    Value:
+      image: "compute-nest-registry.cn-hangzhou.cr.aliyuncs.com/computenest/comfy-ui:latest"
+      workingDir: "/workspace/pytorch/ComfyUI"
+
+  # 资源限制配置
+  ResourceLimits:
+    Value:
+      cpu: "8"
+      memory: "96Gi"
+      ephemeral-storage: "200Gi"
+
+  # GPU模型系列配置
+  GpuModelSeries:
+    Value:
+      Fn::Jq:
+        - First
+        - 'if .gpuSeries == "PPU" then "PPU810E" else .gpuSeries end'
+        - Fn::Sub:
+            - '{"gpuSeries": "${GpuSeries}"}'
+            - GpuSeries:
+                Ref: GpuSeries
+
+  # GPU资源键配置
+  GpuResourceKey:
+    Value:
+      Fn::Jq:
+        - First
+        - 'if .gpuSeries == "PPU" then "alibabacloud.com/ppu" else "nvidia.com/gpu" end'
+        - Fn::Sub:
+            - '{"gpuSeries": "${GpuSeries}"}'
+            - GpuSeries:
+                Ref: GpuSeries
+
+  # QoS标签配置
+  QosLabel:
+    Value:
+      Fn::Jq:
+        - First
+        - 'if .gpuSeries == "PPU" then "alibabacloud.com/compute-qos: default" else "" end'
+        - Fn::Sub:
+            - '{"gpuSeries": "${GpuSeries}"}'
+            - GpuSeries:
+                Ref: GpuSeries
+
+  # 卷挂载配置
+  VolumeMounts:
+    Value:
+      - mountPath: "/workspace/pytorch/ComfyUI/models"
+        name: llm-model
+        subPath: models
+      - mountPath: "/workspace/pytorch/ComfyUI/output"
+        name: llm-model
+        subPath: output
+      - mountPath: "/workspace/pytorch/ComfyUI/user_scripts"
+        name: llm-model
+        subPath: user_scripts
+      - mountPath: "/workspace/pytorch/ComfyUI/user"
+        name: llm-model
+        subPath: user
+      - mountPath: "/workspace/pytorch/ComfyUI/input"
+        name: llm-model
+        subPath: input
+
+  # 服务配置
+  ServiceConfig:
+    Value:
+      ports:
+        - name: serving
+          port: 8188
+          protocol: TCP
+          targetPort: 8188
+      selector:
+        Ref: CommonLabels
+
+
+
+Parameters:
+  WhitelistConfirmation:
+    Type: "String"
+    Label:
+      en: "Whitelist Confirmation"
+      zh-cn: "白名单配置确认"
+    AssociationProperty: "AlertCheckbox"
+    AssociationPropertyMetadata:
+      Description:
+        zh-cn: |
+          <strong>重要前置条件：</strong>
+          使用本服务前，请确保已为P16EN/GU8TF实例正确配置白名单规则，请联系客服、销售或提交工单加白。
+          <a href="https://smartservice.console.aliyun.com/service/create-ticket" target="_blank">提交工单</a>
+        en: |
+          <strong>Important Preconditions:</strong>
+          Before using this service, please ensure that the whitelist rule for P16EN/GU8TF instances is correctly configured. Contact customer service, sales, or submit a ticket to add the whitelist.
+          <a href="https://smartservice.console.aliyun.com/service/create-ticket" target="_blank">Submit a ticket</a>
+      ConfirmText:
+        zh-cn: "我已确认完成白名单配置"
+        en: "I have confirmed the whitelist configuration"
+      Alert: true
+      Type: "warning"
+      MustChecked: true
+
+  ClusterType:
+    Type: String
+    Default: ACS
+    Required: true
+    AllowedValues:
+      - ACS
+      - ACK
+    Label:
+      en: Cluster Type
+      zh-cn: 集群类型
+
+  CsOptions:
+    Type: String
+    Label:
+      en: Cluster Option
+      zh-cn: 集群选项
+    Required: true
+    Default: NewAcs
+    AllowedValues:
+      - NewAcs
+      - NewAck
+      - ExistCs
+    AssociationPropertyMetadata:
+      ValueLabelMapping:
+        NewAcs:
+          en: New ACS
+          zh-cn: 新建ACS集群
+        NewAck:
+          zh-cn: 新建ACK集群
+          en: New ACK
+        ExistCs:
+          zh-cn: 已有集群
+          en: Existing Cluster
+      AutoSelectFirst: true
+      ForceRadio: true
+      AllowedValues:
+        - Condition:
+            Fn::Equals:
+              - 'ACK'
+              - ${ClusterType}
+          Value:
+            - NewAck
+            - ExistCs
+        - Condition:
+            Fn::Equals:
+              - 'ACS'
+              - ${ClusterType}
+          Value:
+            - NewAcs
+            - ExistCs
+
+  ClusterProfile:
+    Type: String
+    Default: Acs
+    AllowedValues:
+      - Acs
+      - Default
+    AssociationPropertyMetadata:
+      Value:
+        - Condition:
+            Fn::Equals:
+              - 'ACS'
+              - ${ClusterType}
+          Value: Acs
+        - Condition:
+            Fn::Equals:
+              - 'ACK'
+              - ${ClusterType}
+          Value: Default
+
+  ClusterId:
+    Type: String
+    Description:
+      en: The ID of Kubernetes ClusterId in which application deployed.
+      zh-cn: 部署应用程序的K8s集群ID
+    AllowedPattern: '[0-9a-z]+$'
+    Default: null
+    Required: true
+    Label:
+      en: Kubernetes ClusterId
+      zh-cn: K8s集群ID
+    AssociationProperty: 'ALIYUN::CS::Cluster::ClusterId'
+    AssociationPropertyMetadata:
+      RegionId: '${RegionId}'
+      Profile: '${ClusterProfile}'
+      Visible:
+        Condition:
+          Fn::Equals:
+            - ${CsOptions}
+            - ExistCs
+
+  CreateOSS:
+    Type: Boolean
+    Label:
+      en: Create New OSS Bucket
+      zh-cn: 新建OSS Bucket
+    Description:
+      en: Whether to create a new OSS bucket or use an existing one
+      zh-cn: 是否新建OSS存储桶或使用已有的
+    Default: true
+
+  ExistingOSSBucket:
+    Type: String
+    Label:
+      en: Existing OSS Bucket Name
+      zh-cn: 已有OSS存储桶名称
+    Description:
+      en: Name of the existing OSS bucket (required when not creating new OSS)
+      zh-cn: 已有OSS存储桶的名称（不新建OSS时必填）
+    Default: ""
+    AssociationProperty: ALIYUN::OSS::Bucket::BucketName
+    AssociationPropertyMetadata:
+      Visible:
+        Condition:
+          Fn::Equals:
+            - ${CreateOSS}
+            - false
+
+  # ACK相关参数
+  PayType:
+    Type: String
+    Label:
+      en: ECS Instance Charge Type
+      zh-cn: 付费类型
+    Default: PostPaid
+    AllowedValues:
+      - PostPaid
+      - PrePaid
+    AssociationProperty: ChargeType
+    AssociationPropertyMetadata:
+      LocaleKey: InstanceChargeType
+      Visible:
+        Condition:
+          Fn::Equals:
+            - ${CsOptions}
+            - NewAck
+
+  PayPeriodUnit:
+    Type: String
+    Label:
+      en: Pay Period Unit
+      zh-cn: 购买资源时长周期
+    Default: Month
+    AllowedValues:
+      - Month
+      - Year
+    AssociationProperty: PayPeriodUnit
+    AssociationPropertyMetadata:
+      Visible:
+        Condition:
+          Fn::And:
+            - Fn::Equals:
+                - ${CsOptions}
+                - NewAck
+            - Fn::Not:
+                Fn::Equals:
+                  - ${PayType}
+                  - PostPaid
+
+  PayPeriod:
+    Type: Number
+    Description:
+      en: When the resource purchase duration is Month, the value of Period ranges from 1 to 9, 12, 24, 36, 48, or 60. <br><b><font color='red'> When ECS instance types are PrePaid valid </b></font>
+      zh-cn: 当购买资源时长为Month时，Period取值：1~9 <br><b><font color='red'>当ECS实例类型为PrePaid有效</b></font>
+    Label:
+      en: Period
+      zh-cn: 购买资源时长
+    Default: 1
+    AllowedValues:
+      - 1
+      - 2
+      - 3
+      - 4
+      - 5
+      - 6
+      - 7
+      - 8
+      - 9
+    AssociationProperty: PayPeriod
+    AssociationPropertyMetadata:
+      Visible:
+        Condition:
+          Fn::And:
+            - Fn::Equals:
+                - ${CsOptions}
+                - NewAck
+            - Fn::Not:
+                Fn::Equals:
+                  - ${PayType}
+                  - PostPaid
+
+  LoginPassword:
+    NoEcho: true
+    Type: String
+    Description:
+      en: Server login password, Length 8-30, must contain three(Capital letters, lowercase letters, numbers, ()`~!@#$%^&*_-+=|{}[]:;<>,.?/ Special symbol in)
+      zh-cn: 服务器登录密码,长度8-30，必须包含三项（大写字母、小写字母、数字、 ()`~!@#$%^&*_-+=|{}[]:;<>,.?/ 中的特殊符号）
+    Label:
+      en: Instance Password
+      zh-cn: 实例密码
+    ConstraintDescription:
+      en: Length 8-30, must contain three(Capital letters, lowercase letters, numbers, ()`~!@#$%^&*_-+=|{}[]:;<>,.?/ Special symbol in)
+      zh-cn: 长度8-30，必须包含三项（大写字母、小写字母、数字、 ()`~!@#$%^&*_-+=|{}[]:;<>,.?/ 中的特殊符号）
+    AssociationProperty: ALIYUN::ECS::Instance::Password
+    AssociationPropertyMetadata:
+      Visible:
+        Condition:
+          Fn::Equals:
+            - ${CsOptions}
+            - NewAck
+    AllowedPattern: ^[a-zA-Z0-9-\(\)\`\~\!\@\#\$\%\^\&\*\_\-\+\=\|\{\}\[\]\:\;\<\>\,\.\?\/]*$
+    MinLength: 8
+    MaxLength: 30
+    Default: computenest*12345
+
+  WorkerInstanceType:
+    Type: String
+    Label:
+      en: Worker Nodes Types
+      zh-cn: Worker节点规格
+    Default: ecs.gn7i-c8g1.2xlarge
+    Required: true
+    AssociationProperty: ALIYUN::ECS::Instance::InstanceType
+    AssociationPropertyMetadata:
+      ZoneId: ${ZoneId}
+      InstanceChargeType: ${PayType}
+      CreateACKClusterParams:
+        NetworkPlugin: ${AckNetworkPlugin}
+      Visible:
+        Condition:
+          Fn::Equals:
+            - NewAck
+            - ${CsOptions}
+      Constraints:
+        InstanceTypeFamily:
+          - ecs.gn8t
+          - ecs.gn7i
+          - ecs.gn8is
+          - ecs.gn7e
+          - ecs.gn7s
+          - ecs.gn8ia
+          - ecs.gn8v
+          - ecs.ebmgn8t
+          - ecs.ebmgn9t
+
+  WorkerInstanceCount:
+    Default: 2
+    Type: Number
+    Label:
+      zh-cn: 实例节点数
+      en: The count for cpu instance.
+    MinValue: 1
+    MaxValue: 5000
+    AssociationPropertyMetadata:
+      Visible:
+        Condition:
+          Fn::Equals:
+            - ${CsOptions}
+            - NewAck
+
+  AckNetworkPlugin:
+    Type: String
+    Label:
+      en: ack plugin network
+      zh-cn: ack网络插件
+    AllowedValues:
+      - flannel
+      - terway-eniip
+    AssociationPropertyMetadata:
+      ValueLabelMapping:
+        flannel: flannel
+        terway-eniip: terway
+      Visible:
+        Condition:
+          Fn::Equals:
+            - ${CsOptions}
+            - NewAck
+    Default: flannel
+
+  ModelSeries:
+    Type: String
+    Label:
+      en: Model Series
+      zh-cn: 模型系列
+    Default: WanX-2.1(I2V-14B,T2V-14B,VACE-1.3B and I2V-1.3B)
+    AllowedValues:
+      - WanX-2.1(I2V-14B,T2V-14B,VACE-1.3B and I2V-1.3B)
+      - WanX-2.2(I2V-14B,T2V-14B,TI2v-5B)
+      - Qwen-Image
+      - Wanx2.2-fun_camera
+      - Wanx2.2-fun_control
+      - Wanx2.2-fun_inpaint
+      - Wanx2.2-s2v
+      - HunyuanVideo
+      - Qwen-Image-Edit
+      - Hunyuan3D-2.1
+      - Hunyuan3D-2
+      - Flux1-dev
+      - Flux1-Krea
+      - Flux1-kontext
+    AssociationPropertyMetadata:
+      ValueLabelMapping:
+        'WanX-2.1(I2V-14B,T2V-14B,VACE-1.3B and I2V-1.3B)': 'WanX-2.1 (图像到视频/文本到视频)'
+        'WanX-2.2(I2V-14B,T2V-14B,TI2v-5B)': 'WanX-2.2 (图像到视频/文本到视频)'
+        'Qwen-Image': 'Qwen-Image'
+        'Wanx2.2-fun_camera': 'WanX-2.2 Fun Camera'
+        'Wanx2.2-fun_control': 'WanX-2.2 Fun Control'
+        'Wanx2.2-fun_inpaint': 'WanX-2.2 Fun Inpaint (首尾帧)'
+        'Wanx2.2-s2v': 'WanX-2.2 S2V'
+        'HunyuanVideo': 'HunyuanVideo (混元视频)'
+        'Qwen-Image-Edit': 'Qwen-Image-Edit (图像编辑)'
+        'Hunyuan3D-2.1': 'Hunyuan3D-2.1'
+        'Hunyuan3D-2': 'Hunyuan3D-2.0'
+        'Flux1-dev': 'Flux1-dev'
+        'Flux1-Krea': 'Flux1-Krea'
+        'Flux1-kontext': 'Flux1-kontext'
+    Description:
+      zh-cn: 选择要部署的模型系列，不同模型需要的实例规格和磁盘空间不同。新增模型包括WanX-2.2系列的趣味功能、HunyuanVideo视频生成和Qwen-Image系列的编辑功能。
+      en: Select the model series to deploy. Different models require different instance specifications and disk space. New models include WanX-2.2 fun series, HunyuanVideo for video generation, and Qwen-Image editing series.
+
+  GpuSeries:
+    Type: String
+    Label:
+      en: GPU Series
+      zh-cn: GPU系列
+    Default: PPU
+    AllowedValues:
+      - A10
+      - L20
+      - H20
+      - PPU
+    AssociationPropertyMetadata:
+      ValueLabelMapping:
+        A10: A10
+        L20: L20
+        H20: GU8TF
+        PPU: P16EN
+
+  SupportPublicAccess:
+    Type: Boolean
+    Label:
+      zh-cn: 支持公网访问
+      en: Support Public Access
+
+  SecondZoneId:
+    Type: String
+    Label:
+      en: Second Zone Id
+      zh-cn: 备可用区
+    Description:
+      en: Second Zone Id, non-required
+      zh-cn: 备可用区,非必填
+    AllowedValues:
+      - cn-hangzhou-b
+      - cn-hangzhou-g
+      - cn-hangzhou-h
+      - cn-hangzhou-i
+      - cn-hangzhou-j
+      - cn-hangzhou-k
+      - cn-beijing-c
+      - cn-beijing-d
+      - cn-beijing-e
+      - cn-beijing-f
+      - cn-beijing-g
+      - cn-beijing-h
+      - cn-beijing-i
+      - cn-beijing-j
+      - cn-beijing-k
+      - cn-beijing-l
+      - cn-shanghai-a
+      - cn-shanghai-b
+      - cn-shanghai-e
+      - cn-shanghai-f
+      - cn-shanghai-g
+      - cn-shanghai-m
+      - cn-shanghai-l
+      - cn-shanghai-n
+      - cn-wulanchabu-a
+      - cn-wulanchabu-b
+      - cn-wulanchabu-c
+      - cn-shenzhen-c
+      - cn-shenzhen-d
+      - cn-shenzhen-e
+      - cn-shenzhen-f
+      - cn-hongkong-b
+      - cn-hongkong-c
+      - cn-hongkong-d
+      - ap-southeast-1a
+      - ap-southeast-1b
+      - ap-southeast-1c
+      - null
+    Default: null
+    AssociationProperty: ALIYUN::ECS::Instance:ZoneId
+    AssociationPropertyMetadata:
+      Visible:
+        Condition:
+          Fn::Not:
+            Fn::Equals:
+              - ${CsOptions}
+              - ExistCs
+      ExclusiveTo:
+        - ZoneId
+
+  ZoneId:
+    Type: String
+    Label:
+      en: Zone ID
+      zh-cn: 主可用区
+    AssociationProperty: ALIYUN::ECS::Instance:ZoneId
+    Default: 'cn-hangzhou-b'
+    AssociationPropertyMetadata:
+      ExclusiveTo:
+        - SecondZoneId
+      Visible:
+        Condition:
+          Fn::Not:
+            Fn::Equals:
+              - ${CsOptions}
+              - ExistCs
+      AllowedValues:
+        - Condition:
+            Fn::And:
+              - Fn::Or:
+                  - Fn::Equals:
+                      - ${CsOptions}
+                      - NewAcs
+                  - Fn::Equals:
+                      - ${CsOptions}
+                      - NewAck
+              - Fn::Equals:
+                  - ${GpuSeries}
+                  - H20
+          Value:
+            - cn-hangzhou-b
+            - cn-beijing-d
+            - cn-shanghai-f
+            - cn-shanghai-o
+            - cn-wulanchabu-c
+        - Condition:
+            Fn::And:
+              - Fn::Or:
+                  - Fn::Equals:
+                      - ${CsOptions}
+                      - NewAcs
+                  - Fn::Equals:
+                      - ${CsOptions}
+                      - NewAck
+              - Fn::Equals:
+                  - ${GpuSeries}
+                  - PPU
+          Value:
+            - cn-wulanchabu-a
+            - cn-beijing-d
+            - cn-shanghai-f
+            - cn-hangzhou-b
+            - ap-southeast-1a
+            - ap-southeast-1b
+            - ap-southeast-1c
+
+Resources:
+
+  RandomPassword:
+    Type: ALIYUN::RandomString
+    Properties:
+      length: 11
+      character_classes:
+        - class: "lowercase"
+          min: 4
+        - class: "uppercase"
+          min: 4
+        - class: "digits"
+          min: 2
+      character_sequences:
+        - sequence: "!@#$^*-+="
+
+  # OSS相关资源
+  OSSBucket:
+    Type: 'ALIYUN::OSS::Bucket'
+    Condition: CreateNewOSS
+    Properties:
+      DeletionForce: true
+      BucketName:
+        Ref: ALIYUN::StackName
+
+  OSSRamUser:
+    Type: ALIYUN::RAM::User
+    Properties:
+      UserName:
+        Ref: ALIYUN::StackName
+      Policies:
+        - PolicyName:
+            Ref: ALIYUN::StackName
+          PolicyDocument:
+            Statement:
+              - Action:
+                  - oss:*
+                Effect: Allow
+                Resource:
+                  - Fn::Sub:
+                      - "acs:oss:*:*:${BucketName}"
+                      - BucketName:
+                          Fn::If:
+                            - CreateNewOSS
+                            - Fn::GetAtt:
+                                - OSSBucket
+                                - Name
+                            - Ref: ExistingOSSBucket
+                  - Fn::Sub:
+                      - "acs:oss:*:*:${BucketName}/*"
+                      - BucketName:
+                          Fn::If:
+                            - CreateNewOSS
+                            - Fn::GetAtt:
+                                - OSSBucket
+                                - Name
+                            - Ref: ExistingOSSBucket
+            Version: '1'
+
+  AccessKey:
+    DependsOn: OSSRamUser
+    Type: ALIYUN::RAM::AccessKey
+    Properties:
+      UserName:
+        Ref: ALIYUN::StackName
+
+  # ACS虚拟容量预留（仅ACS集群时创建）
+  VirtualCapacityReservation:
+    Type: ALIYUN::ACS::VirtualCapacityReservation
+    Condition: ExistAcsOrNewAcsCondition
+    Properties:
+      PodPostpaidSpec:
+        Replicas: 1
+        GpuQuantityConfigs:
+          GpuModel:
+            Fn::If:
+              - IfPPU
+              - PPU810E
+              - H20
+          GpuQuantity: 1
+          ComputeQos: default
+          Arch: Intel
+        MemGib: 80
+        CpuCore: 10
+
+  # 集群Vpc相关配置
+  VpcModule:
+    Type: MODULE::ACS::ComputeNest::VpcAndVSwitch
+    Version: default
+    Condition: CreateClusterCondition
+    Properties:
+      EnableDualZones:
+        Fn::If:
+          - SupportDualZones
+          - true
+          - false
+      VpcOption: NewVPC
+      ZoneId:
+        Ref: ZoneId
+      ZoneIdSecondary:
+        Ref: SecondZoneId
+      VSwitchCidrBlock: '192.168.0.0/24'
+      VSwitchCidrBlockSecondary: '192.168.1.0/24'
+      VpcCidrBlock: '192.168.0.0/16'
+
+  AckOrAcsClusterModule:
+    DependsOn:
+      - VpcModule
+    Type: MODULE::ACS::ComputeNest::AckOrAcsCluster
+    Version: default
+    Condition: CreateClusterCondition
+    Properties:
+      EnableDualZones:
+        Fn::If:
+          - SupportDualZones
+          - true
+          - false
+      CsOptions:
+        Ref: CsOptions
+      ClusterId:
+        Ref: ClusterId
+      VpcId:
+        Fn::GetAtt:
+          - VpcModule
+          - VpcId
+      ZoneId:
+        Ref: ZoneId
+      ZoneIdSecondary:
+        Fn::If:
+          - SupportDualZones
+          - Ref: SecondZoneId
+          - Ref: ZoneId
+      VSwitchId:
+        Fn::GetAtt:
+          - VpcModule
+          - VSwitchId
+      VSwitchIdSecondary:
+        Fn::If:
+          - SupportDualZones
+          - Fn::GetAtt:
+              - VpcModule
+              - VSwitchIdSecondary
+          - Fn::GetAtt:
+              - VpcModule
+              - VSwitchId
+      PodVSwitchId:
+        Fn::GetAtt:
+          - VpcModule
+          - VSwitchId
+      PodVSwitchIdSecondary:
+        Fn::If:
+          - SupportDualZones
+          - Fn::GetAtt:
+              - VpcModule
+              - VSwitchIdSecondary
+          - Fn::GetAtt:
+              - VpcModule
+              - VSwitchId
+      PodCidr: '10.0.0.0/16'
+      ServiceCidr: '172.16.0.0/16'
+      ClusterSpec: ack.pro.small
+      AckNetworkPlugin:
+        Fn::If:
+          - FlannelPluginCondition
+          - flannel
+          - terway
+      PayType:
+        Ref: PayType
+      PayPeriod:
+        Ref: PayPeriod
+      PayPeriodUnit:
+        Ref: PayPeriodUnit
+      WorkerInstanceCount:
+        Ref: WorkerInstanceCount
+      WorkerInstanceTypes:
+        - Ref: WorkerInstanceType
+      WorkerSystemDiskCategory: cloud_essd
+      WorkerSystemDiskSize: 120
+      LoginPassword:
+        Ref: LoginPassword
+
+  # 获取集群信息
+  KubernetesCluster:
+    Type: DATASOURCE::CS::KubernetesCluster
+    Properties:
+      ClusterId:
+        Fn::If:
+          - CreateClusterCondition
+          - Fn::GetAtt:
+              - AckOrAcsClusterModule
+              - ClusterId
+          - Ref: ClusterId
+
+  ClusterUserKubeconfig:
+    Type: DATASOURCE::CS::ClusterUserKubeconfig
+    Properties:
+      ClusterId:
+        Fn::If:
+          - CreateClusterCondition
+          - Fn::GetAtt:
+              - AckOrAcsClusterModule
+              - ClusterId
+          - Ref: ClusterId
+      PrivateIpAddress: true
+
+  # 模型下载Job
+  ModelDownloadApplication:
+    Type: ALIYUN::CS::ClusterApplication
+    DependsOn:
+      - AccessKey
+      - OSSPVPVCApplication
+    Properties:
+      WaitUntil:
+        - Kind: Job
+          Name: model-download-job
+          JsonPath: $.status.succeeded
+          Operator: Equals
+          Value: '1'
+          ValueType: Json
+          Timeout:
+            Fn::FindInMap:
+              - ModelMapping
+              - ModelWaitTimeMap
+              - Ref: ModelSeries
+          FirstMatch: true
+      YamlContent:
+        Fn::Sub:
+          - |
+            apiVersion: batch/v1
+            kind: Job
+            metadata:
+              name: model-download-job
+            spec:
+              ttlSecondsAfterFinished: 1800
+              template:
+                metadata:
+                  labels:
+                    alibabacloud.com/compute-class: performance
+                  name: model-download-job
+                spec:
+                  containers:
+                  - name: model-download-job
+                    image: compute-nest-registry.cn-hangzhou.cr.aliyuncs.com/public/ossutil:2.0
+                    resources: ${resources}
+                    volumeMounts:
+                    - name: scratch-volume
+                      mountPath: /root/models
+                    command: [ "/bin/bash", "-c", "--" ] 
+                    args:
+                      - |
+                        set -x
+            
+                        # 配置 OSS 认证信息
+                        cat >> /usr/bin/oss.cfg <<EOF
+                        [Credentials]
+                        endpoint = ${ossUrl}
+                        accessKeyID = ${accessKeyId}
+                        accessKeySecret = ${accessKeySecret}
+                        region = ${regionId}
+                        EOF
+
+                        # 检查目标 OSS bucket 中是否已经存在模型文件
+                        echo "[$(date '+%Y-%m-%d %H:%M:%S')] 检查目标 OSS bucket 中是否已存在模型文件..."
+                        if ossutil --config-file /usr/bin/oss.cfg ls oss://${bucketName}/llm-model/models/ | grep -q "models"; then
+                          echo "[$(date '+%Y-%m-%d %H:%M:%S')] 模型文件已存在于目标 OSS bucket 中，跳过下载和上传操作"
+                          exit 0
+                        fi
+
+                        echo "[$(date '+%Y-%m-%d %H:%M:%S')] 目标 OSS bucket 中不存在模型文件，开始下载..."
+                        cd /root
+            
+                        # 从公共存储下载模型文件
+                        ossutil cp oss://computenest-artifacts-${regionId}/model-data/${modelSeries}/model.tar.zst model.tar.zst --region ${regionId} --endpoint ${ossUrl} --mode Anonymous
+
+                        echo "[$(date '+%Y-%m-%d %H:%M:%S')] 开始解压模型文件..."
+                        zstd -d -c models.tar.zst | pv | tar -xvf - --strip-components=1
+                        echo "[$(date '+%Y-%m-%d %H:%M:%S')] 模型文件解压完毕"
+
+                        echo "[$(date '+%Y-%m-%d %H:%M:%S')] 开始上传模型文件到目标 OSS bucket..."
+                        ossutil --config-file /usr/bin/oss.cfg cp -r /root/storage/models oss://${bucketName}/llm-model/ --ignore-existing
+                        echo "[$(date '+%Y-%m-%d %H:%M:%S')] 模型文件上传完毕"
+                  volumes:
+                    - name: scratch-volume
+                      ephemeral:
+                        volumeClaimTemplate:
+                          spec:
+                            accessModes: [ "ReadWriteOncePod" ]
+                            storageClassName: alicloud-disk-essd-pl2
+                            resources:
+                              requests:
+                                storage: ${diskSize}Gi
+            
+            
+                  restartPolicy: Never
+          - regionId:
+              Ref: ALIYUN::Region
+            bucketName:
+              Fn::If:
+                - CreateNewOSS
+                - Fn::GetAtt:
+                    - OSSBucket
+                    - Name
+                - Ref: ExistingOSSBucket
+            diskSize:
+              Fn::FindInMap:
+                - ModelMapping
+                - ModelDiskSizeMap
+                - Ref: ModelSeries
+            ossUrl:
+              Fn::Sub: "oss-${ALIYUN::Region}-internal.aliyuncs.com"
+            accessKeyId:
+              Fn::GetAtt:
+                - AccessKey
+                - AccessKeyId
+            accessKeySecret:
+              Fn::GetAtt:
+                - AccessKey
+                - AccessKeySecret
+            modelSeries:
+              Ref: ModelSeries
+            resources:
+              Fn::If:
+                - ExistAcsOrNewAcsCondition
+                - Fn::Indent:
+                    - |-
+                      
+                      requests:
+                        memory: "64Gi"
+                        cpu: "8"
+                      limits:
+                        memory: "128Gi"
+                        cpu: "16"
+                    - 6
+                - Fn::Indent:
+                    - |-
+                      
+                      requests:
+                        memory: "4Gi"
+                        cpu: "2"
+                      limits:
+                        memory: "8Gi"
+                        cpu: "4"
+                    - 6
+      ClusterId:
+        Fn::If:
+          - CreateClusterCondition
+          - Fn::GetAtt:
+              - AckOrAcsClusterModule
+              - ClusterId
+          - Ref: ClusterId
+      DefaultNamespace: default
+  StorageClassApplication:
+    Type: ALIYUN::CS::ClusterApplication
+    Condition: CreateClusterCondition
+    DependsOn:
+      - AckOrAcsClusterModule
+      - PreDeployApplication
+    Properties:
+      YamlContent: |
+        apiVersion: storage.k8s.io/v1
+        kind: StorageClass
+        metadata:
+          name: alicloud-disk-essd-pl2
+        provisioner: diskplugin.csi.alibabacloud.com
+        parameters:
+          type: cloud_essd
+          fstype: ext4
+          performanceLevel: PL2,PL1
+        reclaimPolicy: Delete
+        volumeBindingMode: WaitForFirstConsumer
+        allowVolumeExpansion: true
+      ClusterId:
+        Fn::GetAtt:
+          - AckOrAcsClusterModule
+          - ClusterId
+      DefaultNamespace: default
+  # 预部署应用（创建命名空间和Secret）
+  PreDeployApplication:
+    Type: ALIYUN::CS::ClusterApplication
+    DependsOn:
+      - AccessKey
+    Properties:
+      YamlContent:
+        Fn::Sub:
+          - |
+            apiVersion: v1
+            kind: Namespace
+            metadata:
+              name: llm-model
+            ---
+            apiVersion: v1
+            kind: Secret
+            metadata:
+              name: oss-secret
+              namespace: default
+            stringData:
+              akId: ${accessKeyId}
+              akSecret: ${accessKeySecret}
+          - accessKeyId:
+              Fn::GetAtt:
+                - AccessKey
+                - AccessKeyId
+            accessKeySecret:
+              Fn::GetAtt:
+                - AccessKey
+                - AccessKeySecret
+      ClusterId:
+        Fn::If:
+          - CreateClusterCondition
+          - Fn::GetAtt:
+              - AckOrAcsClusterModule
+              - ClusterId
+          - Ref: ClusterId
+      DefaultNamespace: default
+
+  # OSS PV和PVC
+  OSSPVPVCApplication:
+    Type: ALIYUN::CS::ClusterApplication
+    DependsOn:
+      - PreDeployApplication
+      - StorageClassApplication
+    Properties:
+      YamlContent:
+        Fn::Sub:
+          - |
+            apiVersion: storage.k8s.io/v1
+            kind: StorageClass
+            metadata:
+              name: llm-model
+            provisioner: diskplugin.csi.alibabacloud.com
+            reclaimPolicy: Retain
+            volumeBindingMode: Immediate
+            parameters:
+              type: cloud_essd
+              fstype: ext4
+              performanceLevel: PL2,PL1
+            reclaimPolicy: Delete
+            volumeBindingMode: WaitForFirstConsumer
+            allowVolumeExpansion: true
+            ---
+            apiVersion: v1
+            kind: PersistentVolumeClaim
+            metadata:
+              name: llm-model
+              namespace: default
+            spec:
+              accessModes: [ "ReadWriteMany" ]
+              storageClassName: llm-model
+              resources:
+                requests:
+                  storage: 2048Gi
+          - bucketName:
+              Fn::If:
+                - CreateNewOSS
+                - Fn::GetAtt:
+                    - OSSBucket
+                    - Name
+                - Ref: ExistingOSSBucket
+            ossUrl:
+              Fn::Sub: "oss-${ALIYUN::Region}-internal.aliyuncs.com"
+      ClusterId:
+        Fn::If:
+          - CreateClusterCondition
+          - Fn::GetAtt:
+              - AckOrAcsClusterModule
+              - ClusterId
+          - Ref: ClusterId
+      DefaultNamespace: default
+
+  # ComfyUI应用部署
+  # ComfyUI应用部署
+  # ComfyUI应用部署
+  ComfyUIApplication:
+    Type: ALIYUN::CS::ClusterApplication
+    DependsOn:
+      - OSSPVPVCApplication
+      - ModelDownloadApplication
+    Properties:
+      WaitUntil:
+        - Kind: Deployment
+          Name: comfyui
+          JsonPath: $.status.readyReplicas
+          Operator: Equals
+          Value: '1'
+          ValueType: Json
+          Timeout: 1800
+          FirstMatch: true
+      YamlContent:
+        Fn::Sub:
+          - |
+            apiVersion: v1
+            kind: Secret
+            metadata:
+              name: acs-image-secret
+              namespace: default
+            type: kubernetes.io/dockerconfigjson
+            data:
+              .dockerconfigjson: ewoJImF1dGhzIjogewoJCSJlZ3NsaW5nanVuLXJlZ2lzdHJ5LmNuLXd1bGFuY2hhYnUuY3IuYWxpeXVuY3MuY29tIjogewoJCQkiYXV0aCI6ICJiVzk1WVc5QU1Ua3dNekF4TlRBM05USXlPVEl3T1RwRGJuQkZVakEyTWxGdklRPT0iCgkJfQoJfQp9Cg==
+            ---
+            apiVersion: apps/v1
+            kind: Deployment
+            metadata:
+              labels:
+                app: comfyui
+              name: comfyui
+              namespace: default
+            spec:
+              progressDeadlineSeconds: 600
+              replicas: 1
+              revisionHistoryLimit: 10
+              selector:
+                matchLabels:
+                  app: comfyui
+              template:
+                metadata:
+                  labels:
+                    app: comfyui
+                    alibabacloud.com/compute-class: gpu
+                    alibabacloud.com/gpu-model-series: ${gpuModelSeries}
+                    ${qosLabel}
+                spec:
+                  imagePullSecrets:
+                    - name: acs-image-secret
+                  containers:
+                    - name: comfyui
+                      image: ${containerImage}
+                      workingDir: ${containerWorkingDir}
+                      ports:
+                        - containerPort: 8188
+                          name: server
+                          protocol: TCP
+                      command: ["python3", "main.py", "--listen", "--port", "8188", "--fast"]
+                      resources:
+                        requests:
+                          cpu: '4'
+                          memory: 48Gi
+                        limits:
+                          cpu: ${resourceCpu}
+                          memory: ${resourceMemory}
+                          ${gpuResourceKey}: 1
+                          ephemeral-storage: ${resourceEphemeralStorage}
+                      terminationMessagePath: /dev/termination-log
+                      terminationMessagePolicy: File
+                      volumeMounts:
+                        - mountPath: /workspace/pytorch/ComfyUI/models
+                          name: llm-model
+                          subPath: models
+                        - mountPath: /workspace/pytorch/ComfyUI/output
+                          name: llm-model
+                          subPath: output
+                        - mountPath: /workspace/pytorch/ComfyUI/user_scripts
+                          name: llm-model
+                          subPath: user_scripts
+                        - mountPath: /workspace/pytorch/ComfyUI/user
+                          name: llm-model
+                          subPath: user
+                        - mountPath: /workspace/pytorch/ComfyUI/input
+                          name: llm-model
+                          subPath: input
+                  volumes:
+                    - name: llm-model
+                      persistentVolumeClaim:
+                        claimName: llm-model
+                    - name: ephemeral
+                      emptyDir:
+                        sizeLimit: 100G
+          - containerImage:
+              Fn::Select:
+                - image
+                - Ref: ContainerConfig
+            containerWorkingDir:
+              Fn::Select:
+                - workingDir
+                - Ref: ContainerConfig
+            resourceCpu:
+              Fn::Select:
+                - cpu
+                - Ref: ResourceLimits
+            resourceMemory:
+              Fn::Select:
+                - memory
+                - Ref: ResourceLimits
+            resourceEphemeralStorage:
+              Fn::Select:
+                - ephemeral-storage
+                - Ref: ResourceLimits
+            gpuModelSeries:
+              Ref: GpuModelSeries
+            gpuResourceKey:
+              Ref: GpuResourceKey
+            qosLabel:
+              Ref: QosLabel
+      ClusterId:
+        Fn::If:
+          - CreateClusterCondition
+          - Fn::GetAtt:
+              - AckOrAcsClusterModule
+              - ClusterId
+          - Ref: ClusterId
+      DefaultNamespace: default
+
+
+
+
+  # 私有服务
+  PrivateServiceApplication:
+    Type: ALIYUN::CS::ClusterApplication
+    DependsOn:
+      - ComfyUIApplication
+    Properties:
+      YamlContent:
+        Fn::Sub:
+          - |
+            apiVersion: v1
+            kind: Service
+            metadata:
+              annotations:
+                service.beta.kubernetes.io/alibaba-cloud-loadbalancer-address-type: "intranet"
+                service.beta.kubernetes.io/alibaba-cloud-loadbalancer-ip-version: ipv4
+              labels:
+                app: comfyui
+              name: svc-private
+              namespace: default
+            spec:
+              ports:
+                - name: serving
+                  port: 8188
+                  protocol: TCP
+                  targetPort: 8188
+              selector:
+                app: comfyui
+              type: LoadBalancer
+          - {}
+      ClusterId:
+        Fn::If:
+          - CreateClusterCondition
+          - Fn::GetAtt:
+              - AckOrAcsClusterModule
+              - ClusterId
+          - Ref: ClusterId
+      DefaultNamespace: default
+
+  # 公网服务
+  PublicServiceApplication:
+    Type: ALIYUN::CS::ClusterApplication
+    Condition: IsPublicEnabled
+    DependsOn:
+      - ComfyUIApplication
+    Properties:
+      YamlContent:
+        Fn::Sub:
+          - |
+            apiVersion: v1
+            kind: Service
+            metadata:
+              annotations:
+                service.beta.kubernetes.io/alibaba-cloud-loadbalancer-address-type: "internet"
+                service.beta.kubernetes.io/alibaba-cloud-loadbalancer-ip-version: ipv4
+              labels:
+                app: comfyui
+              name: svc-public
+              namespace: default
+            spec:
+              externalTrafficPolicy: Local
+              ports:
+                - name: serving
+                  port: 8188
+                  protocol: TCP
+                  targetPort: 8188
+              selector:
+                app: comfyui
+              type: LoadBalancer
+          - {}
+      ClusterId:
+        Fn::If:
+          - CreateClusterCondition
+          - Fn::GetAtt:
+              - AckOrAcsClusterModule
+              - ClusterId
+          - Ref: ClusterId
+      DefaultNamespace: default
+
+  # 获取服务地址
+  PrivateIngressResources:
+    Type: DATASOURCE::CS::ClusterApplicationResources
+    DependsOn:
+      - PrivateServiceApplication
+    Properties:
+      Namespace: default
+      Kind: Service
+      FirstMatch: True
+      ApiVersion: v1
+      JsonPath: $.status.loadBalancer.ingress[0].ip
+      ClusterId:
+        Fn::If:
+          - CreateClusterCondition
+          - Fn::GetAtt:
+              - AckOrAcsClusterModule
+              - ClusterId
+          - Ref: ClusterId
+      Name: svc-private
+
+  PublicIngressResources:
+    Type: DATASOURCE::CS::ClusterApplicationResources
+    DependsOn:
+      - PublicServiceApplication
+    Condition: IsPublicEnabled
+    Properties:
+      Namespace: default
+      Kind: Service
+      FirstMatch: True
+      ApiVersion: v1
+      JsonPath: $.status.loadBalancer.ingress[0].ip
+      ClusterId:
+        Fn::If:
+          - CreateClusterCondition
+          - Fn::GetAtt:
+              - AckOrAcsClusterModule
+              - ClusterId
+          - Ref: ClusterId
+      Name: svc-public
+
+Mappings:
+  ModelMapping:
+    ModelNameMap:
+      'WanX-2.1(I2V-14B,T2V-14B,VACE-1.3B and I2V-1.3B)': Wan2.1
+      'WanX-2.2(I2V-14B,T2V-14B,TI2v-5B)': Wanx2.2
+      'Qwen-Image': Qwen-Image
+      'Wanx2.2-fun_camera': Wanx2.2-fun_camera
+      'Wanx2.2-fun_control': Wanx2.2-fun_control
+      'Wanx2.2-fun_inpaint': Wanx2.2-fun_inpaint
+      'Wanx2.2-s2v': Wanx2.2-s2v
+      'HunyuanVideo': HunyuanVideo
+      'Qwen-Image-Edit': Qwen-Image-Edit
+      'Hunyuan3D-2.1': hunyuan2.1
+      'Hunyuan3D-2': hunyuan2.2
+      'Flux1-dev': flux1-dev
+      'Flux1-Krea': flux1-Krea
+      'Flux1-kontext': flux1-kontext
+
+    ModelDiskSizeMap:
+      'WanX-2.1(I2V-14B,T2V-14B,VACE-1.3B and I2V-1.3B)': 250
+      'WanX-2.2(I2V-14B,T2V-14B,TI2v-5B)': 450
+      'Qwen-Image': 250
+      'Wanx2.2-fun_camera': 300
+      'Wanx2.2-fun_control': 300
+      'Wanx2.2-fun_inpaint': 300
+      'Wanx2.2-s2v': 400
+      'HunyuanVideo': 500
+      'Qwen-Image-Edit': 350
+      'Hunyuan3D-2.1': 100
+      'Hunyuan3D-2': 100
+      'Flux1-dev': 150
+      'Flux1-Krea': 150
+      'Flux1-kontext': 150
+
+    ModelWaitTimeMap:
+      'WanX-2.1(I2V-14B,T2V-14B,VACE-1.3B and I2V-1.3B)': 1800
+      'WanX-2.2(I2V-14B,T2V-14B,TI2v-5B)': 2400
+      'Qwen-Image': 1200
+      'Wanx2.2-fun_camera': 1800
+      'Wanx2.2-fun_control': 1800
+      'Wanx2.2-fun_inpaint': 1800
+      'Wanx2.2-s2v': 2400
+      'HunyuanVideo': 3000
+      'Qwen-Image-Edit': 1500
+      'Hunyuan3D-2.1': 1200
+      'Hunyuan3D-2': 1200
+      'Flux1-dev': 1200
+      'Flux1-Krea': 1200
+      'Flux1-kontext': 1200
+
+Outputs:
+  comfyui_address:
+    Label: 内网地址
+    Value:
+      Fn::Sub:
+        - 'http://${PrivateIp}:8188/'
+        - PrivateIp:
+            Fn::GetAtt:
+              - PrivateIngressResources
+              - Response
+
+  公网地址:
+    Label: 公网地址
+    Condition: IsPublicEnabled
+    Value:
+      Fn::Sub:
+        - 'http://${PublicIp}:8188/'
+        - PublicIp:
+            Fn::GetAtt:
+              - PublicIngressResources
+              - Response
+
+  模型系列:
+    Label: 模型系列
+    Value:
+      Ref: ModelSeries
+
+  集群类型:
+    Label: 集群类型
+    Value:
+      Fn::GetAtt:
+        - KubernetesCluster
+        - Profile
+
+  在线访问:
+    Label: 在线访问
+    Value: '<a href="https://appflow.console.aliyun.com/vendor/cn-hangzhou/comfyui/chat?serviceInstanceId={{serviceInstanceId}}" target="_blank" rel="noopener noreferrer"> 访问链接 </a>'
+
+Metadata:
+  ALIYUN::ROS::Interface:
+    Hidden:
+      - ClusterProfile
+    ParameterGroups:
+      - Parameters:
+          - WhitelistConfirmation
+        Label:
+          en: Whitelist Confirmation
+          zh-cn: 白名单确认
+      - Parameters:
+          - ClusterType
+          - CsOptions
+          - PayType
+          - PayPeriodUnit
+          - PayPeriod
+          - WorkerInstanceType
+          - WorkerInstanceCount
+          - LoginPassword
+          - AckNetworkPlugin
+          - ClusterId
+          - CreateOSS
+          - ExistingOSSBucket
+        Label:
+          en: Basic Configuration
+          zh-cn: 基础资源配置
+      - Parameters:
+          - ModelSeries
+          - GpuSeries
+        Label:
+          en: Model Config
+          zh-cn: 模型配置
+      - Parameters:
+          - ZoneId
+          - SecondZoneId
+          - SupportPublicAccess
+        Label:
+          en: Basic Configuration
+          zh-cn: 资源配置

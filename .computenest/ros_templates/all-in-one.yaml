@@ -17,6 +17,10 @@ Mappings:
       'Qwen-Image-Edit': Qwen-Image-Edit
       'Hunyuan3D-2.1': hunyuan2.1
       'Hunyuan3D-2': hunyuan2.2
+      'Flux1-dev': flux1-dev
+      'Flux1-Krea': flux1-Krea
+      'Flux1-kontext': flux1-kontext
+
 
     ModelDiskSizeMap:
       'WanX-2.1(I2V-14B,T2V-14B,VACE-1.3B and I2V-1.3B)': 250
@@ -30,6 +34,10 @@ Mappings:
       'Qwen-Image-Edit': 350
       'Hunyuan3D-2.1': 100
       'Hunyuan3D-2': 100
+      'Flux1-dev': 150
+      'Flux1-Krea': 150
+      'Flux1-kontext': 150
+
     ModelWaitTimeMap:
       'WanX-2.1(I2V-14B,T2V-14B,VACE-1.3B and I2V-1.3B)': 1800
       'WanX-2.2(I2V-14B,T2V-14B,TI2v-5B)': 2400
@@ -42,6 +50,9 @@ Mappings:
       'Qwen-Image-Edit': 1500
       'Hunyuan3D-2.1': 1200
       'Hunyuan3D-2': 1200
+      'Flux1-dev': 1200
+      'Flux1-Krea': 1200
+      'Flux1-kontext': 1200
 
 
 Conditions:
@@ -73,6 +84,9 @@ Parameters:
       - Qwen-Image-Edit
       - Hunyuan3D-2.1
       - Hunyuan3D-2
+      - Flux1-dev
+      - Flux1-Krea
+      - Flux1-kontext
     AssociationPropertyMetadata:
       ValueLabelMapping:
         'WanX-2.1(I2V-14B,T2V-14B,VACE-1.3B and I2V-1.3B)': 'WanX-2.1 (图像到视频/文本到视频)'
@@ -86,6 +100,9 @@ Parameters:
         'Qwen-Image-Edit': 'Qwen-Image-Edit (图像编辑)'
         'Hunyuan3D-2.1': 'Hunyuan3D-2.1'
         'Hunyuan3D-2': 'Hunyuan3D-2.0'
+        'Flux1-dev': 'Flux1-dev'
+        'Flux1-Krea': 'Flux1-Krea'
+        'Flux1-kontext': 'Flux1-kontext'
     Description:
       zh-cn: 选择要部署的模型系列，不同模型需要的实例规格和磁盘空间不同。新增模型包括WanX-2.2系列的趣味功能、HunyuanVideo视频生成和Qwen-Image系列的编辑功能。
       en: Select the model series to deploy. Different models require different instance specifications and disk space. New models include WanX-2.2 fun series, HunyuanVideo for video generation, and Qwen-Image editing series.

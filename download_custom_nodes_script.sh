@@ -40,13 +40,12 @@ function clone () {
       set -e ;
 }
 
-cd /workspace/pytorch
-rm -rf ComfyUI
-clone https://github.com/comfyanonymous/ComfyUI.git
 
-cd /workspace/pytorch/ComfyUI
-pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
-cd /workspace/pytorch/ComfyUI/custom_nodes
+cd /root
+clone https://github.com/comfyanonymous/ComfyUI.git
+cd /root/ComfyUI
+pip install -r requirements.txt
+cd /root/ComfyUI/custom_nodes
 clone_and_install https://github.com/ltdrdata/ComfyUI-Manager.git
 clone_and_install https://github.com/kijai/ComfyUI-WanVideoWrapper.git
 clone_and_install https://github.com/crystian/ComfyUI-Crystools.git
@@ -62,6 +61,16 @@ clone_and_install https://github.com/pythongosssss/ComfyUI-Custom-Scripts.git
 clone_and_install https://github.com/bash-j/mikey_nodes.git
 clone_and_install https://github.com/kijai/ComfyUI-GIMM-VFI.git
 clone_and_install https://github.com/liusida/ComfyUI-Login.git
+clone_and_install https://github.com/city96/ComfyUI-GGUF.git
+clone_and_install https://github.com/jakechai/ComfyUI-JakeUpgrade.git
+clone_and_install https://github.com/Jonseed/ComfyUI-Detail-Daemon.git
+clone_and_install https://github.com/cubiq/ComfyUI_IPAdapter_plus.git
+clone_and_install https://github.com/spinagon/ComfyUI-seamless-tiling.git
+clone_and_install https://github.com/visualbruno/ComfyUI-Hunyuan3d-2-1.git
+clone_and_install https://github.com/smthemex/ComfyUI_PartPacker.git
+clone_and_install https://github.com/NVlabs/PartPacker.git
+rm -rf /root/ComfyUI/login
+
 
 clone https://github.com/chrisgoringe/cg-use-everywhere.git
 clone https://github.com/cubiq/ComfyUI_essentials.git
@@ -75,12 +84,14 @@ clone https://github.com/Fannovel16/comfyui_controlnet_aux.git
 clone https://github.com/florestefano1975/comfyui-portrait-master.git
 clone https://github.com/huchenlei/ComfyUI-layerdiffuse.git
 clone https://github.com/Kosinkadink/ComfyUI-Advanced-ControlNet.git
+clone https://github.com/ltdrdata/ComfyUI-Inspire-Pack.git
 clone https://github.com/mcmonkeyprojects/sd-dynamic-thresholding.git
 clone https://github.com/twri/sdxl_prompt_styler.git
 
 # Video
 clone https://github.com/Fannovel16/ComfyUI-Frame-Interpolation.git
 clone https://github.com/Kosinkadink/ComfyUI-VideoHelperSuite.git
+clone https://github.com/melMass/comfy_mtb.git
 
 # More
 clone https://github.com/pythongosssss/ComfyUI-WD14-Tagger.git
