@@ -1,0 +1,1051 @@
+<!DOCTYPE html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="计算巢是阿里云开放给企业应用服务商的服务管理平台。服务商能够在计算巢上发布私有化部署服务，为其客户提供云上软件一键部署的能力；同时也支持全托管模式的服务，赋能服务商托管其客户资源。">
+  <title>ComfyUI社区版 - Aliyun 计算巢 x Demo</title>
+
+  <link rel="shortcut icon" href="img/favicon.ico">
+
+  <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.0/build/pure-min.css">
+  <link rel="stylesheet" href="css/theme.css">
+  
+
+  
+
+  
+  
+
+  
+    <script src="search/main.js"></script>
+  
+
+  
+
+  <script src="js/highlight.min.js"></script>
+  <script>hljs.highlightAll();</script>
+</head>
+
+<body>
+  <div class="container">
+    <div class="nav">
+      <div class="nav-inner">
+        <div class="logo">
+          <img src="./img/logo-2x.png">
+        </div>
+        <div class="nav-list">
+          <ul>
+          
+              <li><a href="#comfyui">ComfyUI社区版</a></li>
+              
+                  <li><a href="#_1">概述</a></li>
+                  
+              
+                  <li><a href="#_2">前提条件</a></li>
+                  
+              
+                  <li><a href="#_3">计费说明</a></li>
+                  
+                      <li class="li-h3"><a href="#acs">ACS版本费用</a></li>
+                  
+                      <li class="li-h3"><a href="#_4">社区版费用</a></li>
+                  
+              
+                  <li><a href="#_5">整体架构</a></li>
+                  
+              
+                  <li><a href="#_6">部署流程</a></li>
+                  
+                      <li class="li-h3"><a href="#acs_1">ACS版本部署</a></li>
+                  
+                      <li class="li-h3"><a href="#ecs">ECS社区版部署</a></li>
+                  
+              
+                  <li><a href="#_7">参数说明</a></li>
+                  
+              
+                  <li><a href="#_8">内置模型说明</a></li>
+                  
+                      <li class="li-h3"><a href="#_9">主要模型概览</a></li>
+                  
+                      <li class="li-h3"><a href="#_10">完整模型资源清单</a></li>
+                  
+                      <li class="li-h3"><a href="#_11">如何上传自己的模型</a></li>
+                  
+                      <li class="li-h3"><a href="#_12">模型下载</a></li>
+                  
+              
+                  <li><a href="#_13">使用流程</a></li>
+                  
+                      <li class="li-h3"><a href="#_14">图生视频或文生视频功能</a></li>
+                  
+                      <li class="li-h3"><a href="#_15">文生图功能</a></li>
+                  
+                      <li class="li-h3"><a href="#_16">图生图功能</a></li>
+                  
+              
+                  <li><a href="#api">API调用</a></li>
+                  
+                      <li class="li-h3"><a href="#api_1">API 端点概览</a></li>
+                  
+                      <li class="li-h3"><a href="#api_2">文生视频API方式</a></li>
+                  
+                      <li class="li-h3"><a href="#api_3">图生视频API方式</a></li>
+                  
+              
+                  <li><a href="#_17">账号密码</a></li>
+                  
+              
+                  <li><a href="#_18">常见问题</a></li>
+                  
+              
+          
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="content theme-github">
+      
+      <div class="content-inner">        
+        
+        <h1 id="comfyui">ComfyUI社区版</h1>
+<blockquote>
+<p><strong>免责声明：</strong>本服务由第三方提供，我们尽力确保其安全性、准确性和可靠性，但无法保证其完全免于故障、中断、错误或攻击。因此，本公司在此声明：对于本服务的内容、准确性、完整性、可靠性、适用性以及及时性不作任何陈述、保证或承诺，不对您使用本服务所产生的任何直接或间接的损失或损害承担任何责任；对于您通过本服务访问的第三方网站、应用程序、产品和服务，不对其内容、准确性、完整性、可靠性、适用性以及及时性承担任何责任，您应自行承担使用后果产生的风险和责任；对于因您使用本服务而产生的任何损失、损害，包括但不限于直接损失、间接损失、利润损失、商誉损失、数据损失或其他经济损失，不承担任何责任，即使本公司事先已被告知可能存在此类损失或损害的可能性；我们保留不时修改本声明的权利，因此请您在使用本服务前定期检查本声明。如果您对本声明或本服务存在任何问题或疑问，请联系我们。</p>
+</blockquote>
+<h2 id="_1">概述</h2>
+<p>ComfyUI是 最强大的开源节点式生成式AI应用，支持创建图像、视频及音频内容。依托前沿开源模型可实现视频与图像生成。
+依据官方文档，ComfyUI具有以下特点：
++ 节点/图形/流程图界面，用于实验和创建复杂的稳定扩散工作流程，无需编写任何代码。
++ 完全支持 SD1.x、SD2.x 和 SDXL
++ 异步队列系统
++ 多项优化 只重新执行工作流中在两次执行之间发生变化的部分。
++ 命令行选项：--lowvram 可使其在 3GB 内存以下的 GPU 上运行（在低内存的 GPU 上自动启用）
++ 即使没有 GPU 也能使用： --cpu（慢速）
++ 可加载 ckpt、safetensors 和 diffusers 模型/检查点。独立的 VAE 和 CLIP 模型。
++ 嵌入/文本反演
++ Loras （常规、locon 和 loha）
++ 超网络
++ 从生成的 PNG 文件加载完整的工作流（含种子
++ 以 Json 文件保存/加载工作流。
++ 节点界面可用于创建复杂的工作流程，如 "Hires fix "或更高级的工作流程。
++ 区域合成
++ 使用常规和内绘模型进行内绘。
++ 控制网络和 T2I 适配器
++ 升级模型（ESRGAN、ESRGAN 变体、SwinIR、Swin2SR 等）
++ unCLIP 模型
++ GLIGEN
++ 模型合并
++ 使用 TAESD 进行潜伏预览
++ 启动速度极快。
++ 完全离线工作：不会下载任何东西。
++ 配置文件可设置模型的搜索路径。</p>
+<h2 id="_2">前提条件</h2>
+<p>部署ComfyUI社区版服务实例，需要对部分阿里云资源进行访问和创建操作。因此您的账号需要包含如下资源的权限。<strong>说明</strong>：当您的账号是RAM账号时，才需要添加此权限。</p>
+<table>
+<thead>
+<tr>
+<th>权限策略名称</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>AliyunECSFullAccess</td>
+<td>管理云服务器服务（ECS）的权限</td>
+</tr>
+<tr>
+<td>AliyunVPCFullAccess</td>
+<td>管理专有网络（VPC）的权限</td>
+</tr>
+<tr>
+<td>AliyunROSFullAccess</td>
+<td>管理资源编排服务（ROS）的权限</td>
+</tr>
+<tr>
+<td>AliyunCSFullAccess</td>
+<td>管理容器服务（CS）的权限</td>
+</tr>
+<tr>
+<td>AliyunComputeNestUserFullAccess</td>
+<td>管理计算巢服务（ComputeNest）的用户侧权限</td>
+</tr>
+<tr>
+<td>AliyunOSSFullAccess</td>
+<td>管理网络对象存储服务（OSS）的权限</td>
+</tr>
+</tbody>
+</table>
+<h2 id="_3">计费说明</h2>
+<h3 id="acs">ACS版本费用</h3>
+<p>本服务在阿里云上的费用主要涉及：
+* ACS费用
+* 跳板机ECS费用
+    * 说明：该ECS用于部署和管理K8S集群，/root目录中保存了部署所用到的K8S Yaml资源文件，后期需要修改了参数重新部署可以直接在该基础上修改后重新执行kubectl apply。
+      部署完成如不需要也可自行释放。
+* OSS费用</p>
+<p>计费方式：按量付费（小时）或包年包月
+预估费用在创建实例时可实时看到。</p>
+<h3 id="_4">社区版费用</h3>
+<p>社区版在计算巢部署的费用主要涉及：
++ 所选vCPU与内存规格
++ 系统盘类型及容量
++ 公网带宽</p>
+<h2 id="_5">整体架构</h2>
+<p><img alt="acs-arch.png" src="acs-arch.png" /></p>
+<h2 id="_6">部署流程</h2>
+<h3 id="acs_1">ACS版本部署</h3>
+<ol>
+<li>
+<p>单击<a href="https://computenest.console.aliyun.com/service/instance/create/cn-hangzhou?type=user&amp;ServiceName=ComfyUI-ACS%E7%A4%BE%E5%8C%BA%E7%89%88">部署链接</a>。根据界面提示填写参数，可以看到对应询价明细，确认参数后点击<strong>下一步：确认订单</strong>。
+   <img alt="img.png" src="acs/img.png" /></p>
+</li>
+<li>
+<p>点击<strong>下一步：确认订单</strong>后可以也看到价格预览，随后点击<strong>立即部署</strong>，等待部署完成。
+   <img alt="price.png" src="acs/price.png" /></p>
+</li>
+<li>
+<p>等待部署完成后就可以开始使用服务。
+   <img alt="img_2.png" src="acs/img_2.png" /></p>
+</li>
+</ol>
+<h3 id="ecs">ECS社区版部署</h3>
+<ol>
+<li>访问计算巢 <a href="https://computenest.console.aliyun.com/service/instance/create/cn-hangzhou?type=user&amp;ServiceName=Comfy-UI社区版">部署链接</a>，按提示填写部署参数</li>
+<li>填写实例参数<img alt="" src="img/param1.png" />，选择你想购买的方式和实例类型。</li>
+<li><strong>注意</strong> 如果您想要使用图生视频功能，为了降低爆RAM内存的可能，请选择60G以上的内存规格+A10以上的显卡规格。</li>
+<li>根据需求选择新建专用网络或直接使用已有的专有网络。填写可用区和网络参数<img alt="" src="img/param2.png" /></li>
+<li>点击立即创建，等待服务实例部署完成<img alt="" src="img/param3.png" /></li>
+<li>服务实例部署完成后，点击实例ID进入到详情界面<img alt="" src="img/serviceInstance2.png" /></li>
+<li>访问服务实例的使用URL，这里我们采用安全代理直接访问。避免您的数据暴露到公网被别人获取<img alt="" src="img/serviceInstance3.png" /></li>
+<li>进入ComfyUI使用界面</li>
+</ol>
+<h2 id="_7">参数说明</h2>
+<table>
+<thead>
+<tr>
+<th>参数组</th>
+<th>参数项</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>服务实例</td>
+<td>服务实例名称</td>
+<td>长度不超过64个字符，必须以英文字母开头，可包含数字、英文字母、短划线（-）和下划线（_）</td>
+</tr>
+<tr>
+<td></td>
+<td>地域</td>
+<td>服务实例部署的地域</td>
+</tr>
+<tr>
+<td></td>
+<td>付费类型</td>
+<td>资源的计费类型：按量付费和包年包月</td>
+</tr>
+<tr>
+<td>ECS实例配置</td>
+<td>实例类型</td>
+<td>可用区下可以使用的实例规格</td>
+</tr>
+<tr>
+<td>网络配置</td>
+<td>可用区</td>
+<td>ECS实例所在可用区</td>
+</tr>
+<tr>
+<td></td>
+<td>VPC ID</td>
+<td>资源所在VPC</td>
+</tr>
+<tr>
+<td></td>
+<td>交换机ID</td>
+<td>资源所在交换机</td>
+</tr>
+</tbody>
+</table>
+<h2 id="_8">内置模型说明</h2>
+<h3 id="_9">主要模型概览</h3>
+<table>
+<thead>
+<tr>
+<th>模型名称</th>
+<th>类型</th>
+<th>参数规模</th>
+<th>分辨率</th>
+<th>量化格式</th>
+<th>简介</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Wan2_1-I2V-14B-480P_fp8_e4m3fn.safetensors</td>
+<td>图生视频</td>
+<td>14B</td>
+<td>480P</td>
+<td>FP8 E4M3FN</td>
+<td>WanVideo 2.1图生视频模型，14B参数，支持480P分辨率输出，使用FP8量化以节省显存</td>
+</tr>
+<tr>
+<td>Wan2_1-T2V-14B_fp8_e4m3fn.safetensors</td>
+<td>文生视频</td>
+<td>14B</td>
+<td>标准</td>
+<td>FP8 E4M3FN</td>
+<td>WanVideo 2.1文生视频模型，14B参数，直接从文本生成视频，FP8量化版本</td>
+</tr>
+<tr>
+<td>flux1-dev.safetensors</td>
+<td>图像生成</td>
+<td>-</td>
+<td>高分辨率</td>
+<td>标准</td>
+<td>Flux.1 Dev模型，高质量图像生成模型，支持高分辨率输出，开发者版本</td>
+</tr>
+<tr>
+<td>wan2.1/Wan2_1-T2V-1_3B_fp8_e4m3fn.safetensors</td>
+<td>文生视频</td>
+<td>1.3B</td>
+<td>标准</td>
+<td>FP8 E4M3FN</td>
+<td>WanVideo 2.1轻量版文生视频模型，1.3B参数，相比14B版本显存需求更低，适合资源受限环境</td>
+</tr>
+<tr>
+<td>vace-1.3b.safetensors</td>
+<td>视频编辑</td>
+<td>1.3B</td>
+<td>标准</td>
+<td>标准</td>
+<td>VACE 1.3B视频编辑模型，专注于视频内容编辑和处理，轻量化设计，适合快速视频编辑任务</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_10">完整模型资源清单</h3>
+<h4 id="model-categories-overview">📊 <strong>Model Categories Overview</strong></h4>
+<table>
+<thead>
+<tr>
+<th><strong>Category</strong></th>
+<th><strong>Directory</strong></th>
+<th><strong>Total Size</strong></th>
+<th><strong>Model Count</strong></th>
+<th><strong>Primary Function</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Diffusion Models</td>
+<td><code>/diffusion_models</code></td>
+<td>53GB</td>
+<td>6 models</td>
+<td>Core image/video generation</td>
+</tr>
+<tr>
+<td>Text Encoders</td>
+<td><code>/text_encoders</code></td>
+<td>22GB</td>
+<td>2 models</td>
+<td>Text understanding</td>
+</tr>
+<tr>
+<td>CLIP Models</td>
+<td><code>/clip</code></td>
+<td>17GB</td>
+<td>4 models</td>
+<td>Vision-language understanding</td>
+</tr>
+<tr>
+<td>Checkpoints</td>
+<td><code>/checkpoints</code></td>
+<td>17GB</td>
+<td>1 model</td>
+<td>Complete model checkpoints</td>
+</tr>
+<tr>
+<td>UNET Models</td>
+<td><code>/unet</code></td>
+<td>14GB</td>
+<td>1 model</td>
+<td>Neural network architecture</td>
+</tr>
+<tr>
+<td>VAE Models</td>
+<td><code>/vae</code></td>
+<td>1.5GB</td>
+<td>5 models</td>
+<td>Latent space processing</td>
+</tr>
+<tr>
+<td>CLIP Vision</td>
+<td><code>/clip_vision</code></td>
+<td>2.4GB</td>
+<td>1 model</td>
+<td>Visual understanding</td>
+</tr>
+<tr>
+<td>Face Restoration</td>
+<td><code>/facerestore_models</code></td>
+<td>1.3GB</td>
+<td>4 models</td>
+<td>Face enhancement</td>
+</tr>
+<tr>
+<td>Video Interpolation</td>
+<td><code>/interpolation</code></td>
+<td>824MB</td>
+<td>4 models</td>
+<td>Frame interpolation</td>
+</tr>
+<tr>
+<td>Content Safety</td>
+<td><code>/nsfw_detector</code></td>
+<td>329MB</td>
+<td>1 model</td>
+<td>Content moderation</td>
+</tr>
+<tr>
+<td>Upscaling</td>
+<td><code>/upscale_models</code></td>
+<td>192MB</td>
+<td>3 models</td>
+<td>Image super-resolution</td>
+</tr>
+<tr>
+<td>VAE Approximation</td>
+<td><code>/vae_approx</code></td>
+<td>19MB</td>
+<td>4 models</td>
+<td>Fast preview generation</td>
+</tr>
+<tr>
+<td>Text Embeddings</td>
+<td><code>/embeddings</code></td>
+<td>260KB</td>
+<td>2 models</td>
+<td>Negative prompts</td>
+</tr>
+<tr>
+<td>Configurations</td>
+<td><code>/configs</code></td>
+<td>52KB</td>
+<td>11 files</td>
+<td>Model configurations</td>
+</tr>
+</tbody>
+</table>
+<h4 id="diffusion-models-diffusion_models-53gb">🎯 <strong>Diffusion Models</strong> (<code>/diffusion_models</code>) - 53GB</h4>
+<table>
+<thead>
+<tr>
+<th><strong>Model Name</strong></th>
+<th><strong>Size</strong></th>
+<th><strong>Type</strong></th>
+<th><strong>Parameters</strong></th>
+<th><strong>Function</strong></th>
+<th><strong>Best For</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Wan2_1-I2V-14B-480P_fp8_e4m3fn.safetensors</code></td>
+<td>16GB</td>
+<td>Image→Video</td>
+<td>14B</td>
+<td>Animate static images</td>
+<td>Image animation</td>
+</tr>
+<tr>
+<td><code>Wan2_1-T2V-14B_fp8_e4m3fn.safetensors</code></td>
+<td>14GB</td>
+<td>Text→Video</td>
+<td>14B</td>
+<td>Generate videos from text</td>
+<td>Text-to-video</td>
+</tr>
+<tr>
+<td><code>flux1-dev.safetensors</code></td>
+<td>12GB</td>
+<td>Text→Image</td>
+<td>-</td>
+<td>Experimental image generation</td>
+<td>Testing new features</td>
+</tr>
+<tr>
+<td><code>wan21_vace_1_3b.safetensors</code></td>
+<td>6.7GB</td>
+<td>Video Editing</td>
+<td>1.3B</td>
+<td>Enhanced video editing</td>
+<td>Professional editing</td>
+</tr>
+<tr>
+<td><code>wan2.1/Wan2_1-T2V-1_3B_fp8_e4m3fn.safetensors</code></td>
+<td>1.4GB</td>
+<td>Text→Video</td>
+<td>1.3B</td>
+<td>Fast video generation</td>
+<td>Quick previews</td>
+</tr>
+</tbody>
+</table>
+<h4 id="text-encoders-text_encoders-22gb">🧠 <strong>Text Encoders</strong> (<code>/text_encoders</code>) - 22GB</h4>
+<table>
+<thead>
+<tr>
+<th><strong>Model Name</strong></th>
+<th><strong>Size</strong></th>
+<th><strong>Format</strong></th>
+<th><strong>Precision</strong></th>
+<th><strong>Function</strong></th>
+<th><strong>Best For</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>wan2.1/umt5-xxl-enc-bf16.safetensors</code></td>
+<td>11GB</td>
+<td>SafeTensors</td>
+<td>BF16</td>
+<td>Multi-language text encoding</td>
+<td>High-quality generation</td>
+</tr>
+<tr>
+<td><code>wan2.1/models_t5_umt5-xxl-enc-bf16.pth</code></td>
+<td>11GB</td>
+<td>PyTorch</td>
+<td>BF16</td>
+<td>T5-based text encoding</td>
+<td>PyTorch workflows</td>
+</tr>
+</tbody>
+</table>
+<h4 id="clip-models-clip-17gb">🎨 <strong>CLIP Models</strong> (<code>/clip</code>) - 17GB</h4>
+<table>
+<thead>
+<tr>
+<th><strong>Model Name</strong></th>
+<th><strong>Size</strong></th>
+<th><strong>Type</strong></th>
+<th><strong>Precision</strong></th>
+<th><strong>Function</strong></th>
+<th><strong>Best For</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>t5xxl_fp16.safetensors</code></td>
+<td>9.2GB</td>
+<td>T5 Text Encoder</td>
+<td>FP16</td>
+<td>Advanced text understanding</td>
+<td>Complex prompts</td>
+</tr>
+<tr>
+<td><code>umt5_xxl_fp8_e4m3fn.safetensors</code></td>
+<td>6.3GB</td>
+<td>UMT5 Encoder</td>
+<td>FP8</td>
+<td>Efficient text encoding</td>
+<td>Resource optimization</td>
+</tr>
+<tr>
+<td><code>wan2.1/open-clip-xlm-roberta-large-vit-huge-14_visual_fp16.safetensors</code></td>
+<td>1.2GB</td>
+<td>Multilingual CLIP</td>
+<td>FP16</td>
+<td>Cross-language vision</td>
+<td>International content</td>
+</tr>
+<tr>
+<td><code>clip_l.safetensors</code></td>
+<td>235MB</td>
+<td>CLIP Language</td>
+<td>-</td>
+<td>Vision-language alignment</td>
+<td>Standard workflows</td>
+</tr>
+</tbody>
+</table>
+<h4 id="checkpoints-checkpoints-17gb">💾 <strong>Checkpoints</strong> (<code>/checkpoints</code>) - 17GB</h4>
+<table>
+<thead>
+<tr>
+<th><strong>Model Name</strong></th>
+<th><strong>Size</strong></th>
+<th><strong>Type</strong></th>
+<th><strong>Precision</strong></th>
+<th><strong>Function</strong></th>
+<th><strong>Best For</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>flux1-schnell-fp8.safetensors</code></td>
+<td>17GB</td>
+<td>Fast Image Gen</td>
+<td>FP8</td>
+<td>Rapid image generation</td>
+<td>Production workflows</td>
+</tr>
+</tbody>
+</table>
+<h4 id="unet-models-unet-14gb">🔧 <strong>UNET Models</strong> (<code>/unet</code>) - 14GB</h4>
+<table>
+<thead>
+<tr>
+<th><strong>Model Name</strong></th>
+<th><strong>Size</strong></th>
+<th><strong>Type</strong></th>
+<th><strong>Quantization</strong></th>
+<th><strong>Function</strong></th>
+<th><strong>Best For</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Wan2.1_14B_VACE-Q6_K.gguf</code></td>
+<td>14GB</td>
+<td>Video Editing</td>
+<td>Q6_K</td>
+<td>Professional video editing</td>
+<td>High-quality editing</td>
+</tr>
+</tbody>
+</table>
+<h4 id="vae-models-vae-15gb">🔄 <strong>VAE Models</strong> (<code>/vae</code>) - 1.5GB</h4>
+<table>
+<thead>
+<tr>
+<th><strong>Model Name</strong></th>
+<th><strong>Size</strong></th>
+<th><strong>Type</strong></th>
+<th><strong>Precision</strong></th>
+<th><strong>Function</strong></th>
+<th><strong>Best For</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ae.safetensors</code></td>
+<td>320MB</td>
+<td>Standard VAE</td>
+<td>-</td>
+<td>Basic latent processing</td>
+<td>General use</td>
+</tr>
+<tr>
+<td><code>vae-ft-mse-840000-ema-pruned.safetensors</code></td>
+<td>320MB</td>
+<td>Fine-tuned VAE</td>
+<td>-</td>
+<td>High-quality reconstruction</td>
+<td>Quality workflows</td>
+</tr>
+<tr>
+<td><code>diffusion_pytorch_model.safetensors</code></td>
+<td>320MB</td>
+<td>Standard VAE</td>
+<td>-</td>
+<td>Broad compatibility</td>
+<td>General compatibility</td>
+</tr>
+<tr>
+<td><code>wan2.1/Wan2_1_VAE_bf16.safetensors</code></td>
+<td>243MB</td>
+<td>Wan2.1 VAE</td>
+<td>BF16</td>
+<td>Video-optimized processing</td>
+<td>Video generation</td>
+</tr>
+<tr>
+<td><code>wan21_vace_vae.safetensors</code></td>
+<td>243MB</td>
+<td>VACE VAE</td>
+<td>-</td>
+<td>Video editing processing</td>
+<td>Video editing</td>
+</tr>
+</tbody>
+</table>
+<h4 id="clip-vision-models-clip_vision-24gb">👁️ <strong>CLIP Vision Models</strong> (<code>/clip_vision</code>) - 2.4GB</h4>
+<table>
+<thead>
+<tr>
+<th><strong>Model Name</strong></th>
+<th><strong>Size</strong></th>
+<th><strong>Architecture</strong></th>
+<th><strong>Training Data</strong></th>
+<th><strong>Function</strong></th>
+<th><strong>Best For</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>CLIP-ViT-H-14-laion2B-s32B-b79K.safetensors</code></td>
+<td>2.4GB</td>
+<td>ViT-Huge-14</td>
+<td>LAION-2B</td>
+<td>Visual understanding</td>
+<td>High-quality analysis</td>
+</tr>
+</tbody>
+</table>
+<h4 id="video-interpolation-models-interpolation-824mb">🎬 <strong>Video Interpolation Models</strong> (<code>/interpolation</code>) - 824MB</h4>
+<h5 id="gimm-vfi-directory-interpolationgimm-vfi-interpolationgimm-vfi_safetensors">GIMM-VFI Directory (<code>/interpolation/gimm-vfi</code> &amp; <code>/interpolation/GIMM-VFI_safetensors</code>)</h5>
+<table>
+<thead>
+<tr>
+<th><strong>Model Name</strong></th>
+<th><strong>Size</strong></th>
+<th><strong>Type</strong></th>
+<th><strong>Function</strong></th>
+<th><strong>Best For</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>gimmvfi_f_arb_lpips_fp32.safetensors</code></td>
+<td>117MB</td>
+<td>Full VFI Model</td>
+<td>Complete frame interpolation</td>
+<td>Production workflows</td>
+</tr>
+<tr>
+<td><code>gimmvfi_r_arb_lpips_fp32.safetensors</code></td>
+<td>76MB</td>
+<td>Refinement Model</td>
+<td>Frame quality enhancement</td>
+<td>Quality improvement</td>
+</tr>
+<tr>
+<td><code>flowformer_sintel_fp32.safetensors</code></td>
+<td>62MB</td>
+<td>Motion Model</td>
+<td>Advanced motion understanding</td>
+<td>Complex motion</td>
+</tr>
+<tr>
+<td><code>raft-things_fp32.safetensors</code></td>
+<td>21MB</td>
+<td>Optical Flow</td>
+<td>Motion estimation</td>
+<td>Motion calculation</td>
+</tr>
+</tbody>
+</table>
+<h4 id="face-restoration-models-facerestore_models-13gb">🔍 <strong>Face Restoration Models</strong> (<code>/facerestore_models</code>) - 1.3GB</h4>
+<table>
+<thead>
+<tr>
+<th><strong>Model Name</strong></th>
+<th><strong>Size</strong></th>
+<th><strong>Type</strong></th>
+<th><strong>Function</strong></th>
+<th><strong>Best For</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>codeformer-v0.1.0.pth</code></td>
+<td>360MB</td>
+<td>CodeFormer</td>
+<td>Advanced face enhancement</td>
+<td>Professional portraits</td>
+</tr>
+<tr>
+<td><code>GFPGANv1.4.pth</code></td>
+<td>333MB</td>
+<td>GFPGAN v1.4</td>
+<td>Improved face restoration</td>
+<td>High-quality restoration</td>
+</tr>
+<tr>
+<td><code>GFPGANv1.3.pth</code></td>
+<td>333MB</td>
+<td>GFPGAN v1.3</td>
+<td>Face restoration</td>
+<td>General face enhancement</td>
+</tr>
+<tr>
+<td><code>GPEN-BFR-512.onnx</code></td>
+<td>272MB</td>
+<td>GPEN (ONNX)</td>
+<td>Real-time face restoration</td>
+<td>Fast processing</td>
+</tr>
+</tbody>
+</table>
+<h4 id="upscaling-models-upscale_models-192mb">⬆️ <strong>Upscaling Models</strong> (<code>/upscale_models</code>) - 192MB</h4>
+<table>
+<thead>
+<tr>
+<th><strong>Model Name</strong></th>
+<th><strong>Size</strong></th>
+<th><strong>Scale</strong></th>
+<th><strong>Type</strong></th>
+<th><strong>Function</strong></th>
+<th><strong>Best For</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>8x_NMKD-Superscale_150000_G.pth</code></td>
+<td>64MB</td>
+<td>8x</td>
+<td>NMKD</td>
+<td>Extreme upscaling</td>
+<td>Maximum resolution</td>
+</tr>
+<tr>
+<td><code>4x_foolhardy_Remacri.pth</code></td>
+<td>64MB</td>
+<td>4x</td>
+<td>Enhanced ESRGAN</td>
+<td>Sharp upscaling</td>
+<td>General upscaling</td>
+</tr>
+<tr>
+<td><code>4x_NMKD-Siax_200k.pth</code></td>
+<td>64MB</td>
+<td>4x</td>
+<td>NMKD Siax</td>
+<td>Alternative upscaling</td>
+<td>Artistic enhancement</td>
+</tr>
+</tbody>
+</table>
+<h4 id="content-safety-models-nsfw_detector-329mb">🚫 <strong>Content Safety Models</strong> (<code>/nsfw_detector</code>) - 329MB</h4>
+<table>
+<thead>
+<tr>
+<th><strong>Model Name</strong></th>
+<th><strong>Size</strong></th>
+<th><strong>Architecture</strong></th>
+<th><strong>Function</strong></th>
+<th><strong>Best For</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>vit-base-nsfw-detector/model.safetensors</code></td>
+<td>329MB</td>
+<td>ViT-Base</td>
+<td>Content moderation</td>
+<td>Safety filtering</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Additional Files:</strong>
+- <code>config.json</code> - Model configuration
+- <code>preprocessor_config.json</code> - Input preprocessing
+- <code>confusion_matrix.png</code> - Performance metrics</p>
+<h4 id="vae-approximation-models-vae_approx-19mb">⚡ <strong>VAE Approximation Models</strong> (<code>/vae_approx</code>) - 19MB</h4>
+<table>
+<thead>
+<tr>
+<th><strong>Model Name</strong></th>
+<th><strong>Size</strong></th>
+<th><strong>Target</strong></th>
+<th><strong>Function</strong></th>
+<th><strong>Best For</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>taef1_decoder.pth</code></td>
+<td>4.8MB</td>
+<td>SD3/FLUX</td>
+<td>Fast preview for SD3/FLUX</td>
+<td>Modern models</td>
+</tr>
+<tr>
+<td><code>taesd3_decoder.pth</code></td>
+<td>4.8MB</td>
+<td>SD3</td>
+<td>Fast preview for SD3</td>
+<td>SD3 workflows</td>
+</tr>
+<tr>
+<td><code>taesdxl_decoder.pth</code></td>
+<td>4.7MB</td>
+<td>SDXL</td>
+<td>Fast preview for SDXL</td>
+<td>SDXL workflows</td>
+</tr>
+<tr>
+<td><code>taesd_decoder.pth</code></td>
+<td>4.7MB</td>
+<td>SD1.5</td>
+<td>Fast preview for SD1.5</td>
+<td>SD1.5 workflows</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_11">如何上传自己的模型</h3>
+<ol>
+<li>在计算巢控制台找到部署的服务实例，并切换Tab到资源界面，并找到所属产品为对象存储 OSS的资源，点击进入。<img alt="img_3.png" src="img_3.png" /></li>
+<li>访问"文件列表"，在路径为/llm-model/model下为所有类型的模型。<img alt="img_4.png" src="img_4.png" /></li>
+<li>可根据自己的需求上传模型，并重启comfyui客户端即可。<img alt="img_5.png" src="img_5.png" /></li>
+</ol>
+<h3 id="_12">模型下载</h3>
+<ol>
+<li>推荐前往魔搭下载</li>
+<li>模型存储路径为：/root/storage/models</li>
+</ol>
+<h2 id="_13">使用流程</h2>
+<p>本服务已经内置了两个可以直接使用的工作流。其中涉及的插件和模型也已经准备好。
+<img alt="img_1.png" src="img/workflows.png" /></p>
+<h3 id="_14">图生视频或文生视频功能</h3>
+<ol>
+<li>在下图处选择想要的功能。建议只选择一种进行使用，避免爆内存。<img alt="img.png" src="img/option.png" /></li>
+<li>按图中指引选择工作流侧栏，选择wanx-21.json并打开。<img alt="img.png" src="img/app2.png" /></li>
+<li>在此处选择示例图片或选择自己本机电脑上传。<img alt="img.png" src="img/app3.png" /></li>
+<li>在TextEncode处填写描述词。上面部分是你想要生成的内容，下面部分是你不想要生成的内容。<img alt="img.png" src="img/prompt.png" /></li>
+<li>在ImageClip Encode处可设置图片的分辨率和帧数。本模型最高可设置720*720。<img alt="img.png" src="img/definition.png" /></li>
+<li>其余参数可参考官网：https://comfyui-wiki.com/zh/interface/node-options  或以下文档：https://github.com/kijai/ComfyUI-WanVideoWrapper/blob/main/readme.md</li>
+</ol>
+<p>PS：如果使用vace模型，可使用工作流vace.json作为参考
+<img alt="img_9.png" src="img_9.png" /></p>
+<h3 id="_15">文生图功能</h3>
+<ol>
+<li>工作流框处选择该工作流funny_pictures.json。<img alt="img.png" src="img/text2img.png" /></li>
+<li>输入你想要的内容。<img alt="img.png" src="img/text2img2.png" /></li>
+<li>这里可以输入一些比较搞怪的内容，比如我这里是关羽大战白雪公主。</li>
+<li>可以在此处设置图片的分辨率和图片的数量。如果想加快生产速度，可将batch_size设置为1.<img alt="img.png" src="img/text2img3.png" /></li>
+<li>等待图片的生成。</li>
+</ol>
+<h3 id="_16">图生图功能</h3>
+<p>访问模版，或自己导入工作流使用。<img alt="img2img.png" src="img/img2img.png" /></p>
+<h2 id="api">API调用</h2>
+<h3 id="api_1">API 端点概览</h3>
+<table>
+<thead>
+<tr>
+<th>端点</th>
+<th>方法</th>
+<th>功能</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/queue</code></td>
+<td>GET</td>
+<td>获取队列状态</td>
+<td>查看当前任务队列</td>
+</tr>
+<tr>
+<td><code>/prompt</code></td>
+<td>POST</td>
+<td>提交工作流</td>
+<td>执行生成任务</td>
+</tr>
+<tr>
+<td><code>/history/{prompt_id}</code></td>
+<td>GET</td>
+<td>获取执行历史</td>
+<td>查看任务执行结果</td>
+</tr>
+<tr>
+<td><code>/upload/image</code></td>
+<td>POST</td>
+<td>上传图片</td>
+<td>上传输入图片文件</td>
+</tr>
+<tr>
+<td><code>/view</code></td>
+<td>GET</td>
+<td>下载输出文件</td>
+<td>获取生成的结果文件</td>
+</tr>
+</tbody>
+</table>
+<p>支持公网或者私网的API调用。
+可参考一下代码实现一个API调用的脚本。</p>
+<pre><code class="language-python">import requests
+import json
+import time
+
+def run_workflow_file(workflow_file, server=&quot;http://127.0.0.1:8188&quot;):
+    &quot;&quot;&quot;运行本地工作流JSON文件&quot;&quot;&quot;
+
+    # 加载工作流
+    with open(workflow_file, 'r', encoding='utf-8') as f:
+        workflow = json.load(f)
+
+    # 提交
+    response = requests.post(f&quot;{server}/prompt&quot;, json={&quot;prompt&quot;: workflow})
+    prompt_id = response.json()['prompt_id']
+    print(f&quot;任务提交: {prompt_id}&quot;)
+
+    # 等待完成
+    while True:
+        response = requests.get(f&quot;{server}/history/{prompt_id}&quot;)
+        history = response.json()
+        if prompt_id in history:
+            break
+        print(&quot;等待中...&quot;)
+        time.sleep(3)
+
+    # 下载所有输出文件
+    outputs = history[prompt_id]['outputs']
+    for node_id, node_output in outputs.items():
+        # 处理不同类型的输出
+        for file_type in ['images', 'videos', 'gifs']:
+            if file_type in node_output:
+                for file_info in node_output[file_type]:
+                    filename = file_info['filename']
+                    file_url = f&quot;{server}/view?filename={filename}&amp;type=output&quot;
+
+                    response = requests.get(file_url)
+                    with open(filename, 'wb') as f:
+                        f.write(response.content)
+                    print(f&quot;已下载: {filename}&quot;)
+
+# 使用示例
+run_workflow_file(&quot;my_workflow.json&quot;)
+</code></pre>
+<p>其中本地工作流采用下图提供的方式来获取：
+<img alt="img_6.png" src="acs/img_6.png" /></p>
+<p>由于Comfyui未提供官方的API文档，此处根据文生视频和图生视频提供两个完整的示例：关于如何使用API来调用工作流进行文生图或者文生视频等
+访问：https://github.com/aliyun-computenest/comfyui-acs/
+找到demo文件夹
+<img alt="img_7.png" src="acs/img_7.png" /></p>
+<h3 id="api_2">文生视频API方式</h3>
+<ol>
+<li>打开text_to_video_workflow.json为定义的工作流，确认好模型。（里面默认定义的模型为14B的万相2.1文生视频模型）</li>
+<li>确认好Prompt和生成的分辨率等参数</li>
+<li>修改代码中server服务地址，由127.0.0.1到你的实际服务地址。<img alt="img_8.png" src="acs/img_8.png" /></li>
+<li>本地执行python text_to_video_example.py，等待视频生成</li>
+</ol>
+<h3 id="api_3">图生视频API方式</h3>
+<ol>
+<li>打开image_to_video_workflow.json为定义的工作流，确认好模型。（里面默认定义的模型为14B的万相2.1图生视频模型）</li>
+<li>确认好Prompt和生成的分辨率等参数</li>
+<li>修改代码中server服务地址，由127.0.0.1到你的实际服务地址。<img alt="img_8.png" src="acs/img_8.png" /></li>
+<li>本地执行python image_to_video_example.py，等待视频生成</li>
+</ol>
+<h2 id="_17">账号密码</h2>
+<p>默认账号和密码为:
+1. 账号：admin
+2. 密码：admin</p>
+<h2 id="_18">常见问题</h2>
+<ol>
+<li>出现某个节点类型不存在，通过manager安装缺少的节点，并重启。<img alt="img_1.png" src="img/issue1.png" /><img alt="img.png" src="img/issue2.png" /></li>
+</ol>
+        
+      </div>
+
+      <div class="copyrights">© 2009-2022 Aliyun.com 版权所有</div>
+    </div>
+  </div>
+  
+  <!--
+  MkDocs version      : 1.6.1
+  Docs Build Date UTC : 2025-09-12 09:55:42.732612+00:00
+  -->
+</body>
+</html>

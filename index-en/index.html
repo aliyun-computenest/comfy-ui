@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="计算巢是阿里云开放给企业应用服务商的服务管理平台。服务商能够在计算巢上发布私有化部署服务，为其客户提供云上软件一键部署的能力；同时也支持全托管模式的服务，赋能服务商托管其客户资源。">
+  <title>ComfyUI Community Edition - Aliyun 计算巢 x Demo</title>
+
+  <link rel="shortcut icon" href="../img/favicon.ico">
+
+  <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.0/build/pure-min.css">
+  <link rel="stylesheet" href="../css/theme.css">
+  
+
+  
+
+  
+  
+
+  
+    <script src="../search/main.js"></script>
+  
+
+  
+
+  <script src="../js/highlight.min.js"></script>
+  <script>hljs.highlightAll();</script>
+</head>
+
+<body>
+  <div class="container">
+    <div class="nav">
+      <div class="nav-inner">
+        <div class="logo">
+          <img src="./img/logo-2x.png">
+        </div>
+        <div class="nav-list">
+          <ul>
+          
+              <li><a href="#comfyui-community-edition">ComfyUI Community Edition</a></li>
+              
+                  <li><a href="#overview">Overview</a></li>
+                  
+              
+                  <li><a href="#prerequisites">Prerequisites</a></li>
+                  
+              
+                  <li><a href="#billing-information">Billing Information</a></li>
+                  
+              
+                  <li><a href="#parameter-description">Parameter Description</a></li>
+                  
+              
+                  <li><a href="#deployment-process">Deployment Process</a></li>
+                  
+              
+                  <li><a href="#switch-comfyuis-default-language-to-english">Switch ComfyUI's default language to English</a></li>
+                  
+              
+                  <li><a href="#usage-guide">Usage Guide</a></li>
+                  
+                      <li class="li-h3"><a href="#model-categories-overview">📊 Model Categories Overview</a></li>
+                  
+                      <li class="li-h3"><a href="#diffusion-models-diffusion_models-53gb">🎯 Diffusion Models (/diffusion_models) - 53GB</a></li>
+                  
+                      <li class="li-h3"><a href="#text-encoders-text_encoders-22gb">🧠 Text Encoders (/text_encoders) - 22GB</a></li>
+                  
+                      <li class="li-h3"><a href="#clip-models-clip-17gb">🎨 CLIP Models (/clip) - 17GB</a></li>
+                  
+                      <li class="li-h3"><a href="#checkpoints-checkpoints-17gb">💾 Checkpoints (/checkpoints) - 17GB</a></li>
+                  
+                      <li class="li-h3"><a href="#unet-models-unet-14gb">🔧 UNET Models (/unet) - 14GB</a></li>
+                  
+                      <li class="li-h3"><a href="#vae-models-vae-15gb">🔄 VAE Models (/vae) - 1.5GB</a></li>
+                  
+                      <li class="li-h3"><a href="#clip-vision-models-clip_vision-24gb">👁️ CLIP Vision Models (/clip_vision) - 2.4GB</a></li>
+                  
+                      <li class="li-h3"><a href="#video-interpolation-models-interpolation-824mb">🎬 Video Interpolation Models (/interpolation) - 824MB</a></li>
+                  
+                      <li class="li-h3"><a href="#face-restoration-models-facerestore_models-13gb">🔍 Face Restoration Models (/facerestore_models) - 1.3GB</a></li>
+                  
+                      <li class="li-h3"><a href="#upscaling-models-upscale_models-192mb">⬆️ Upscaling Models (/upscale_models) - 192MB</a></li>
+                  
+                      <li class="li-h3"><a href="#content-safety-models-nsfw_detector-329mb">🚫 Content Safety Models (/nsfw_detector) - 329MB</a></li>
+                  
+                      <li class="li-h3"><a href="#vae-approximation-models-vae_approx-19mb">⚡ VAE Approximation Models (/vae_approx) - 19MB</a></li>
+                  
+              
+                  <li><a href="#model-downloads">Model Downloads</a></li>
+                  
+              
+                  <li><a href="#account-credentials">Account Credentials</a></li>
+                  
+              
+                  <li><a href="#frequently-asked-questions">Frequently Asked Questions</a></li>
+                  
+              
+          
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="content theme-github">
+      
+      <div class="content-inner">        
+        
+        <h1 id="comfyui-community-edition">ComfyUI Community Edition</h1>
+<blockquote>
+<p><strong>Disclaimer:</strong> This service is provided by a third party. While we strive to ensure its security, accuracy, and reliability, we cannot guarantee it is completely free from failures, interruptions, errors, or attacks. Therefore, our company hereby declares: We make no representations, warranties, or commitments regarding the content, accuracy, completeness, reliability, applicability, and timeliness of this service, and assume no responsibility for any direct or indirect losses or damages arising from your use of this service; We assume no responsibility for the content, accuracy, completeness, reliability, applicability, and timeliness of third-party websites, applications, products, and services accessed through this service - you should bear the risks and responsibilities arising from their use; We assume no responsibility for any losses or damages arising from your use of this service, including but not limited to direct losses, indirect losses, profit losses, goodwill losses, data losses, or other economic losses, even if our company has been previously informed of the possibility of such losses or damages; We reserve the right to modify this disclaimer from time to time, so please check this disclaimer regularly before using this service. If you have any questions or concerns about this disclaimer or this service, please contact us.</p>
+</blockquote>
+<h2 id="overview">Overview</h2>
+<p>ComfyUI is the most powerful open-source node-based generative AI application, supporting the creation of images, videos, and audio content. Leveraging cutting-edge open-source models, it enables video and image generation.</p>
+<p>According to the official documentation, ComfyUI features:</p>
+<ul>
+<li><strong>Node/Graph/Flowchart Interface</strong> - Experiment and create complex Stable Diffusion workflows without writing any code</li>
+<li><strong>Full Support</strong> for SD1.x, SD2.x, and SDXL</li>
+<li><strong>Asynchronous Queue System</strong></li>
+<li><strong>Multiple Optimizations</strong> - Only re-executes parts of the workflow that changed between executions</li>
+<li><strong>Command Line Options</strong> - <code>--lowvram</code> enables running on GPUs with less than 3GB memory (automatically enabled on low-memory GPUs)</li>
+<li><strong>CPU Support</strong> - Works even without GPU using <code>--cpu</code> (slower)</li>
+<li><strong>Model Loading</strong> - Supports ckpt, safetensors, and diffusers models/checkpoints. Standalone VAE and CLIP models</li>
+<li><strong>Embeddings/Textual Inversion</strong></li>
+<li><strong>LoRAs</strong> (regular, locon, and loha)</li>
+<li><strong>Hypernetworks</strong></li>
+<li><strong>Workflow Loading</strong> - Load complete workflows from generated PNG files (including seeds)</li>
+<li><strong>JSON Export/Import</strong> - Save/load workflows as JSON files</li>
+<li><strong>Complex Workflows</strong> - Node interface for creating complex workflows like "Hires fix" or more advanced workflows</li>
+<li><strong>Area Composition</strong></li>
+<li><strong>Inpainting</strong> - Using regular and inpainting models</li>
+<li><strong>ControlNet and T2I Adapters</strong></li>
+<li><strong>Upscaling Models</strong> (ESRGAN, ESRGAN variants, SwinIR, Swin2SR, etc.)</li>
+<li><strong>unCLIP Models</strong></li>
+<li><strong>GLIGEN</strong></li>
+<li><strong>Model Merging</strong></li>
+<li><strong>Latent Previews</strong> using TAESD</li>
+<li><strong>Fast Startup</strong></li>
+<li><strong>Fully Offline</strong> - Downloads nothing</li>
+<li><strong>Configuration Files</strong> for setting model search paths</li>
+</ul>
+<h2 id="prerequisites">Prerequisites</h2>
+<p>Deploying the ComfyUI Community Edition service instance requires access and creation permissions for certain Alibaba Cloud resources. Therefore, your account needs permissions for the following resources. <strong>Note</strong>: These permissions are only required when your account is a RAM account.</p>
+<table>
+<thead>
+<tr>
+<th><strong>Permission Policy Name</strong></th>
+<th><strong>Description</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>AliyunECSFullAccess</td>
+<td>Permission to manage Elastic Compute Service (ECS)</td>
+</tr>
+<tr>
+<td>AliyunVPCFullAccess</td>
+<td>Permission to manage Virtual Private Cloud (VPC)</td>
+</tr>
+<tr>
+<td>AliyunROSFullAccess</td>
+<td>Permission to manage Resource Orchestration Service (ROS)</td>
+</tr>
+<tr>
+<td>AliyunComputeNestUserFullAccess</td>
+<td>User-side permission to manage Compute Nest Service</td>
+</tr>
+</tbody>
+</table>
+<h2 id="billing-information">Billing Information</h2>
+<p>The costs for deploying the Community Edition on Compute Nest mainly include:</p>
+<ul>
+<li><strong>Selected vCPU and memory specifications</strong></li>
+<li><strong>System disk type and capacity</strong></li>
+<li><strong>Public network bandwidth</strong></li>
+</ul>
+<h2 id="parameter-description">Parameter Description</h2>
+<table>
+<thead>
+<tr>
+<th><strong>Parameter Group</strong></th>
+<th><strong>Parameter</strong></th>
+<th><strong>Description</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Service Instance</td>
+<td>Service Instance Name</td>
+<td>Maximum 64 characters, must start with an English letter, can include numbers, English letters, hyphens (-), and underscores (_)</td>
+</tr>
+<tr>
+<td></td>
+<td>Region</td>
+<td>Region where the service instance is deployed</td>
+</tr>
+<tr>
+<td></td>
+<td>Payment Type</td>
+<td>Billing type for resources: Pay-as-you-go and Subscription</td>
+</tr>
+<tr>
+<td>ECS Instance Configuration</td>
+<td>Instance Type</td>
+<td>Available instance specifications in the availability zone</td>
+</tr>
+<tr>
+<td>Network Configuration</td>
+<td>Availability Zone</td>
+<td>Availability zone where the ECS instance is located</td>
+</tr>
+<tr>
+<td></td>
+<td>VPC ID</td>
+<td>VPC where resources are located</td>
+</tr>
+<tr>
+<td></td>
+<td>Switch ID</td>
+<td>Switch where resources are located</td>
+</tr>
+</tbody>
+</table>
+<h2 id="deployment-process">Deployment Process</h2>
+<ol>
+<li>
+<p><strong>Access Compute Nest</strong> <a href="https://computenest.console.aliyun.com/service/instance/create/ap-southeast-1?type=user&amp;ServiceId=service-11cf4eb33d1442ea8533">deployment link</a> and fill in deployment parameters as prompted</p>
+</li>
+<li>
+<p><strong>Fill in instance parameters</strong> and select your desired purchase method and instance type
+   <img alt="img.png" src="../img.png" /></p>
+</li>
+<li>
+<p><strong>Important Note</strong>: If you want to use image-to-video functionality, to reduce the possibility of RAM overflow, please select memory specifications of 60GB or higher + A10 or higher GPU specifications</p>
+</li>
+<li>
+<p><strong>Configure network settings</strong> - Choose to create a new dedicated network or use an existing VPC. Fill in availability zone and network parameters
+   <img alt="img_1.png" src="../img_1.png" /></p>
+</li>
+<li>
+<p><strong>Create instance</strong> - Click "Create Now" and wait for service instance deployment to complete</p>
+</li>
+<li>
+<p><strong>Access instance details</strong> - After deployment completion, click the instance ID to enter the details interface
+   <img alt="img_2.png" src="../img_2.png" /></p>
+</li>
+<li>
+<p><strong>Access service</strong> - Visit the service instance's usage URL. We use secure proxy for direct access to prevent your data from being exposed to the public network
+   <img alt="Service Access" src="../img/serviceInstance3.png" /></p>
+</li>
+<li>
+<p><strong>Enter ComfyUI interface</strong>
+<img alt="img_3.png" src="../img_3.png" /></p>
+</li>
+</ol>
+<h2 id="switch-comfyuis-default-language-to-english">Switch ComfyUI's default language to English</h2>
+<ol>
+<li>Click the settings button in the image</li>
+</ol>
+<p><img alt="img_4.png" src="../img_4.png" />
+2. Search for "Language" in the search box, then switch the option to English</p>
+<p><img alt="img_5.png" src="../img_5.png" />
+3. Then the UI will automatically change.</p>
+<h2 id="usage-guide">Usage Guide</h2>
+<h3 id="model-categories-overview">📊 <strong>Model Categories Overview</strong></h3>
+<table>
+<thead>
+<tr>
+<th><strong>Category</strong></th>
+<th><strong>Directory</strong></th>
+<th><strong>Total Size</strong></th>
+<th><strong>Model Count</strong></th>
+<th><strong>Primary Function</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Diffusion Models</td>
+<td><code>/diffusion_models</code></td>
+<td>53GB</td>
+<td>6 models</td>
+<td>Core image/video generation</td>
+</tr>
+<tr>
+<td>Text Encoders</td>
+<td><code>/text_encoders</code></td>
+<td>22GB</td>
+<td>2 models</td>
+<td>Text understanding</td>
+</tr>
+<tr>
+<td>CLIP Models</td>
+<td><code>/clip</code></td>
+<td>17GB</td>
+<td>4 models</td>
+<td>Vision-language understanding</td>
+</tr>
+<tr>
+<td>Checkpoints</td>
+<td><code>/checkpoints</code></td>
+<td>17GB</td>
+<td>1 model</td>
+<td>Complete model checkpoints</td>
+</tr>
+<tr>
+<td>UNET Models</td>
+<td><code>/unet</code></td>
+<td>14GB</td>
+<td>1 model</td>
+<td>Neural network architecture</td>
+</tr>
+<tr>
+<td>VAE Models</td>
+<td><code>/vae</code></td>
+<td>1.5GB</td>
+<td>5 models</td>
+<td>Latent space processing</td>
+</tr>
+<tr>
+<td>CLIP Vision</td>
+<td><code>/clip_vision</code></td>
+<td>2.4GB</td>
+<td>1 model</td>
+<td>Visual understanding</td>
+</tr>
+<tr>
+<td>Face Restoration</td>
+<td><code>/facerestore_models</code></td>
+<td>1.3GB</td>
+<td>4 models</td>
+<td>Face enhancement</td>
+</tr>
+<tr>
+<td>Video Interpolation</td>
+<td><code>/interpolation</code></td>
+<td>824MB</td>
+<td>4 models</td>
+<td>Frame interpolation</td>
+</tr>
+<tr>
+<td>Content Safety</td>
+<td><code>/nsfw_detector</code></td>
+<td>329MB</td>
+<td>1 model</td>
+<td>Content moderation</td>
+</tr>
+<tr>
+<td>Upscaling</td>
+<td><code>/upscale_models</code></td>
+<td>192MB</td>
+<td>3 models</td>
+<td>Image super-resolution</td>
+</tr>
+<tr>
+<td>VAE Approximation</td>
+<td><code>/vae_approx</code></td>
+<td>19MB</td>
+<td>4 models</td>
+<td>Fast preview generation</td>
+</tr>
+<tr>
+<td>Text Embeddings</td>
+<td><code>/embeddings</code></td>
+<td>260KB</td>
+<td>2 models</td>
+<td>Negative prompts</td>
+</tr>
+<tr>
+<td>Configurations</td>
+<td><code>/configs</code></td>
+<td>52KB</td>
+<td>11 files</td>
+<td>Model configurations</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="diffusion-models-diffusion_models-53gb">🎯 <strong>Diffusion Models</strong> (<code>/diffusion_models</code>) - 53GB</h3>
+<table>
+<thead>
+<tr>
+<th><strong>Model Name</strong></th>
+<th><strong>Size</strong></th>
+<th><strong>Type</strong></th>
+<th><strong>Parameters</strong></th>
+<th><strong>Function</strong></th>
+<th><strong>Best For</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Wan2_1-I2V-14B-480P_fp8_e4m3fn.safetensors</code></td>
+<td>16GB</td>
+<td>Image→Video</td>
+<td>14B</td>
+<td>Animate static images</td>
+<td>Image animation</td>
+</tr>
+<tr>
+<td><code>Wan2_1-T2V-14B_fp8_e4m3fn.safetensors</code></td>
+<td>14GB</td>
+<td>Text→Video</td>
+<td>14B</td>
+<td>Generate videos from text</td>
+<td>Text-to-video</td>
+</tr>
+<tr>
+<td><code>flux1-dev.safetensors</code></td>
+<td>12GB</td>
+<td>Text→Image</td>
+<td>-</td>
+<td>Experimental image generation</td>
+<td>Testing new features</td>
+</tr>
+<tr>
+<td><code>wan21_vace_1_3b.safetensors</code></td>
+<td>6.7GB</td>
+<td>Video Editing</td>
+<td>1.3B</td>
+<td>Enhanced video editing</td>
+<td>Professional editing</td>
+</tr>
+<tr>
+<td><code>wan2.1/Wan2_1-T2V-1_3B_fp8_e4m3fn.safetensors</code></td>
+<td>1.4GB</td>
+<td>Text→Video</td>
+<td>1.3B</td>
+<td>Fast video generation</td>
+<td>Quick previews</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="text-encoders-text_encoders-22gb">🧠 <strong>Text Encoders</strong> (<code>/text_encoders</code>) - 22GB</h3>
+<table>
+<thead>
+<tr>
+<th><strong>Model Name</strong></th>
+<th><strong>Size</strong></th>
+<th><strong>Format</strong></th>
+<th><strong>Precision</strong></th>
+<th><strong>Function</strong></th>
+<th><strong>Best For</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>wan2.1/umt5-xxl-enc-bf16.safetensors</code></td>
+<td>11GB</td>
+<td>SafeTensors</td>
+<td>BF16</td>
+<td>Multi-language text encoding</td>
+<td>High-quality generation</td>
+</tr>
+<tr>
+<td><code>wan2.1/models_t5_umt5-xxl-enc-bf16.pth</code></td>
+<td>11GB</td>
+<td>PyTorch</td>
+<td>BF16</td>
+<td>T5-based text encoding</td>
+<td>PyTorch workflows</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="clip-models-clip-17gb">🎨 <strong>CLIP Models</strong> (<code>/clip</code>) - 17GB</h3>
+<table>
+<thead>
+<tr>
+<th><strong>Model Name</strong></th>
+<th><strong>Size</strong></th>
+<th><strong>Type</strong></th>
+<th><strong>Precision</strong></th>
+<th><strong>Function</strong></th>
+<th><strong>Best For</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>t5xxl_fp16.safetensors</code></td>
+<td>9.2GB</td>
+<td>T5 Text Encoder</td>
+<td>FP16</td>
+<td>Advanced text understanding</td>
+<td>Complex prompts</td>
+</tr>
+<tr>
+<td><code>umt5_xxl_fp8_e4m3fn.safetensors</code></td>
+<td>6.3GB</td>
+<td>UMT5 Encoder</td>
+<td>FP8</td>
+<td>Efficient text encoding</td>
+<td>Resource optimization</td>
+</tr>
+<tr>
+<td><code>wan2.1/open-clip-xlm-roberta-large-vit-huge-14_visual_fp16.safetensors</code></td>
+<td>1.2GB</td>
+<td>Multilingual CLIP</td>
+<td>FP16</td>
+<td>Cross-language vision</td>
+<td>International content</td>
+</tr>
+<tr>
+<td><code>clip_l.safetensors</code></td>
+<td>235MB</td>
+<td>CLIP Language</td>
+<td>-</td>
+<td>Vision-language alignment</td>
+<td>Standard workflows</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="checkpoints-checkpoints-17gb">💾 <strong>Checkpoints</strong> (<code>/checkpoints</code>) - 17GB</h3>
+<table>
+<thead>
+<tr>
+<th><strong>Model Name</strong></th>
+<th><strong>Size</strong></th>
+<th><strong>Type</strong></th>
+<th><strong>Precision</strong></th>
+<th><strong>Function</strong></th>
+<th><strong>Best For</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>flux1-schnell-fp8.safetensors</code></td>
+<td>17GB</td>
+<td>Fast Image Gen</td>
+<td>FP8</td>
+<td>Rapid image generation</td>
+<td>Production workflows</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="unet-models-unet-14gb">🔧 <strong>UNET Models</strong> (<code>/unet</code>) - 14GB</h3>
+<table>
+<thead>
+<tr>
+<th><strong>Model Name</strong></th>
+<th><strong>Size</strong></th>
+<th><strong>Type</strong></th>
+<th><strong>Quantization</strong></th>
+<th><strong>Function</strong></th>
+<th><strong>Best For</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Wan2.1_14B_VACE-Q6_K.gguf</code></td>
+<td>14GB</td>
+<td>Video Editing</td>
+<td>Q6_K</td>
+<td>Professional video editing</td>
+<td>High-quality editing</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="vae-models-vae-15gb">🔄 <strong>VAE Models</strong> (<code>/vae</code>) - 1.5GB</h3>
+<table>
+<thead>
+<tr>
+<th><strong>Model Name</strong></th>
+<th><strong>Size</strong></th>
+<th><strong>Type</strong></th>
+<th><strong>Precision</strong></th>
+<th><strong>Function</strong></th>
+<th><strong>Best For</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ae.safetensors</code></td>
+<td>320MB</td>
+<td>Standard VAE</td>
+<td>-</td>
+<td>Basic latent processing</td>
+<td>General use</td>
+</tr>
+<tr>
+<td><code>vae-ft-mse-840000-ema-pruned.safetensors</code></td>
+<td>320MB</td>
+<td>Fine-tuned VAE</td>
+<td>-</td>
+<td>High-quality reconstruction</td>
+<td>Quality workflows</td>
+</tr>
+<tr>
+<td><code>diffusion_pytorch_model.safetensors</code></td>
+<td>320MB</td>
+<td>Standard VAE</td>
+<td>-</td>
+<td>Broad compatibility</td>
+<td>General compatibility</td>
+</tr>
+<tr>
+<td><code>wan2.1/Wan2_1_VAE_bf16.safetensors</code></td>
+<td>243MB</td>
+<td>Wan2.1 VAE</td>
+<td>BF16</td>
+<td>Video-optimized processing</td>
+<td>Video generation</td>
+</tr>
+<tr>
+<td><code>wan21_vace_vae.safetensors</code></td>
+<td>243MB</td>
+<td>VACE VAE</td>
+<td>-</td>
+<td>Video editing processing</td>
+<td>Video editing</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="clip-vision-models-clip_vision-24gb">👁️ <strong>CLIP Vision Models</strong> (<code>/clip_vision</code>) - 2.4GB</h3>
+<table>
+<thead>
+<tr>
+<th><strong>Model Name</strong></th>
+<th><strong>Size</strong></th>
+<th><strong>Architecture</strong></th>
+<th><strong>Training Data</strong></th>
+<th><strong>Function</strong></th>
+<th><strong>Best For</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>CLIP-ViT-H-14-laion2B-s32B-b79K.safetensors</code></td>
+<td>2.4GB</td>
+<td>ViT-Huge-14</td>
+<td>LAION-2B</td>
+<td>Visual understanding</td>
+<td>High-quality analysis</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="video-interpolation-models-interpolation-824mb">🎬 <strong>Video Interpolation Models</strong> (<code>/interpolation</code>) - 824MB</h3>
+<h4 id="gimm-vfi-directory-interpolationgimm-vfi-interpolationgimm-vfi_safetensors">GIMM-VFI Directory (<code>/interpolation/gimm-vfi</code> &amp; <code>/interpolation/GIMM-VFI_safetensors</code>)</h4>
+<table>
+<thead>
+<tr>
+<th><strong>Model Name</strong></th>
+<th><strong>Size</strong></th>
+<th><strong>Type</strong></th>
+<th><strong>Function</strong></th>
+<th><strong>Best For</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>gimmvfi_f_arb_lpips_fp32.safetensors</code></td>
+<td>117MB</td>
+<td>Full VFI Model</td>
+<td>Complete frame interpolation</td>
+<td>Production workflows</td>
+</tr>
+<tr>
+<td><code>gimmvfi_r_arb_lpips_fp32.safetensors</code></td>
+<td>76MB</td>
+<td>Refinement Model</td>
+<td>Frame quality enhancement</td>
+<td>Quality improvement</td>
+</tr>
+<tr>
+<td><code>flowformer_sintel_fp32.safetensors</code></td>
+<td>62MB</td>
+<td>Motion Model</td>
+<td>Advanced motion understanding</td>
+<td>Complex motion</td>
+</tr>
+<tr>
+<td><code>raft-things_fp32.safetensors</code></td>
+<td>21MB</td>
+<td>Optical Flow</td>
+<td>Motion estimation</td>
+<td>Motion calculation</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="face-restoration-models-facerestore_models-13gb">🔍 <strong>Face Restoration Models</strong> (<code>/facerestore_models</code>) - 1.3GB</h3>
+<table>
+<thead>
+<tr>
+<th><strong>Model Name</strong></th>
+<th><strong>Size</strong></th>
+<th><strong>Type</strong></th>
+<th><strong>Function</strong></th>
+<th><strong>Best For</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>codeformer-v0.1.0.pth</code></td>
+<td>360MB</td>
+<td>CodeFormer</td>
+<td>Advanced face enhancement</td>
+<td>Professional portraits</td>
+</tr>
+<tr>
+<td><code>GFPGANv1.4.pth</code></td>
+<td>333MB</td>
+<td>GFPGAN v1.4</td>
+<td>Improved face restoration</td>
+<td>High-quality restoration</td>
+</tr>
+<tr>
+<td><code>GFPGANv1.3.pth</code></td>
+<td>333MB</td>
+<td>GFPGAN v1.3</td>
+<td>Face restoration</td>
+<td>General face enhancement</td>
+</tr>
+<tr>
+<td><code>GPEN-BFR-512.onnx</code></td>
+<td>272MB</td>
+<td>GPEN (ONNX)</td>
+<td>Real-time face restoration</td>
+<td>Fast processing</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="upscaling-models-upscale_models-192mb">⬆️ <strong>Upscaling Models</strong> (<code>/upscale_models</code>) - 192MB</h3>
+<table>
+<thead>
+<tr>
+<th><strong>Model Name</strong></th>
+<th><strong>Size</strong></th>
+<th><strong>Scale</strong></th>
+<th><strong>Type</strong></th>
+<th><strong>Function</strong></th>
+<th><strong>Best For</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>8x_NMKD-Superscale_150000_G.pth</code></td>
+<td>64MB</td>
+<td>8x</td>
+<td>NMKD</td>
+<td>Extreme upscaling</td>
+<td>Maximum resolution</td>
+</tr>
+<tr>
+<td><code>4x_foolhardy_Remacri.pth</code></td>
+<td>64MB</td>
+<td>4x</td>
+<td>Enhanced ESRGAN</td>
+<td>Sharp upscaling</td>
+<td>General upscaling</td>
+</tr>
+<tr>
+<td><code>4x_NMKD-Siax_200k.pth</code></td>
+<td>64MB</td>
+<td>4x</td>
+<td>NMKD Siax</td>
+<td>Alternative upscaling</td>
+<td>Artistic enhancement</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="content-safety-models-nsfw_detector-329mb">🚫 <strong>Content Safety Models</strong> (<code>/nsfw_detector</code>) - 329MB</h3>
+<table>
+<thead>
+<tr>
+<th><strong>Model Name</strong></th>
+<th><strong>Size</strong></th>
+<th><strong>Architecture</strong></th>
+<th><strong>Function</strong></th>
+<th><strong>Best For</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>vit-base-nsfw-detector/model.safetensors</code></td>
+<td>329MB</td>
+<td>ViT-Base</td>
+<td>Content moderation</td>
+<td>Safety filtering</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Additional Files:</strong>
+- <code>config.json</code> - Model configuration
+- <code>preprocessor_config.json</code> - Input preprocessing
+- <code>confusion_matrix.png</code> - Performance metrics</p>
+<hr />
+<h3 id="vae-approximation-models-vae_approx-19mb">⚡ <strong>VAE Approximation Models</strong> (<code>/vae_approx</code>) - 19MB</h3>
+<table>
+<thead>
+<tr>
+<th><strong>Model Name</strong></th>
+<th><strong>Size</strong></th>
+<th><strong>Target</strong></th>
+<th><strong>Function</strong></th>
+<th><strong>Best For</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>taef1_decoder.pth</code></td>
+<td>4.8MB</td>
+<td>SD3/FLUX</td>
+<td>Fast preview for SD3/FLUX</td>
+<td>Modern models</td>
+</tr>
+<tr>
+<td><code>taesd3_decoder.pth</code></td>
+<td>4.8MB</td>
+<td>SD3</td>
+<td>Fast preview for SD3</td>
+<td>SD3 workflows</td>
+</tr>
+<tr>
+<td><code>taesdxl_decoder.pth</code></td>
+<td>4.7MB</td>
+<td>SDXL</td>
+<td>Fast preview for SDXL</td>
+<td>SDXL workflows</td>
+</tr>
+<tr>
+<td><code>taesd_decoder.pth</code></td>
+<td>4.7MB</td>
+<td>SD1.5</td>
+<td>Fast preview for SD1.5</td>
+<td>SD1.5 workflows</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="model-downloads">Model Downloads</h2>
+<ol>
+<li><strong>Recommended source</strong>: ModelScope (魔搭)</li>
+<li><strong>Model storage path</strong>: <code>/root/storage/models</code></li>
+</ol>
+<h2 id="account-credentials">Account Credentials</h2>
+<p>Default username and password:
+- <strong>Username</strong>: admin
+- <strong>Password</strong>: admin</p>
+<h2 id="frequently-asked-questions">Frequently Asked Questions</h2>
+<ol>
+<li><strong>Missing node types</strong>: If you encounter "node type does not exist" errors, install missing nodes through the manager and restart
+   <img alt="Issue 1" src="../img/issue1.png" />
+   <img alt="Issue 2" src="../img/issue2.png" /></li>
+</ol>
+<hr />
+<p><em>This documentation provides comprehensive guidance for deploying and using ComfyUI Community Edition on Alibaba Cloud's Compute Nest platform.</em></p>
+        
+      </div>
+
+      <div class="copyrights">© 2009-2022 Aliyun.com 版权所有</div>
+    </div>
+  </div>
+  
+  <!--
+  MkDocs version      : 1.6.1
+  Docs Build Date UTC : 2025-09-12 09:55:42.757601+00:00
+  -->
+</body>
+</html>
