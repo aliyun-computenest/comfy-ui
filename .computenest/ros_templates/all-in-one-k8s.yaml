@@ -421,7 +421,7 @@ Parameters:
           - ecs.ebmgn9t
 
   WorkerInstanceCount:
-    Default: 2
+    Default: 3
     Type: Number
     Label:
       zh-cn: 实例节点数
@@ -867,7 +867,7 @@ Resources:
             metadata:
               name: model-download-job
             spec:
-              ttlSecondsAfterFinished: 1800
+              ttlSecondsAfterFinished: 3600
               template:
                 metadata:
                   labels:
@@ -880,7 +880,7 @@ Resources:
                     resources: ${resources}
                     volumeMounts:
                     - name: scratch-volume
-                      mountPath: /root/models
+                      mountPath: /root
                     command: [ "/bin/bash", "-c", "--" ] 
                     args:
                       - |
@@ -909,11 +909,11 @@ Resources:
                         ossutil cp oss://computenest-artifacts-${regionId}/model-data/${modelSeries}/model.tar.zst model.tar.zst --region ${regionId} --endpoint ${ossUrl} --mode Anonymous
 
                         echo "[$(date '+%Y-%m-%d %H:%M:%S')] 开始解压模型文件..."
-                        zstd -d -c models.tar.zst | pv | tar -xvf - --strip-components=1
+                        zstd -d -c model.tar.zst | pv | tar -xvf - --strip-components=1
                         echo "[$(date '+%Y-%m-%d %H:%M:%S')] 模型文件解压完毕"
 
                         echo "[$(date '+%Y-%m-%d %H:%M:%S')] 开始上传模型文件到目标 OSS bucket..."
-                        ossutil --config-file /usr/bin/oss.cfg cp -r /root/storage/models oss://${bucketName}/llm-model/ --ignore-existing
+                        ossutil --config-file /usr/bin/oss.cfg cp -r /root/storage/ oss://${bucketName}/llm-model/ --ignore-existing
                         echo "[$(date '+%Y-%m-%d %H:%M:%S')] 模型文件上传完毕"
                   volumes:
                     - name: scratch-volume
@@ -953,7 +953,10 @@ Resources:
                 - AccessKey
                 - AccessKeySecret
             modelSeries:
-              Ref: ModelSeries
+              Fn::FindInMap:
+                - ModelMapping
+                - ModelNameMap
+                - Ref: ModelSeries
             resources:
               Fn::If:
                 - ExistAcsOrNewAcsCondition
@@ -1050,11 +1053,11 @@ Resources:
       DefaultNamespace: default
 
   # OSS PV和PVC
+  # OSS PV和PVC
   OSSPVPVCApplication:
     Type: ALIYUN::CS::ClusterApplication
     DependsOn:
       - PreDeployApplication
-      - StorageClassApplication
     Properties:
       YamlContent:
         Fn::Sub:
@@ -1063,16 +1066,16 @@ Resources:
             kind: StorageClass
             metadata:
               name: llm-model
-            provisioner: diskplugin.csi.alibabacloud.com
+            provisioner: ossplugin.csi.alibabacloud.com
             reclaimPolicy: Retain
             volumeBindingMode: Immediate
             parameters:
-              type: cloud_essd
-              fstype: ext4
-              performanceLevel: PL2,PL1
-            reclaimPolicy: Delete
-            volumeBindingMode: WaitForFirstConsumer
-            allowVolumeExpansion: true
+              bucket: "${bucketName}"
+              url: "${ossUrl}"
+              path: "/llm-model"
+              otherOpts: "-o umask=022 -o max_stat_cache_size=0 -o allow_other"
+              csi.storage.k8s.io/node-publish-secret-name: oss-secret
+              csi.storage.k8s.io/node-publish-secret-namespace: default
             ---
             apiVersion: v1
             kind: PersistentVolumeClaim
@@ -1235,15 +1238,22 @@ Resources:
           - Ref: ClusterId
       DefaultNamespace: default
 
-
-
-
+  # 私有服务
   # 私有服务
   PrivateServiceApplication:
     Type: ALIYUN::CS::ClusterApplication
     DependsOn:
       - ComfyUIApplication
     Properties:
+      WaitUntil:
+        - Kind: Service
+          Name: svc-private
+          JsonPath: $.status.loadBalancer.ingress[0].ip
+          Operator: NotEmpty
+          Timeout: 900
+          FirstMatch: true
+          Namespace: default
+          ApiVersion: v1
       YamlContent:
         Fn::Sub:
           - |
@@ -1266,7 +1276,7 @@ Resources:
               selector:
                 app: comfyui
               type: LoadBalancer
-          - {}
+          - { }
       ClusterId:
         Fn::If:
           - CreateClusterCondition
@@ -1283,6 +1293,15 @@ Resources:
     DependsOn:
       - ComfyUIApplication
     Properties:
+      WaitUntil:
+        - Kind: Service
+          Name: svc-public
+          JsonPath: $.status.loadBalancer.ingress[0].ip
+          Operator: NotEmpty
+          Timeout: 900
+          FirstMatch: true
+          Namespace: default
+          ApiVersion: v1
       YamlContent:
         Fn::Sub:
           - |
@@ -1306,7 +1325,7 @@ Resources:
               selector:
                 app: comfyui
               type: LoadBalancer
-          - {}
+          - { }
       ClusterId:
         Fn::If:
           - CreateClusterCondition
@@ -1315,6 +1334,8 @@ Resources:
               - ClusterId
           - Ref: ClusterId
       DefaultNamespace: default
+
+
 
   # 获取服务地址
   PrivateIngressResources:
@@ -1439,10 +1460,6 @@ Outputs:
       Fn::GetAtt:
         - KubernetesCluster
         - Profile
-
-  在线访问:
-    Label: 在线访问
-    Value: '<a href="https://appflow.console.aliyun.com/vendor/cn-hangzhou/comfyui/chat?serviceInstanceId={{serviceInstanceId}}" target="_blank" rel="noopener noreferrer"> 访问链接 </a>'
 
 Metadata:
   ALIYUN::ROS::Interface:
