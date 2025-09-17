@@ -20,6 +20,8 @@ Mappings:
       'Flux1-dev': flux1-dev
       'Flux1-Krea': flux1-Krea
       'Flux1-kontext': flux1-kontext
+      'HunyuanImage2.1': HunyuanImage2.1
+
 
 
     ModelDiskSizeMap:
@@ -37,6 +39,7 @@ Mappings:
       'Flux1-dev': 150
       'Flux1-Krea': 150
       'Flux1-kontext': 150
+      'HunyuanImage2.1': 150
 
     ModelWaitTimeMap:
       'WanX-2.1(I2V-14B,T2V-14B,VACE-1.3B and I2V-1.3B)': 1800
@@ -53,6 +56,7 @@ Mappings:
       'Flux1-dev': 1200
       'Flux1-Krea': 1200
       'Flux1-kontext': 1200
+      'HunyuanImage2.1': 1200
 
 
 Conditions:
@@ -87,6 +91,7 @@ Parameters:
       - Flux1-dev
       - Flux1-Krea
       - Flux1-kontext
+      - HunyuanImage2.1
     AssociationPropertyMetadata:
       ValueLabelMapping:
         'WanX-2.1(I2V-14B,T2V-14B,VACE-1.3B and I2V-1.3B)': 'WanX-2.1 (图像到视频/文本到视频)'
@@ -103,6 +108,7 @@ Parameters:
         'Flux1-dev': 'Flux1-dev'
         'Flux1-Krea': 'Flux1-Krea'
         'Flux1-kontext': 'Flux1-kontext'
+        'HunyuanImage2.1': 'HunyuanImage2.1'
     Description:
       zh-cn: 选择要部署的模型系列，不同模型需要的实例规格和磁盘空间不同。新增模型包括WanX-2.2系列的趣味功能、HunyuanVideo视频生成和Qwen-Image系列的编辑功能。
       en: Select the model series to deploy. Different models require different instance specifications and disk space. New models include WanX-2.2 fun series, HunyuanVideo for video generation, and Qwen-Image editing series.
@@ -659,7 +665,7 @@ Resources:
             
             # 等待ComfyUI启动
             MAX_ATTEMPTS=60
-            INTERVAL=2
+            INTERVAL=3
             
             echo "Waiting for ComfyUI to start..."
             cd "$WORKING_DIR"
