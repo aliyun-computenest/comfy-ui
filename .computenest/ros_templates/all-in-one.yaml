@@ -21,6 +21,9 @@ Mappings:
       'Flux1-Krea': flux1-Krea
       'Flux1-kontext': flux1-kontext
       'HunyuanImage2.1': HunyuanImage2.1
+      'Wanx2.2-Vace': wanx2.2-vace
+      'HuMo': humo
+
 
 
 
@@ -40,6 +43,8 @@ Mappings:
       'Flux1-Krea': 150
       'Flux1-kontext': 150
       'HunyuanImage2.1': 150
+      'Wanx2.2-Vace': 300
+      'HuMo': 300
 
     ModelWaitTimeMap:
       'WanX-2.1(I2V-14B,T2V-14B,VACE-1.3B and I2V-1.3B)': 1800
@@ -57,6 +62,8 @@ Mappings:
       'Flux1-Krea': 1200
       'Flux1-kontext': 1200
       'HunyuanImage2.1': 1200
+      'Wanx2.2-Vace': 1800
+      'HuMo': 1800
 
 
 Conditions:
@@ -92,6 +99,8 @@ Parameters:
       - Flux1-Krea
       - Flux1-kontext
       - HunyuanImage2.1
+      - Wanx2.2-Vace
+      - HuMo
     AssociationPropertyMetadata:
       ValueLabelMapping:
         'WanX-2.1(I2V-14B,T2V-14B,VACE-1.3B and I2V-1.3B)': 'WanX-2.1 (图像到视频/文本到视频)'
@@ -109,6 +118,8 @@ Parameters:
         'Flux1-Krea': 'Flux1-Krea'
         'Flux1-kontext': 'Flux1-kontext'
         'HunyuanImage2.1': 'HunyuanImage2.1'
+        'Wanx2.2-Vace': 'WanX-2.2 VACE'
+        'HuMo': 'HuMo'
     Description:
       zh-cn: 选择要部署的模型系列，不同模型需要的实例规格和磁盘空间不同。新增模型包括WanX-2.2系列的趣味功能、HunyuanVideo视频生成和Qwen-Image系列的编辑功能。
       en: Select the model series to deploy. Different models require different instance specifications and disk space. New models include WanX-2.2 fun series, HunyuanVideo for video generation, and Qwen-Image editing series.
@@ -461,7 +472,7 @@ Resources:
         Fn::If:
           - EnablePublicAccess
           - 5
-          - 0
+          - 5
       IoOptimized: optimized
       MaxAmount: 1
 
@@ -481,8 +492,10 @@ Resources:
         Fn::Sub:
           - |
             # 下载模型数据的函数
-            yum install -y zstd --disablerepo=nvidia-container-toolkit --disablerepo=nvidia-container-toolkit-experimental -q
-            yum install -y pv --disablerepo=nvidia-container-toolkit --disablerepo=nvidia-container-toolkit-experimental -q
+            # 临时禁用 docker-ce-stable 仓库
+            yum install -y zstd --disablerepo=nvidia-container-toolkit --disablerepo=nvidia-container-toolkit-experimental --disablerepo=docker-ce-stable -q
+            yum install -y pv --disablerepo=nvidia-container-toolkit --disablerepo=nvidia-container-toolkit-experimental --disablerepo=docker-ce-stable -q
+  
   
             download_model_data() {
               # 检查模型目录是否已存在且不为空
