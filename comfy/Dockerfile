@@ -6,37 +6,72 @@ LABEL maintainer="renyun"
 # 设置APT镜像源（阿里云源）
 RUN sed -i 's/archive.ubuntu.com/mirrors.aliyun.com/g' /etc/apt/sources.list && \
     sed -i 's/security.ubuntu.com/mirrors.aliyun.com/g' /etc/apt/sources.list
+
 # 安装系统依赖（基于Ubuntu 22.04）
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
     ffmpeg libsm6 libxext6 libgl1 libglib2.0-0 \
-    git ninja-build aria2 wget
+    git ninja-build aria2 wget \
+    build-essential cmake pkg-config \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
-# 安装Python依赖（复用基础镜像已安装的torch/vllm）
+# 配置pip使用阿里云镜像源
+RUN pip config set global.index-url https://mirrors.aliyun.com/pypi/simple/ && \
+    pip config set install.trusted-host mirrors.aliyun.com
+
+# 先升级pip和基础工具
+RUN pip install --no-cache-dir --upgrade pip setuptools wheel
+
+# 分批安装依赖，避免内存问题和依赖冲突
+# 第一批：基础科学计算库
+RUN pip install --no-cache-dir \
+    "numpy<1.25" \
+    Cython
+
+# 第二批：编译相关工具
+RUN pip install --no-cache-dir \
+    py-build-cmake \
+    ninja
+
+# 第三批：数据处理和可视化
+RUN pip install --no-cache-dir \
+    pandas \
+    matplotlib \
+    scipy \
+    scikit-learn \
+    joblib
+
+# 第四批：图像处理
 RUN pip install --no-cache-dir \
     opencv-python-headless \
-    scikit-learn \
-    matplotlib \
-    pandas \
+    svglib \
+    qrcode
+
+# 第五批：深度学习相关（可能需要编译）
+RUN pip install --no-cache-dir \
     numba \
-    xformers \
-    "numpy<1.25" \
-    SageAttention \
-    Cython \
-    py-build-cmake \
+    onnx
+
+# 第六批：特殊依赖（可能有编译需求）
+RUN pip install --no-cache-dir \
+    xformers || echo "xformers installation failed, continuing..."
+
+RUN pip install --no-cache-dir \
+    SageAttention || echo "SageAttention installation failed, continuing..."
+
+# 第七批：其他工具库
+RUN pip install --no-cache-dir \
     aiohttp \
     ffmpeg-python \
     GitPython \
-    joblib \
     lark \
-    matplotlib \
     mpmath \
-    onnx \
-    pandas \
-    qrcode \
-    rich \
-    scipy svglib \
-    gradio>=5.0.0
+    rich
+
+# 第八批：Gradio（最后安装，避免依赖冲突）
+RUN pip install --no-cache-dir \
+    "gradio>=5.0.0"
 
 # 创建工作目录并克隆仓库
 WORKDIR /root
@@ -50,4 +85,3 @@ WORKDIR /root/ComfyUI
 
 # 启动命令
 CMD ["python3", "main.py", "--listen", "--port", "8188", "--fast"]
-# python3 main.py --listen --port 8188 --fast

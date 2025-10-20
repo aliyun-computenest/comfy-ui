@@ -182,7 +182,7 @@ ImageBuilder:
     CommandType: RunShellScript
     Timeout: 7200
     CommandContent: |-
-      sudo yum install zstd --disablerepo=nvidia-container-toolkit --disablerepo=nvidia-container-toolkit-experimental -yum
+      sudo yum install zstd --disablerepo=nvidia-container-toolkit --disablerepo=nvidia-container-toolkit-experimental -y
       curl -o ossutil-2.1.2-linux-amd64.zip https://gosspublic.alicdn.com/ossutil/v2/2.1.2/ossutil-2.1.2-linux-amd64.zip
       unzip ossutil-2.1.2-linux-amd64.zip
       cd ossutil-2.1.2-linux-amd64
