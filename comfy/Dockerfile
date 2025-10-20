@@ -57,9 +57,6 @@ RUN pip install --no-cache-dir pillow
 
 RUN pip install --no-cache-dir reportlab
 
-RUN pip install --no-cache-dir svglib
-
-RUN pip install --no-cache-dir qrcode[pil]
 
 # 第五批：深度学习相关
 RUN pip install --no-cache-dir \
