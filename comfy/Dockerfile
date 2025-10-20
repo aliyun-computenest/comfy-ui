@@ -7,12 +7,19 @@ LABEL maintainer="renyun"
 RUN sed -i 's/archive.ubuntu.com/mirrors.aliyun.com/g' /etc/apt/sources.list && \
     sed -i 's/security.ubuntu.com/mirrors.aliyun.com/g' /etc/apt/sources.list
 
-# 安装系统依赖（基于Ubuntu 22.04）
+# 安装系统依赖（opencv-python-headless 需要这些库）
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
     ffmpeg libsm6 libxext6 libgl1 libglib2.0-0 \
     git ninja-build aria2 wget \
     build-essential cmake pkg-config \
+    libopencv-dev \
+    libfreetype6-dev \
+    libpng-dev \
+    libjpeg-dev \
+    libxml2-dev \
+    libxslt1-dev \
+    zlib1g-dev \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -23,7 +30,6 @@ RUN pip config set global.index-url https://mirrors.aliyun.com/pypi/simple/ && \
 # 先升级pip和基础工具
 RUN pip install --no-cache-dir --upgrade pip setuptools wheel
 
-# 分批安装依赖，避免内存问题和依赖冲突
 # 第一批：基础科学计算库
 RUN pip install --no-cache-dir \
     "numpy<1.25" \
@@ -42,23 +48,30 @@ RUN pip install --no-cache-dir \
     scikit-learn \
     joblib
 
-# 第四批：图像处理
-RUN pip install --no-cache-dir \
-    opencv-python-headless \
-    svglib \
-    qrcode
+# 第四批：图像处理 - 逐个安装并添加详细日志
+RUN pip install --no-cache-dir --verbose opencv-python-headless 2>&1 | tee /tmp/opencv_install.log || \
+    (echo "OpenCV installation failed, trying alternative..." && \
+     pip install --no-cache-dir opencv-contrib-python-headless)
 
-# 第五批：深度学习相关（可能需要编译）
+RUN pip install --no-cache-dir pillow
+
+RUN pip install --no-cache-dir reportlab
+
+RUN pip install --no-cache-dir svglib
+
+RUN pip install --no-cache-dir qrcode[pil]
+
+# 第五批：深度学习相关
 RUN pip install --no-cache-dir \
     numba \
     onnx
 
 # 第六批：特殊依赖（可能有编译需求）
-RUN pip install --no-cache-dir \
-    xformers || echo "xformers installation failed, continuing..."
+RUN pip install --no-cache-dir xformers || \
+    echo "xformers installation failed, continuing..."
 
-RUN pip install --no-cache-dir \
-    SageAttention || echo "SageAttention installation failed, continuing..."
+RUN pip install --no-cache-dir SageAttention || \
+    echo "SageAttention installation failed, continuing..."
 
 # 第七批：其他工具库
 RUN pip install --no-cache-dir \
@@ -69,9 +82,8 @@ RUN pip install --no-cache-dir \
     mpmath \
     rich
 
-# 第八批：Gradio（最后安装，避免依赖冲突）
-RUN pip install --no-cache-dir \
-    "gradio>=5.0.0"
+# 第八批：Gradio
+RUN pip install --no-cache-dir "gradio>=5.0.0"
 
 # 创建工作目录并克隆仓库
 WORKDIR /root
