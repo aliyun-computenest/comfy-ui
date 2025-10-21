@@ -1390,7 +1390,7 @@ Mappings:
       'HunyuanVideo': HunyuanVideo
       'Qwen-Image-Edit': Qwen-Image-Edit
       'Hunyuan3D-2.1': hunyuan2.1
-      'Hunyuan3D-2': hunyuan2.2
+      'Hunyuan3D-2': hunyuan2.0
       'Flux1-dev': flux1-dev
       'Flux1-Krea': flux1-Krea
       'Flux1-kontext': flux1-kontext

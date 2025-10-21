@@ -16,14 +16,11 @@ Mappings:
       'HunyuanVideo': HunyuanVideo
       'Qwen-Image-Edit': Qwen-Image-Edit
       'Hunyuan3D-2.1': hunyuan2.1
-      'Hunyuan3D-2': hunyuan2.2
+      'Hunyuan3D-2': hunyuan2.0
       'Flux1-dev': flux1-dev
       'Flux1-Krea': flux1-Krea
       'Flux1-kontext': flux1-kontext
       'HunyuanImage2.1': HunyuanImage2.1
-      'Wanx2.2-Vace': wanx2.2-vace
-      'HuMo': humo
-
 
 
 
@@ -37,14 +34,12 @@ Mappings:
       'Wanx2.2-s2v': 400
       'HunyuanVideo': 500
       'Qwen-Image-Edit': 350
-      'Hunyuan3D-2.1': 100
-      'Hunyuan3D-2': 100
-      'Flux1-dev': 150
-      'Flux1-Krea': 150
-      'Flux1-kontext': 150
-      'HunyuanImage2.1': 150
-      'Wanx2.2-Vace': 300
-      'HuMo': 300
+      'Hunyuan3D-2.1': 200
+      'Hunyuan3D-2': 200
+      'Flux1-dev': 200
+      'Flux1-Krea': 200
+      'Flux1-kontext': 200
+      'HunyuanImage2.1': 200
 
     ModelWaitTimeMap:
       'WanX-2.1(I2V-14B,T2V-14B,VACE-1.3B and I2V-1.3B)': 1800
@@ -62,8 +57,6 @@ Mappings:
       'Flux1-Krea': 1200
       'Flux1-kontext': 1200
       'HunyuanImage2.1': 1200
-      'Wanx2.2-Vace': 1800
-      'HuMo': 1800
 
 
 Conditions:
@@ -99,8 +92,6 @@ Parameters:
       - Flux1-Krea
       - Flux1-kontext
       - HunyuanImage2.1
-      - Wanx2.2-Vace
-      - HuMo
     AssociationPropertyMetadata:
       ValueLabelMapping:
         'WanX-2.1(I2V-14B,T2V-14B,VACE-1.3B and I2V-1.3B)': 'WanX-2.1 (图像到视频/文本到视频)'
@@ -118,8 +109,6 @@ Parameters:
         'Flux1-Krea': 'Flux1-Krea'
         'Flux1-kontext': 'Flux1-kontext'
         'HunyuanImage2.1': 'HunyuanImage2.1'
-        'Wanx2.2-Vace': 'WanX-2.2 VACE'
-        'HuMo': 'HuMo'
     Description:
       zh-cn: 选择要部署的模型系列，不同模型需要的实例规格和磁盘空间不同。新增模型包括WanX-2.2系列的趣味功能、HunyuanVideo视频生成和Qwen-Image系列的编辑功能。
       en: Select the model series to deploy. Different models require different instance specifications and disk space. New models include WanX-2.2 fun series, HunyuanVideo for video generation, and Qwen-Image editing series.
@@ -495,8 +484,8 @@ Resources:
             # 临时禁用 docker-ce-stable 仓库
             yum install -y zstd --disablerepo=nvidia-container-toolkit --disablerepo=nvidia-container-toolkit-experimental --disablerepo=docker-ce-stable -q
             yum install -y pv --disablerepo=nvidia-container-toolkit --disablerepo=nvidia-container-toolkit-experimental --disablerepo=docker-ce-stable -q
-  
-  
+            
+            
             download_model_data() {
               # 检查模型目录是否已存在且不为空
               local model_dir="/root/model-data"
@@ -504,7 +493,7 @@ Resources:
                   echo "模型目录 $model_dir 已存在且不为空，跳过下载"
                   return 0
               fi
-  
+            
               mkdir -p /root/model-data
               cd /root
             
@@ -530,10 +519,10 @@ Resources:
               echo "[$(date '+%Y-%m-%d %H:%M:%S')] 模型文件解压完毕"
               rm $model_file
             }
-  
+            
             # 下载模型文件
             download_model_data
-  
+            
             # 添加调试信息
             echo "=== Debug: Checking docker-compose.yaml locations ==="         
             # 设置固定的docker-compose文件路径
@@ -572,7 +561,7 @@ Resources:
             Description=Docker Compose Application Service
             Requires=docker.service
             After=docker.service
-  
+            
             [Service]
             Type=oneshot
             RemainAfterExit=yes
@@ -580,7 +569,7 @@ Resources:
             ExecStart=/bin/bash -c 'cd $WORKING_DIR && /usr/bin/docker compose -f $COMPOSE_FILE up -d && /usr/local/bin/check-container-status'
             ExecStop=/bin/bash -c 'cd $WORKING_DIR && /usr/bin/docker compose -f $COMPOSE_FILE down'
             TimeoutStartSec=0
-  
+            
             [Install]
             WantedBy=multi-user.target
             EOF
@@ -591,30 +580,30 @@ Resources:
             # 使用固定的compose文件路径
             COMPOSE_FILE="comfy/docker-compose.yaml"
             WORKING_DIR="/root/ossutil-2.1.2-linux-amd64/comfy-ui"
-  
+            
             echo "check-container-status: Using WORKING_DIR=$WORKING_DIR, COMPOSE_FILE=$COMPOSE_FILE"
-  
+            
             cd "$WORKING_DIR" || {
                 echo "Error: Cannot change to directory $WORKING_DIR"
                 exit 1
             }
-  
+            
             MAX_WAIT_TIME=${WaitTime}
             CHECK_INTERVAL=10
-  
+            
             if ! command -v docker compose &> /dev/null; then
                 echo "Error: docker compose is not installed"
                 exit 1
             fi
-  
+            
             SERVICES=$(docker compose -f "$COMPOSE_FILE" config --services 2>/dev/null)
             if [ -z "$SERVICES" ]; then
                 echo "Error: No services found in $COMPOSE_FILE"
                 exit 1
             fi
-  
+            
             WAIT_TIME=0
-  
+            
             while [ $WAIT_TIME -le $MAX_WAIT_TIME ]; do
                 ALL_HEALTHY=true
                 for SERVICE in $SERVICES; do
@@ -655,7 +644,7 @@ Resources:
                 sleep $CHECK_INTERVAL
                 WAIT_TIME=$((WAIT_TIME + CHECK_INTERVAL))
             done
-  
+            
             echo "Timeout reached! Abnormal services:" >&2
             docker compose -f "$COMPOSE_FILE" ps --all
             exit 1
@@ -701,7 +690,7 @@ Resources:
             systemctl status stable-diffusion-comfy --no-pager || true
             echo "Final docker compose status:"
             docker compose -f "$COMPOSE_FILE" ps || true
-            exit 1
+
           - ModelSeries:
               Fn::FindInMap:
                 - ModelMapping
