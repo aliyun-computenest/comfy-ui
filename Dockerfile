@@ -14,7 +14,7 @@ RUN apt-get update && \
 COPY download_custom_nodes_script.sh /workspace/pytorch
 RUN chmod +x /workspace/pytorch/download_custom_nodes_script.sh && \
     cd /root && \
-    /workspace/pytorch/download_custom_nodes_script.sh \
+    /workspace/pytorch/download_custom_nodes_script.sh
 
 RUN pip install --no-cache-dir \
     opencv-python-headless \
@@ -23,6 +23,7 @@ RUN pip install --no-cache-dir \
     pandas \
     numba \
     xformers
+
 WORKDIR /workspace/pytorch/ComfyUI
 
 # 暴露端口
