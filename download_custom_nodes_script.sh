@@ -96,4 +96,3 @@ clone https://github.com/melMass/comfy_mtb.git
 # More
 clone https://github.com/pythongosssss/ComfyUI-WD14-Tagger.git
 clone https://github.com/SLAPaper/ComfyUI-Image-Selector.git
-clone https://github.com/ssitu/ComfyUI_UltimateSDUpscale.git
