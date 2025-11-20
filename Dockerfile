@@ -22,8 +22,7 @@ RUN pip install --no-cache-dir \
     matplotlib \
     pandas \
     numba \
-    xformers \
-    SageAttention
+    xformers
 WORKDIR /workspace/pytorch/ComfyUI
 
 # 暴露端口
