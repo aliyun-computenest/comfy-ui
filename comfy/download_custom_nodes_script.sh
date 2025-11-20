@@ -50,7 +50,6 @@ clone_and_install https://github.com/ltdrdata/ComfyUI-Manager.git
 clone_and_install https://github.com/kijai/ComfyUI-WanVideoWrapper.git
 clone_and_install https://github.com/crystian/ComfyUI-Crystools.git
 clone_and_install https://github.com/crystian/ComfyUI-Crystools-save.git
-clone_and_install https://github.com/Wan-Video/Wan2.1.git
 clone_and_install https://github.com/Suzie1/ComfyUI_Comfyroll_CustomNodes.git
 clone_and_install https://github.com/ltdrdata/ComfyUI-Impact-Pack.git
 clone_and_install https://github.com/welltop-cn/ComfyUI-TeaCache.git
