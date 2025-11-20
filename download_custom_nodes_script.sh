@@ -50,7 +50,6 @@ clone_and_install https://github.com/ltdrdata/ComfyUI-Manager.git
 clone_and_install https://github.com/kijai/ComfyUI-WanVideoWrapper.git
 clone_and_install https://github.com/crystian/ComfyUI-Crystools.git
 clone_and_install https://github.com/crystian/ComfyUI-Crystools-save.git
-clone_and_install https://github.com/Wan-Video/Wan2.1.git
 clone_and_install https://github.com/Suzie1/ComfyUI_Comfyroll_CustomNodes.git
 clone_and_install https://github.com/ltdrdata/ComfyUI-Impact-Pack.git
 clone_and_install https://github.com/welltop-cn/ComfyUI-TeaCache.git
@@ -68,7 +67,6 @@ clone_and_install https://github.com/cubiq/ComfyUI_IPAdapter_plus.git
 clone_and_install https://github.com/spinagon/ComfyUI-seamless-tiling.git
 clone_and_install https://github.com/visualbruno/ComfyUI-Hunyuan3d-2-1.git
 clone_and_install https://github.com/smthemex/ComfyUI_PartPacker.git
-clone_and_install https://github.com/NVlabs/PartPacker.git
 rm -rf /root/ComfyUI/login
 
 
@@ -96,3 +94,4 @@ clone https://github.com/melMass/comfy_mtb.git
 # More
 clone https://github.com/pythongosssss/ComfyUI-WD14-Tagger.git
 clone https://github.com/SLAPaper/ComfyUI-Image-Selector.git
+clone https://github.com/ssitu/ComfyUI_UltimateSDUpscale.git
