@@ -6,9 +6,12 @@ WORKDIR /workspace/pytorch
 
 # 安装系统依赖（git、ffmpeg 等）
 RUN apt-get update && \
-    apt-get install -y git ffmpeg && \
+    apt-get install -y git ffmpeg build-essential cmake ninja-build && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
+
+# 升级 pybind11 到最新版本以兼容 fpsample
+RUN pip install --no-cache-dir --upgrade pybind11
 
 # 复制并执行自定义节点安装脚本
 COPY download_custom_nodes_script.sh /workspace/pytorch
