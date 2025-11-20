@@ -22,7 +22,8 @@ RUN pip install --no-cache-dir \
     matplotlib \
     pandas \
     numba \
-    xformers
+    xformers \
+    SageAttention
 
 WORKDIR /workspace/pytorch/ComfyUI
 
