@@ -98,6 +98,12 @@ RUN pip install --no-cache-dir \
     --trusted-host mirrors.aliyun.com \
     "gradio>=5.0.0"
 
+# ================= 新增/修改部分 =================
+# 设置全局环境变量，确保脚本内的 pip 也能生效
+ENV PIP_INDEX_URL=https://mirrors.aliyun.com/pypi/simple/
+ENV PIP_TRUSTED_HOST=mirrors.aliyun.com
+# ===============================================
+
 # 创建工作目录并克隆仓库
 WORKDIR /root
 COPY download_custom_nodes_script.sh download_custom_nodes_script.sh

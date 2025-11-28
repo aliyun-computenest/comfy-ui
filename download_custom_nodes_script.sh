@@ -2,6 +2,9 @@
 
 set -euo pipefail
 
+# 定义 pip 镜像源参数
+PIP_OPTS="-i https://mirrors.aliyun.com/pypi/simple/ --trusted-host mirrors.aliyun.com --no-cache-dir"
+
 function clone_and_install () {
     local original_dir=$(pwd)
     local url="$1"
@@ -19,7 +22,8 @@ function clone_and_install () {
     cd "$repo_name" || return 2
     if [[ -f requirements.txt ]]; then
         echo "🔧 安装依赖: $repo_name"
-        pip install -r requirements.txt > /dev/null
+        # 修改：添加 PIP_OPTS 并移除 > /dev/null 以便查看错误
+        pip install $PIP_OPTS -r requirements.txt
     else
         echo "ⓘ 未找到 requirements.txt"
     fi
@@ -40,12 +44,21 @@ function clone () {
       set -e ;
 }
 
-
 cd /root
-clone https://github.com/comfyanonymous/ComfyUI.git
+# 确保 ComfyUI 目录存在，如果不存在则克隆
+if [ ! -d "ComfyUI" ]; then
+    clone https://github.com/comfyanonymous/ComfyUI.git
+fi
+
 cd /root/ComfyUI
-pip install -r requirements.txt
+
+# 修改：安装 ComfyUI 主依赖，使用镜像源参数
+echo "🔧 安装 ComfyUI 主依赖..."
+pip install $PIP_OPTS -r requirements.txt
+
 cd /root/ComfyUI/custom_nodes
+
+# 插件列表
 clone_and_install https://github.com/ltdrdata/ComfyUI-Manager.git
 clone_and_install https://github.com/kijai/ComfyUI-WanVideoWrapper.git
 clone_and_install https://github.com/crystian/ComfyUI-Crystools.git
@@ -54,6 +67,7 @@ clone_and_install https://github.com/Suzie1/ComfyUI_Comfyroll_CustomNodes.git
 clone_and_install https://github.com/ltdrdata/ComfyUI-Impact-Pack.git
 clone_and_install https://github.com/welltop-cn/ComfyUI-TeaCache.git
 clone_and_install https://github.com/sh570655308/ComfyUI-TopazVideoAI.git
+
 # General
 clone_and_install https://github.com/cubiq/ComfyUI_InstantID.git
 clone_and_install https://github.com/pythongosssss/ComfyUI-Custom-Scripts.git
@@ -67,9 +81,11 @@ clone_and_install https://github.com/cubiq/ComfyUI_IPAdapter_plus.git
 clone_and_install https://github.com/spinagon/ComfyUI-seamless-tiling.git
 clone_and_install https://github.com/visualbruno/ComfyUI-Hunyuan3d-2-1.git
 clone_and_install https://github.com/smthemex/ComfyUI_PartPacker.git
+
+# 删除不需要的目录
 rm -rf /root/ComfyUI/login
 
-
+# 纯克隆不需要安装依赖的节点
 clone https://github.com/chrisgoringe/cg-use-everywhere.git
 clone https://github.com/cubiq/ComfyUI_essentials.git
 clone https://github.com/jags111/efficiency-nodes-comfyui.git
@@ -95,3 +111,5 @@ clone https://github.com/melMass/comfy_mtb.git
 clone https://github.com/pythongosssss/ComfyUI-WD14-Tagger.git
 clone https://github.com/SLAPaper/ComfyUI-Image-Selector.git
 clone https://github.com/ssitu/ComfyUI_UltimateSDUpscale.git
+
+echo "🎉 所有节点处理完成"
