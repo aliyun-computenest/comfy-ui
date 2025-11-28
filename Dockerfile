@@ -105,15 +105,17 @@ RUN pip install --no-cache-dir \
 ENV PIP_INDEX_URL=https://mirrors.aliyun.com/pypi/simple/
 ENV PIP_TRUSTED_HOST=mirrors.aliyun.com
 
-# 清理并创建目标工作目录
-RUN rm -rf /workspace/pytorch/ComfyUI && \
-    mkdir -p /workspace/pytorch
+# 只删除可能存在的旧 ComfyUI 目录，不删除整个 pytorch 目录
+RUN rm -rf /workspace/pytorch/ComfyUI
 
 # 克隆仓库到目标目录
 WORKDIR /workspace/pytorch
 COPY download_custom_nodes_script.sh download_custom_nodes_script.sh
 RUN date > /tmp/build_time
 RUN chmod +x download_custom_nodes_script.sh && ./download_custom_nodes_script.sh
+
+# 创建缺失的模板目录
+RUN mkdir -p /usr/local/lib/python3.12/site-packages/comfyui_workflow_templates/templates
 
 EXPOSE 8188
 WORKDIR /workspace/pytorch/ComfyUI
