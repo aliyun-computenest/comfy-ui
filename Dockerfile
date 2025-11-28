@@ -38,7 +38,7 @@ RUN pip install --no-cache-dir --upgrade \
 RUN pip install --no-cache-dir \
     -i https://mirrors.aliyun.com/pypi/simple/ \
     --trusted-host mirrors.aliyun.com \
-    "numpy" \
+    numpy \
     Cython
 
 # 第二批：编译相关工具
@@ -64,11 +64,14 @@ RUN pip install --no-cache-dir \
     --trusted-host mirrors.aliyun.com \
     opencv-python-headless pillow reportlab
 
-# 第五批：深度学习相关
+# 第五批：深度学习相关 - 固定兼容版本
 RUN pip install --no-cache-dir \
     -i https://mirrors.aliyun.com/pypi/simple/ \
     --trusted-host mirrors.aliyun.com \
-    numba onnx
+    numba \
+    onnx \
+    "transformers>=4.40.0,<4.45.0" \
+    "peft>=0.10.0,<0.13.0"
 
 # 第六批：特殊依赖
 RUN pip install --no-cache-dir \
@@ -98,11 +101,17 @@ RUN pip install --no-cache-dir \
     --trusted-host mirrors.aliyun.com \
     "gradio>=5.0.0"
 
-# ================= 新增/修改部分 =================
+# 修复 comfyui-frontend-package
+RUN pip install --no-cache-dir \
+    -i https://mirrors.aliyun.com/pypi/simple/ \
+    --trusted-host mirrors.aliyun.com \
+    --force-reinstall \
+    comfyui-frontend-package || \
+    mkdir -p /usr/local/lib/python3.12/site-packages/comfyui_workflow_templates/templates
+
 # 设置全局环境变量，确保脚本内的 pip 也能生效
 ENV PIP_INDEX_URL=https://mirrors.aliyun.com/pypi/simple/
 ENV PIP_TRUSTED_HOST=mirrors.aliyun.com
-# ===============================================
 
 # 创建工作目录并克隆仓库
 WORKDIR /root
