@@ -38,7 +38,7 @@ RUN pip install --no-cache-dir --upgrade \
 RUN pip install --no-cache-dir \
     -i https://mirrors.aliyun.com/pypi/simple/ \
     --trusted-host mirrors.aliyun.com \
-    "numpy<1.25" \
+    "numpy" \
     Cython
 
 # 第二批：编译相关工具
