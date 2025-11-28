@@ -1,5 +1,5 @@
 # 使用阿里云预装CUDA 12.4和PyTorch的基础镜像
-FROM mirrors-ssl.aliyuncs.com/egs-registry.cn-hangzhou.cr.aliyuncs.com/egs/vllm:0.7.2-pytorch2.5.1-cuda12.4-ubuntu22.04
+FROM compute-nest-registry.cn-hangzhou.cr.aliyuncs.com/computenest/wanx-acs:latest
 
 LABEL maintainer="renyun"
 
