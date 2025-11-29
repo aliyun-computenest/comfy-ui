@@ -58,11 +58,11 @@ RUN pip install --no-cache-dir \
     scikit-learn \
     joblib
 
-# 第四批：图像处理
+# 第四批：图像处理（去掉 reportlab）
 RUN pip install --no-cache-dir \
     -i https://mirrors.aliyun.com/pypi/simple/ \
     --trusted-host mirrors.aliyun.com \
-    opencv-python-headless pillow reportlab
+    opencv-python-headless pillow
 
 # 第五批：深度学习相关 - 固定兼容版本
 RUN pip install --no-cache-dir \
