@@ -18,7 +18,7 @@ function clone_and_install () {
 
     echo "📂 进入目录: $repo_name"
     cd "$repo_name" || return 2
-    
+
     if [[ -f requirements.txt ]]; then
         echo "🔧 安装依赖: $repo_name"
         # 使用统一镜像源，允许失败继续
@@ -71,7 +71,6 @@ clone https://github.com/kijai/ComfyUI-KJNodes.git
 clone https://github.com/rgthree/rgthree-comfy.git
 clone https://github.com/shiimizu/ComfyUI_smZNodes.git
 clone https://github.com/WASasquatch/was-node-suite-comfyui.git
-clone https://github.com/cubiq/PuLID_ComfyUI.git
 clone https://github.com/Fannovel16/comfyui_controlnet_aux.git
 clone https://github.com/florestefano1975/comfyui-portrait-master.git
 clone https://github.com/huchenlei/ComfyUI-layerdiffuse.git
