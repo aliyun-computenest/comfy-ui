@@ -101,29 +101,21 @@ RUN pip install --no-cache-dir \
     --trusted-host mirrors.aliyun.com \
     "gradio>=5.0.0"
 
-# 修复 comfyui-frontend-package
-RUN pip install --no-cache-dir \
-    -i https://mirrors.aliyun.com/pypi/simple/ \
-    --trusted-host mirrors.aliyun.com \
-    --force-reinstall \
-    comfyui-frontend-package || \
-    mkdir -p /usr/local/lib/python3.12/site-packages/comfyui_workflow_templates/templates
-
 # 设置全局环境变量，确保脚本内的 pip 也能生效
 ENV PIP_INDEX_URL=https://mirrors.aliyun.com/pypi/simple/
 ENV PIP_TRUSTED_HOST=mirrors.aliyun.com
 
-# 创建工作目录并克隆仓库
-WORKDIR /root
+# 清理并创建目标工作目录
+RUN rm -rf /workspace/pytorch/ComfyUI && \
+    mkdir -p /workspace/pytorch
+
+# 克隆仓库到目标目录
+WORKDIR /workspace/pytorch
 COPY download_custom_nodes_script.sh download_custom_nodes_script.sh
 RUN date > /tmp/build_time
 RUN chmod +x download_custom_nodes_script.sh && ./download_custom_nodes_script.sh
 
-# 创建软链接
-RUN mkdir -p /workspace/pytorch && \
-    ln -s /root/ComfyUI /workspace/pytorch/ComfyUI
-
 EXPOSE 8188
-WORKDIR /root/ComfyUI
+WORKDIR /workspace/pytorch/ComfyUI
 
 CMD ["python3", "main.py", "--listen", "--port", "8188", "--fast"]
