@@ -62,14 +62,15 @@ Service:
     ShortDescription: 最强大的开源节点式生成式AI应用，支持创建图像、视频及音频内容。依托前沿开源模型实现视频与图像生成。
     Softwares:
     - Name: comfyui
-      Version: 0.3.49
+      Version: v0.6.0
   - Agreements: []
     Image: resources/icons/service_logo_en.png
     Locale: en-US
     Name: ComfyUI Community Edition
-    ShortDescription: The most powerful open-source node-based generative AI application,
-      supporting the creation of images, videos, and audio content. Leveraging cutting-edge
-      open-source models to achieve video and image generation.
+    ShortDescription: The most powerful open-source node-based generative AI 
+      application, supporting the creation of images, videos, and audio content.
+      Leveraging cutting-edge open-source models to achieve video and image 
+      generation.
     Softwares:
     - Name: comfyui
       Version: 0.3.49
@@ -99,19 +100,19 @@ Artifact:
     ArtifactName: "ecs_image-qwen-image"
     Description: ComfyUI Qwen-Image 镜像，预装 ComfyUI 和 Qwen-Image 模型环境
     SupportRegionIds:
-      - ap-southeast-1
-      - cn-beijing
-      - cn-wulanchabu
-      - cn-shanghai
-      - cn-shenzhen
-      - cn-guangzhou
-      - cn-hongkong
-      - cn-hangzhou
-      - ap-northeast-1
-      - ap-northeast-2
-      - ap-southeast-7
-      - eu-central-1
-      - us-west-1
+    - ap-southeast-1
+    - cn-beijing
+    - cn-wulanchabu
+    - cn-shanghai
+    - cn-shenzhen
+    - cn-guangzhou
+    - cn-hongkong
+    - cn-hangzhou
+    - ap-northeast-1
+    - ap-northeast-2
+    - ap-southeast-7
+    - eu-central-1
+    - us-west-1
     ArtifactProperty:
       RegionId: us-west-1
     ArtifactBuildProperty:
@@ -133,22 +134,22 @@ Artifact:
   EcsImage:
     ArtifactType: EcsImage
     ArtifactName: "ecs_image-comfy-ui"
-    Description: ComfyUI WanX-2.1(I2V-14B,T2V-14B,VACE-1.3B and I2V-1.3B) 镜像，预装 ComfyUI
-      环境
+    Description: ComfyUI WanX-2.1(I2V-14B,T2V-14B,VACE-1.3B and I2V-1.3B) 镜像，预装 
+      ComfyUI 环境
     SupportRegionIds:
-      - ap-southeast-1
-      - cn-beijing
-      - cn-wulanchabu
-      - cn-shanghai
-      - cn-shenzhen
-      - cn-guangzhou
-      - cn-hongkong
-      - cn-hangzhou
-      - ap-northeast-1
-      - ap-northeast-2
-      - ap-southeast-7
-      - eu-central-1
-      - us-west-1
+    - ap-southeast-1
+    - cn-beijing
+    - cn-wulanchabu
+    - cn-shanghai
+    - cn-shenzhen
+    - cn-guangzhou
+    - cn-hongkong
+    - cn-hangzhou
+    - ap-northeast-1
+    - ap-northeast-2
+    - ap-southeast-7
+    - eu-central-1
+    - us-west-1
     ArtifactProperty:
       RegionId: ap-southeast-1
     ArtifactBuildProperty:
@@ -171,19 +172,19 @@ Artifact:
     ArtifactName: "ecsImage-wanx22"
     Description: ComfyUI WanX-2.2(I2V-14B,T2V-14B,ti2v-5B) 镜像，预装 ComfyUI 环境
     SupportRegionIds:
-      - ap-southeast-1
-      - cn-beijing
-      - cn-wulanchabu
-      - cn-shanghai
-      - cn-shenzhen
-      - cn-guangzhou
-      - cn-hongkong
-      - cn-hangzhou
-      - ap-northeast-1
-      - ap-northeast-2
-      - ap-southeast-7
-      - eu-central-1
-      - us-west-1
+    - ap-southeast-1
+    - cn-beijing
+    - cn-wulanchabu
+    - cn-shanghai
+    - cn-shenzhen
+    - cn-guangzhou
+    - cn-hongkong
+    - cn-hangzhou
+    - ap-northeast-1
+    - ap-northeast-2
+    - ap-southeast-7
+    - eu-central-1
+    - us-west-1
     ArtifactProperty:
       RegionId: ap-southeast-1
     ArtifactBuildProperty:
