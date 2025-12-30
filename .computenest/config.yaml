@@ -164,12 +164,13 @@ Service:
       version: 0.3.49
 
 
+      Version: v0.6.0
 Artifact:
   EcsImage:
     ArtifactType: EcsImage
     ArtifactName: "ecs_image-comfy-ui"
-    Description: ComfyUI WanX-2.1(I2V-14B,T2V-14B,VACE-1.3B and I2V-1.3B) 镜像，预装 ComfyUI
-      环境
+    Description: ComfyUI WanX-2.1(I2V-14B,T2V-14B,VACE-1.3B and I2V-1.3B) 镜像，预装 
+      ComfyUI 环境
     SupportRegionIds:
     - ap-southeast-1
     - cn-beijing
