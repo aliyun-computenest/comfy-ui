@@ -113,8 +113,23 @@ Artifact:
       - eu-central-1
       - us-west-1
     ArtifactProperty:
-      RegionId: ${ImageBuilder.EcsImageQwen.RegionId}
-      ImageId: ${ImageBuilder.EcsImageQwen.SourceImageId}
+      RegionId: us-west-1
+    ArtifactBuildProperty:
+      EnableGpu: true
+      RegionId: us-west-1
+      SourceImageId: "m-rj9axgjjjs8f4cnyf6v5"
+      SystemDiskSize: 250
+      CommandType: RunShellScript
+      CommandContent: |-
+        #!/bin/bash
+        git clone https://github.com/aliyun-computenest/comfy-ui.git
+        cd comfy-ui/
+        sed -i 's/pull_policy: always/pull_policy: if_not_present/g' comfy/docker-compose.yaml
+        docker compose -f comfy/docker-compose.yaml down
+        docker compose -f comfy/docker-compose.yaml build --no-cache 2>&1 | stdbuf -oL grep -viE 'Downloading|sha256|extracting|KiB|Downloaded';
+        docker compose up -d;
+        sleep 20;
+        docker compose down;
   EcsImage:
     ArtifactType: EcsImage
     ArtifactName: "ecs_image-comfy-ui"
@@ -135,8 +150,21 @@ Artifact:
       - eu-central-1
       - us-west-1
     ArtifactProperty:
-      RegionId: ${ImageBuilder.EcsImageComfyUI.RegionId}
-      ImageId: ${ImageBuilder.EcsImageComfyUI.SourceImageId}
+      RegionId: ap-southeast-1
+    ArtifactBuildProperty:
+      EnableGpu: true
+      RegionId: ap-southeast-1
+      SourceImageId: "m-t4n0mt2ukwl9ttpmctiq"
+      SystemDiskSize: 250
+      CommandType: RunShellScript
+      CommandContent: |-
+        git clone https://github.com/aliyun-computenest/comfy-ui.git
+        cd comfy-ui/
+        sed -i 's/pull_policy: always/pull_policy: if_not_present/g' comfy/docker-compose.yaml
+        docker compose -f comfy/docker-compose.yaml build --no-cache 2>&1 | stdbuf -oL grep -viE 'Downloading|sha256|extracting|KiB|Downloaded';
+        docker compose up -d;
+        sleep 20;
+        docker compose down;
 
   EcsImage2:
     ArtifactType: EcsImage
@@ -157,57 +185,20 @@ Artifact:
       - eu-central-1
       - us-west-1
     ArtifactProperty:
-      RegionId: ${ImageBuilder.EcsImageWanx22.RegionId}
-      ImageId: ${ImageBuilder.EcsImageWanx22.SourceImageId}
+      RegionId: ap-southeast-1
+    ArtifactBuildProperty:
+      EnableGpu: true
+      RegionId: ap-southeast-1
+      SourceImageId: "m-t4nf4f7uvrdnqf76vela"
+      SystemDiskSize: 450
+      CommandType: RunShellScript
+      CommandContent: |-
+        git clone https://github.com/aliyun-computenest/comfy-ui.git
+        cd comfy-ui/
+        sed -i 's/pull_policy: always/pull_policy: if_not_present/g' comfy/docker-compose.yaml
+        docker compose -f comfy/docker-compose.yaml build --no-cache 2>&1 | stdbuf -oL grep -viE 'Downloading|sha256|extracting|KiB|Downloaded';
+        docker compose up -d;
+        sleep 20;
+        docker compose down;
 
-ImageBuilder:
-  EcsImageComfyUI:
-    RegionId: ap-southeast-1
-    SourceImageId: m-t4n0mt2ukwl9ttpmctiq
-    SystemDiskSize: 250
-    InstanceType: ecs.gn7i-c8g1.2xlarge
-    InternetMaxBandwidthOut: 100
-    CommandType: RunShellScript
-    Timeout: 7200
-    CommandContent: |-
-      git clone https://github.com/aliyun-computenest/comfy-ui.git
-      cd comfy-ui/
-      sed -i 's/pull_policy: always/pull_policy: if_not_present/g' comfy/docker-compose.yaml
-      docker compose -f comfy/docker-compose.yaml build --no-cache 2>&1 | stdbuf -oL grep -viE 'Downloading|sha256|extracting|KiB|Downloaded';
-      docker compose -f comfy/docker-compose.yaml pull 2>&1 | stdbuf -oL grep -viE 'Downloading|sha256|extracting|KiB|Downloaded' || true;
 
-  EcsImageWanx22:
-    RegionId: ap-southeast-1
-    SourceImageId: m-t4nf4f7uvrdnqf76vela
-    SystemDiskSize: 450
-    InstanceType: ecs.gn7i-c8g1.2xlarge
-    InternetMaxBandwidthOut: 100
-    CommandType: RunShellScript
-    Timeout: 14400
-    CommandContent: |-
-      git clone https://github.com/aliyun-computenest/comfy-ui.git
-      cd comfy-ui/
-      sed -i 's/pull_policy: always/pull_policy: if_not_present/g' comfy/docker-compose.yaml
-      docker compose -f comfy/docker-compose.yaml build --no-cache 2>&1 | stdbuf -oL grep -viE 'Downloading|sha256|extracting|KiB|Downloaded';
-      docker compose -f comfy/docker-compose.yaml pull 2>&1 | stdbuf -oL grep -viE 'Downloading|sha256|extracting|KiB|Downloaded' || true;
-
-  EcsImageQwen:
-    RegionId: us-west-1
-    SourceImageId: "m-rj9axgjjjs8f4cnyf6v5"
-    VSwitchId: vsw-rj9943r8xl6u3owwszf37
-    ZoneId: us-west-1b
-    SecurityGroupId: sg-rj98kma81aco4ks4gl16
-    SystemDiskSize: 250
-    InstanceType: ecs.gn6i-c4g1.xlarge
-    CommandType: RunShellScript
-    InternetMaxBandwidthOut: 100
-    Timeout: 10800
-    Tags: []
-    CommandContent: |-
-      #!/bin/bash
-      git clone https://github.com/aliyun-computenest/comfy-ui.git
-      cd comfy-ui/
-      sed -i 's/pull_policy: always/pull_policy: if_not_present/g' comfy/docker-compose.yaml
-      docker compose -f comfy/docker-compose.yaml down
-      docker compose -f comfy/docker-compose.yaml build --no-cache 2>&1 | stdbuf -oL grep -viE 'Downloading|sha256|extracting|KiB|Downloaded';
-      docker compose -f comfy/docker-compose.yaml pull 2>&1 | stdbuf -oL grep -viE 'Downloading|sha256|extracting|KiB|Downloaded' || true;

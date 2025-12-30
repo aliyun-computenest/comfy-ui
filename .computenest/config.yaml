@@ -162,65 +162,7 @@ Service:
     Softwares:
     - name: comfyui
       version: 0.3.49
-ImageBuilder:
-  EcsImageComfyUI:
-    RegionId: ap-southeast-1
-    SourceImageId: m-t4naf7w95vrx5stifbd9
-    SystemDiskSize: 250
-    InstanceType: ecs.gn7i-c8g1.2xlarge
-    InternetMaxBandwidthOut: 100
-    CommandType: RunShellScript
-    Timeout: 7200
-    CommandContent: |-
-      sudo yum install zstd --disablerepo=nvidia-container-toolkit --disablerepo=nvidia-container-toolkit-experimental -y
-      curl -o ossutil-2.1.2-linux-amd64.zip https://gosspublic.alicdn.com/ossutil/v2/2.1.2/ossutil-2.1.2-linux-amd64.zip
-      unzip ossutil-2.1.2-linux-amd64.zip
-      cd ossutil-2.1.2-linux-amd64
-      chmod 755 ossutil
-      sudo mv ossutil /usr/local/bin/ && sudo ln -s /usr/local/bin/ossutil /usr/bin/ossutil
-      ossutil
-      git clone https://github.com/aliyun-computenest/comfy-ui.git
-      cd comfy-ui/
-      sed -i 's/pull_policy: always/pull_policy: if_not_present/g' comfy/docker-compose.yaml
-      docker compose -f comfy/docker-compose.yaml build --no-cache 2>&1 | stdbuf -oL grep -viE 'Downloading|sha256|extracting|KiB|Downloaded';
-      docker compose -f comfy/docker-compose.yaml pull 2>&1 | stdbuf -oL grep -viE 'Downloading|sha256|extracting|KiB|Downloaded' || true;
 
-  EcsImageWanx22:
-    RegionId: ap-southeast-1
-    SourceImageId: m-t4n31aqxq7nspdkha3ae
-    SystemDiskSize: 450
-    InstanceType: ecs.gn7i-c8g1.2xlarge
-    InternetMaxBandwidthOut: 100
-    CommandType: RunShellScript
-    Timeout: 14400
-    CommandContent: |-
-      git clone https://github.com/aliyun-computenest/comfy-ui.git
-      cd comfy-ui/
-      sed -i 's/pull_policy: always/pull_policy: if_not_present/g' comfy/docker-compose.yaml
-      docker compose -f comfy/docker-compose.yaml build --no-cache 2>&1 | stdbuf -oL grep -viE 'Downloading|sha256|extracting|KiB|Downloaded';
-      docker compose -f comfy/docker-compose.yaml pull 2>&1 | stdbuf -oL grep -viE 'Downloading|sha256|extracting|KiB|Downloaded' || true;
-
-  EcsImageQwen:
-    RegionId: us-west-1
-    SourceImageId: "m-rj9hztrcp8hos70lyxns"
-    VSwitchId: vsw-rj9wfxe0xx54ns5jkf1vx
-    ZoneId: us-west-1b
-    SecurityGroupId: sg-rj9iptmngm2nd6fxtnnt
-    SystemDiskSize: 250
-    InstanceType: ecs.gn6i-c4g1.xlarge
-    CommandType: RunShellScript
-    InternetMaxBandwidthOut: 100
-    Timeout: 10800
-    Tags: []
-    CommandContent: |-
-      #!/bin/bash
-      rm -rf comfy-ui/
-      git clone https://github.com/aliyun-computenest/comfy-ui.git
-      cd comfy-ui/
-      sed -i 's/pull_policy: always/pull_policy: if_not_present/g' comfy/docker-compose.yaml
-      docker compose -f comfy/docker-compose.yaml down
-      docker compose -f comfy/docker-compose.yaml build --no-cache 2>&1 | stdbuf -oL grep -viE 'Downloading|sha256|extracting|KiB|Downloaded';
-      docker compose -f comfy/docker-compose.yaml pull 2>&1 | stdbuf -oL grep -viE 'Downloading|sha256|extracting|KiB|Downloaded' || true;
 
 Artifact:
   EcsImage:
@@ -243,8 +185,28 @@ Artifact:
     - eu-central-1
     - us-west-1
     ArtifactProperty:
-      RegionId: ${ImageBuilder.EcsImageComfyUI.RegionId}
-      ImageId: ${ImageBuilder.EcsImageComfyUI.SourceImageId}
+      RegionId: ap-southeast-1
+    ArtifactBuildProperty:
+      EnableGpu: true
+      RegionId: ap-southeast-1
+      SourceImageId: "m-t4naf7w95vrx5stifbd9"
+      SystemDiskSize: 250
+      CommandType: RunShellScript
+      CommandContent: |-
+        sudo yum install zstd --disablerepo=nvidia-container-toolkit --disablerepo=nvidia-container-toolkit-experimental -y
+        curl -o ossutil-2.1.2-linux-amd64.zip https://gosspublic.alicdn.com/ossutil/v2/2.1.2/ossutil-2.1.2-linux-amd64.zip
+        unzip ossutil-2.1.2-linux-amd64.zip
+        cd ossutil-2.1.2-linux-amd64
+        chmod 755 ossutil
+        sudo mv ossutil /usr/local/bin/ && sudo ln -s /usr/local/bin/ossutil /usr/bin/ossutil
+        ossutil
+        git clone https://github.com/aliyun-computenest/comfy-ui.git
+        cd comfy-ui/
+        sed -i 's/pull_policy: always/pull_policy: if_not_present/g' comfy/docker-compose.yaml
+        docker compose -f comfy/docker-compose.yaml build --no-cache 2>&1 | stdbuf -oL grep -viE 'Downloading|sha256|extracting|KiB|Downloaded';
+        docker compose up -d;
+        sleep 20;
+        docker compose down;
 
   EcsImage2:
     ArtifactType: EcsImage
@@ -265,8 +227,21 @@ Artifact:
     - eu-central-1
     - us-west-1
     ArtifactProperty:
-      RegionId: ${ImageBuilder.EcsImageWanx22.RegionId}
-      ImageId: ${ImageBuilder.EcsImageWanx22.SourceImageId}
+      RegionId: ap-southeast-1
+    ArtifactBuildProperty:
+      EnableGpu: true
+      RegionId: ap-southeast-1
+      SourceImageId: "m-t4n31aqxq7nspdkha3ae"
+      SystemDiskSize: 450
+      CommandType: RunShellScript
+      CommandContent: |-
+        git clone https://github.com/aliyun-computenest/comfy-ui.git
+        cd comfy-ui/
+        sed -i 's/pull_policy: always/pull_policy: if_not_present/g' comfy/docker-compose.yaml
+        docker compose -f comfy/docker-compose.yaml build --no-cache 2>&1 | stdbuf -oL grep -viE 'Downloading|sha256|extracting|KiB|Downloaded';
+        docker compose up -d;
+        sleep 20;
+        docker compose down;
 
   EcsImageQwen:
     ArtifactType: EcsImage
@@ -287,8 +262,24 @@ Artifact:
     - eu-central-1
     - us-west-1
     ArtifactProperty:
-      RegionId: ${ImageBuilder.EcsImageQwen.RegionId}
-      ImageId: ${ImageBuilder.EcsImageQwen.SourceImageId}
+      RegionId: us-west-1
+    ArtifactBuildProperty:
+      EnableGpu: true
+      RegionId: us-west-1
+      SourceImageId: "m-rj9hztrcp8hos70lyxns"
+      SystemDiskSize: 250
+      CommandType: RunShellScript
+      CommandContent: |-
+        #!/bin/bash
+        rm -rf comfy-ui/
+        git clone https://github.com/aliyun-computenest/comfy-ui.git
+        cd comfy-ui/
+        sed -i 's/pull_policy: always/pull_policy: if_not_present/g' comfy/docker-compose.yaml
+        docker compose -f comfy/docker-compose.yaml down
+        docker compose -f comfy/docker-compose.yaml build --no-cache 2>&1 | stdbuf -oL grep -viE 'Downloading|sha256|extracting|KiB|Downloaded';
+        docker compose up -d;
+        sleep 20;
+        docker compose down;
 
   KubectlFile:
     ArtifactType: File
