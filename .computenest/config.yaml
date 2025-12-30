@@ -162,16 +162,6 @@ Service:
     Softwares:
     - name: comfyui
       version: 0.3.49
-  - Locale: en-US
-    Name: ComfyUI Community Edition
-    ShortDescription: Most powerful open-source node-based generation AI application,
-      supporting the creation of images, videos and audio content. Leveraging advanced
-      open-source models to generate videos and images.
-    Image: 
-      https://service-info-public.oss-cn-hangzhou.aliyuncs.com/1853370294850618/cn-hangzhou/service_logo_en12e360df18994e46a9ae.png
-    Softwares:
-    - name: comfyui
-      version: 0.3.49
 ImageBuilder:
   EcsImageComfyUI:
     RegionId: ap-southeast-1
