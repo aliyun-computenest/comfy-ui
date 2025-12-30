@@ -6,12 +6,6 @@ Service:
         ecs_image-comfy-ui:
           ArtifactId: ${Artifact.EcsImage.ArtifactId}
           ArtifactVersion: draft
-        ecsImage-wanx22:
-          ArtifactId: ${Artifact.EcsImage2.ArtifactId}
-          ArtifactVersion: draft
-        ecs_image-qwen-image:
-          ArtifactId: ${Artifact.EcsImageQwen.ArtifactId}
-          ArtifactVersion: draft
       SupplierTemplateConfigs:
       - Name: ECS-Single
         Url: ros_templates/template.yaml
