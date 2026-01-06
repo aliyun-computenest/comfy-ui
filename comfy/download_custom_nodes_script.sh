@@ -69,28 +69,3 @@ clone_and_install https://github.com/visualbruno/ComfyUI-Hunyuan3d-2-1.git
 rm -rf /root/ComfyUI/login
 
 
-clone https://github.com/chrisgoringe/cg-use-everywhere.git
-clone https://github.com/cubiq/ComfyUI_essentials.git
-clone https://github.com/jags111/efficiency-nodes-comfyui.git
-clone https://github.com/kijai/ComfyUI-KJNodes.git
-clone https://github.com/rgthree/rgthree-comfy.git
-clone https://github.com/shiimizu/ComfyUI_smZNodes.git
-clone https://github.com/WASasquatch/was-node-suite-comfyui.git
-
-clone https://github.com/Fannovel16/comfyui_controlnet_aux.git
-clone https://github.com/florestefano1975/comfyui-portrait-master.git
-clone https://github.com/huchenlei/ComfyUI-layerdiffuse.git
-clone https://github.com/Kosinkadink/ComfyUI-Advanced-ControlNet.git
-clone https://github.com/ltdrdata/ComfyUI-Inspire-Pack.git
-clone https://github.com/mcmonkeyprojects/sd-dynamic-thresholding.git
-clone https://github.com/twri/sdxl_prompt_styler.git
-
-# Video
-clone https://github.com/Fannovel16/ComfyUI-Frame-Interpolation.git
-clone https://github.com/Kosinkadink/ComfyUI-VideoHelperSuite.git
-clone https://github.com/melMass/comfy_mtb.git
-
-# More
-clone https://github.com/pythongosssss/ComfyUI-WD14-Tagger.git
-clone https://github.com/SLAPaper/ComfyUI-Image-Selector.git
-clone https://github.com/ssitu/ComfyUI_UltimateSDUpscale.git
