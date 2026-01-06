@@ -8,12 +8,7 @@ Service:
       - Start
       - Stop
       - Restart
-    - TemplateName: ACS集群版
-      SupportOperations:
-      - Start
-      - Stop
-      - Restart
-    - TemplateName: 选择已有ACK/ACS集群
+    - TemplateName: 容器集群版
       SupportOperations:
       - Start
       - Stop
@@ -50,16 +45,8 @@ Service:
           - VpcOption
           TrialType: TrialOnly
           Type: Normal
-      - Name: ACS集群版
+      - Name: 容器集群版
         Url: ros_templates/final_template.yaml
-        ArchitectureDiagramUrl: resources/architecture/architecture-cluster.png
-        AllowedRegions:
-        - ap-southeast-1
-        - cn-hangzhou
-        - cn-beijing
-        - cn-shanghai
-      - Name: 选择已有ACK/ACS集群
-        Url: ros_templates/exist_template.yaml
         ArchitectureDiagramUrl: resources/architecture/architecture-cluster.png
         AllowedRegions:
         - ap-southeast-1
@@ -124,19 +111,8 @@ Service:
       OutputConfigs:
       - OutputKey: comfyui_address
         EnableWebProxy: true
-    - Name: ACS集群版
-      Url: ros_templates/final_template.yaml
-      ArchitectureDiagramUrl: resources/architecture/architecture-cluster.png
-      AllowedRegions:
-      - ap-southeast-1
-      - cn-hangzhou
-      - cn-beijing
-      - cn-shanghai
-      OutputConfigs:
-      - OutputKey: comfyui_address
-        EnableWebProxy: true
-    - Name: 选择已有ACK/ACS集群
-      Url: ros_templates/exist_template.yaml
+    - Name: 容器集群版
+      Url: ros_templates/all-in-one-k8s.yaml
       ArchitectureDiagramUrl: resources/architecture/architecture-cluster.png
       AllowedRegions:
       - ap-southeast-1

@@ -475,6 +475,7 @@ Parameters:
       - Flux1-dev
       - Flux1-Krea
       - Flux1-kontext
+      - Z-Image-Turbo
     AssociationPropertyMetadata:
       ValueLabelMapping:
         'WanX-2.1(I2V-14B,T2V-14B,VACE-1.3B and I2V-1.3B)': 'WanX-2.1 (图像到视频/文本到视频)'
@@ -491,6 +492,7 @@ Parameters:
         'Flux1-dev': 'Flux1-dev'
         'Flux1-Krea': 'Flux1-Krea'
         'Flux1-kontext': 'Flux1-kontext'
+        'Z-Image-Turbo': 'Z-Image-Turbo'
     Description:
       zh-cn: 选择要部署的模型系列，不同模型需要的实例规格和磁盘空间不同。新增模型包括WanX-2.2系列的趣味功能、HunyuanVideo视频生成和Qwen-Image系列的编辑功能。
       en: Select the model series to deploy. Different models require different instance specifications and disk space. New models include WanX-2.2 fun series, HunyuanVideo for video generation, and Qwen-Image editing series.
@@ -1122,7 +1124,7 @@ Resources:
           Operator: Equals
           Value: '1'
           ValueType: Json
-          Timeout: 1800
+          Timeout: 3600
           FirstMatch: true
       YamlContent:
         Fn::Sub:
@@ -1394,6 +1396,7 @@ Mappings:
       'Flux1-dev': flux1-dev
       'Flux1-Krea': flux1-Krea
       'Flux1-kontext': flux1-kontext
+      'Z-Image-Turbo': z_image_turbo
 
     ModelDiskSizeMap:
       'WanX-2.1(I2V-14B,T2V-14B,VACE-1.3B and I2V-1.3B)': 250
@@ -1410,22 +1413,24 @@ Mappings:
       'Flux1-dev': 150
       'Flux1-Krea': 150
       'Flux1-kontext': 150
+      'Z-Image-Turbo': 250
 
     ModelWaitTimeMap:
-      'WanX-2.1(I2V-14B,T2V-14B,VACE-1.3B and I2V-1.3B)': 1800
+      'WanX-2.1(I2V-14B,T2V-14B,VACE-1.3B and I2V-1.3B)': 2100
       'WanX-2.2(I2V-14B,T2V-14B,TI2v-5B)': 2400
-      'Qwen-Image': 1200
-      'Wanx2.2-fun_camera': 1800
-      'Wanx2.2-fun_control': 1800
-      'Wanx2.2-fun_inpaint': 1800
+      'Qwen-Image': 2100
+      'Wanx2.2-fun_camera': 2100
+      'Wanx2.2-fun_control': 2100
+      'Wanx2.2-fun_inpaint': 2100
       'Wanx2.2-s2v': 2400
       'HunyuanVideo': 3000
-      'Qwen-Image-Edit': 1500
+      'Qwen-Image-Edit': 2100
       'Hunyuan3D-2.1': 1200
       'Hunyuan3D-2': 1200
       'Flux1-dev': 1200
       'Flux1-Krea': 1200
       'Flux1-kontext': 1200
+      'Z-Image-Turbo': 1200
 
 Outputs:
   comfyui_address:
