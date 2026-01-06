@@ -221,7 +221,7 @@ Artifact:
         # 确保在正确的目录下执行
         cd comfy
         echo "开始构建 Docker 镜像..."
-        docker compose -f docker-compose.yaml build --no-cache 2>&1 | stdbuf -oL grep -viE '\''Downloading|sha256|extracting|KiB|Downloaded'\'';
+        docker compose -f docker-compose.yaml build --no-cache 2>&1 | stdbuf -oL grep -viE 'Downloading|sha256|extracting|KiB|Downloaded';
         
         echo "构建完成"
         #docker compose -f docker-compose.yaml up -d;
