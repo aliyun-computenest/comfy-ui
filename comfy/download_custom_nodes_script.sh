@@ -44,6 +44,8 @@ function clone () {
 cd /root
 clone https://github.com/comfyanonymous/ComfyUI.git
 cd /root/ComfyUI
+# 修复版本不存在的问题：将固定版本改为兼容版本
+sed -i 's/comfyui-workflow-templates==0.7.66/comfyui-workflow-templates>=0.7.65,<0.8.0/g' requirements.txt
 pip install -r requirements.txt
 cd /root/ComfyUI/custom_nodes
 clone_and_install https://github.com/ltdrdata/ComfyUI-Manager.git
