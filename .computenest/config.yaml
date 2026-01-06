@@ -179,7 +179,7 @@ Artifact:
     ArtifactProperty:
       RegionId: ap-southeast-1
     ArtifactBuildProperty:
-      EnableGpu: true
+      #EnableGpu: true
       RegionId: ap-southeast-1
       SourceImageId: m-t4ndkfxdtgxk7n8gjcy6
       SystemDiskSize: 250
@@ -196,9 +196,9 @@ Artifact:
         cd comfy-ui/
         sed -i 's/pull_policy: always/pull_policy: if_not_present/g' comfy/docker-compose.yaml
         docker compose -f comfy/docker-compose.yaml build --no-cache 2>&1 | stdbuf -oL grep -viE 'Downloading|sha256|extracting|KiB|Downloaded';
-        docker compose up -d;
-        sleep 20;
-        docker compose down;
+        ##docker compose up -d;
+        ##sleep 20;
+        ##docker compose down;
 
   KubectlFile:
     ArtifactType: File
