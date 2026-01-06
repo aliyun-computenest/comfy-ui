@@ -185,20 +185,48 @@ Artifact:
       SystemDiskSize: 250
       CommandType: RunShellScript
       CommandContent: |-
-        sudo yum install zstd --disablerepo=nvidia-container-toolkit --disablerepo=nvidia-container-toolkit-experimental -y
+        #!/bin/bash
+        set -e  # 遇到错误立即退出
+        
+        # 直接开始安装 ossutil
+        echo "开始安装 ossutil..."
         curl -o ossutil-2.1.2-linux-amd64.zip https://gosspublic.alicdn.com/ossutil/v2/2.1.2/ossutil-2.1.2-linux-amd64.zip
-        unzip ossutil-2.1.2-linux-amd64.zip
+        unzip -o ossutil-2.1.2-linux-amd64.zip
         cd ossutil-2.1.2-linux-amd64
         chmod 755 ossutil
-        sudo mv ossutil /usr/local/bin/ && sudo ln -s /usr/local/bin/ossutil /usr/bin/ossutil
-        ossutil
+        
+        sudo rm -f /usr/bin/ossutil
+        sudo mv -f ossutil /usr/local/bin/
+        sudo ln -s /usr/local/bin/ossutil /usr/bin/ossutil
+        
+        cd ..
+        rm -rf ossutil-2.1.2-linux-amd64 ossutil-2.1.2-linux-amd64.zip
+        
+        echo "ossutil 安装完成"
+        
+        # 克隆仓库（如果已存在则先删除）
+        if [ -d "comfy-ui" ]; then
+          echo "删除已存在的 comfy-ui 目录..."
+          rm -rf comfy-ui
+        fi
+        
+        echo "克隆 comfy-ui 仓库..."
         git clone https://github.com/aliyun-computenest/comfy-ui.git
         cd comfy-ui/
+        
+        # 修改 docker-compose 配置
+        echo "修改 docker-compose 配置..."
         sed -i 's/pull_policy: always/pull_policy: if_not_present/g' comfy/docker-compose.yaml
-        docker compose -f comfy/docker-compose.yaml build --no-cache 2>&1 | stdbuf -oL grep -viE 'Downloading|sha256|extracting|KiB|Downloaded';
-        ##docker compose up -d;
-        ##sleep 20;
-        ##docker compose down;
+        
+        # 确保在正确的目录下执行
+        cd comfy
+        echo "开始构建 Docker 镜像..."
+        docker compose -f docker-compose.yaml build --no-cache 2>&1 | stdbuf -oL grep -viE '\''Downloading|sha256|extracting|KiB|Downloaded'\'';
+        
+        echo "构建完成"
+        #docker compose -f docker-compose.yaml up -d;
+        #sleep 20;
+        #docker compose -f docker-compose.yaml down;
 
   KubectlFile:
     ArtifactType: File
