@@ -8,11 +8,6 @@ Service:
           - Start
           - Stop
           - Restart
-      - TemplateName: 容器集群版
-        SupportOperations:
-          - Start
-          - Stop
-          - Restart
   DeployMetadata:
     ServiceInstanceNameRule:
       Prefix: comfyui-
@@ -20,7 +15,7 @@ Service:
     SupplierDeployMetadata:
       SupplierTemplateConfigs:
         - Name: ECS单机版
-          Url: ros_templates/all-in-one.yaml
+          Url: ros_templates/all-in-one-international.yaml
           ArchitectureDiagramUrl: resources/architecture/architecture.jpg
           AllowedRegions:
             - ap-southeast-1
@@ -60,7 +55,7 @@ Service:
 
     TemplateConfigs:
       - Name: ECS单机版
-        Url: ros_templates/all-in-one.yaml
+        Url: ros_templates/all-in-one-international.yaml
         ArchitectureDiagramUrl: resources/architecture/architecture.jpg
         AllowedRegions:
           - ap-southeast-1
@@ -148,8 +143,7 @@ Artifact:
     ArtifactBuildProperty:
       #EnableGpu: true
       RegionId: ap-southeast-1
-      SourceImageId: m-t4n7d7e2rwd7l4f8yof1
-      SystemDiskSize: 250
+      SystemDiskSize: 40
       CommandType: RunShellScript
       CommandContent: |-
         #!/bin/bash

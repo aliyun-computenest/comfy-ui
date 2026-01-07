@@ -528,40 +528,29 @@ Resources:
             # 下载模型文件
             download_model_data
             
-            # 添加调试信息
-            echo "=== Debug: Checking docker-compose.yaml locations ==="         
-            # 设置固定的docker-compose文件路径
-            COMPOSE_FILE_PATH="/root/comfy-ui/comfy/docker-compose.yaml"
-            WORKING_DIR="/root/comfy-ui"
-            COMPOSE_FILE="comfy/docker-compose.yaml"
+            # 设置docker-compose文件路径
+            WORKING_DIR="/root/ossutil-2.1.2-linux-amd64/comfy-ui/comfy"
+            COMPOSE_FILE_PATH="/root/ossutil-2.1.2-linux-amd64/comfy-ui/comfy/docker-compose.yaml"
             
-            echo "Using fixed configuration:"
-            echo "  COMPOSE_FILE_PATH: $COMPOSE_FILE_PATH"
-            echo "  WORKING_DIR: $WORKING_DIR"
-            echo "  COMPOSE_FILE: $COMPOSE_FILE"
-            
-            # 验证docker-compose文件是否存在
-            if [ ! -f "$COMPOSE_FILE_PATH" ]; then
-                echo "Error: docker-compose.yaml not found at $COMPOSE_FILE_PATH"
-                echo "Listing contents of parent directory:"
-                ls -la "/root/comfy-ui/" || echo "Directory not found"
+            # 验证工作目录和docker-compose文件
+            if [ ! -d "/root/ossutil-2.1.2-linux-amd64/comfy-ui/comfy" ]; then
+                echo "Error: Working directory does not exist"
                 exit 1
             fi
             
-            # 验证工作目录存在
-            if [ ! -d "$WORKING_DIR" ]; then
-                echo "Error: Working directory $WORKING_DIR does not exist"
+            if [ ! -f "/root/ossutil-2.1.2-linux-amd64/comfy-ui/comfy/docker-compose.yaml" ]; then
+                echo "Error: docker-compose.yaml not found"
                 exit 1
             fi
             
             # 修改docker-compose配置
-            sed -i '/custom_nodes/d' "$COMPOSE_FILE_PATH"
-            sed -i '/- \/root\/storage\/input:\/root\/ComfyUI\/input/a\      - ./disabled-plugins/ComfyUI-ReActor:/root/ComfyUI/custom_nodes/ComfyUI-ReActor:ro' "$COMPOSE_FILE_PATH"
+            sed -i '/custom_nodes/d' /root/ossutil-2.1.2-linux-amd64/comfy-ui/comfy/docker-compose.yaml
+            sed -i '/- \/root\/storage\/input:\/root\/ComfyUI\/input/a\      - ./disabled-plugins/ComfyUI-ReActor:/root/ComfyUI/custom_nodes/ComfyUI-ReActor:ro' /root/ossutil-2.1.2-linux-amd64/comfy-ui/comfy/docker-compose.yaml
             
-            file_path="/etc/systemd/system/stable-diffusion-comfy.service"
-            if [ ! -f "$file_path" ]; then
+            # 创建systemd服务文件
+            if [ ! -f "/etc/systemd/system/stable-diffusion-comfy.service" ]; then
                 echo "Creating systemd service file..."
-                cat > $file_path <<EOF
+                cat > /etc/systemd/system/stable-diffusion-comfy.service <<EOF
             [Unit]
             Description=Docker Compose Application Service
             Requires=docker.service
@@ -570,9 +559,9 @@ Resources:
             [Service]
             Type=oneshot
             RemainAfterExit=yes
-            WorkingDirectory=$WORKING_DIR
-            ExecStart=/bin/bash -c 'cd $WORKING_DIR && /usr/bin/docker compose -f $COMPOSE_FILE up -d && /usr/local/bin/check-container-status'
-            ExecStop=/bin/bash -c 'cd $WORKING_DIR && /usr/bin/docker compose -f $COMPOSE_FILE down'
+            WorkingDirectory=/root/ossutil-2.1.2-linux-amd64/comfy-ui/comfy
+            ExecStart=/bin/bash -c 'cd /root/ossutil-2.1.2-linux-amd64/comfy-ui/comfy && /usr/bin/docker compose -f docker-compose.yaml up -d && /usr/local/bin/check-container-status'
+            ExecStop=/bin/bash -c 'cd /root/ossutil-2.1.2-linux-amd64/comfy-ui/comfy && /usr/bin/docker compose -f docker-compose.yaml down'
             TimeoutStartSec=0
             
             [Install]
@@ -582,14 +571,9 @@ Resources:
                 # 创建状态检查脚本
                 cat > /usr/local/bin/check-container-status <<'EOF'
             #!/bin/bash
-            # 使用固定的compose文件路径
-            COMPOSE_FILE="comfy/docker-compose.yaml"
-            WORKING_DIR="/root/comfy-ui"
-            
-            echo "check-container-status: Using WORKING_DIR=$WORKING_DIR, COMPOSE_FILE=$COMPOSE_FILE"
-            
-            cd "$WORKING_DIR" || {
-                echo "Error: Cannot change to directory $WORKING_DIR"
+            # 切换到工作目录
+            cd /root/ossutil-2.1.2-linux-amd64/comfy-ui/comfy || {
+                echo "Error: Cannot change to working directory"
                 exit 1
             }
             
@@ -601,9 +585,9 @@ Resources:
                 exit 1
             fi
             
-            SERVICES=$(docker compose -f "$COMPOSE_FILE" config --services 2>/dev/null)
+            SERVICES=$(docker compose -f docker-compose.yaml config --services 2>/dev/null)
             if [ -z "$SERVICES" ]; then
-                echo "Error: No services found in $COMPOSE_FILE"
+                echo "Error: No services found in docker-compose.yaml"
                 exit 1
             fi
             
@@ -612,7 +596,7 @@ Resources:
             while [ $WAIT_TIME -le $MAX_WAIT_TIME ]; do
                 ALL_HEALTHY=true
                 for SERVICE in $SERVICES; do
-                    CONTAINER_ID=$(docker compose -f "$COMPOSE_FILE" ps -q "$SERVICE")
+                    CONTAINER_ID=$(docker compose -f docker-compose.yaml ps -q "$SERVICE")
             
                     if [ -z "$CONTAINER_ID" ]; then
                         echo "[$SERVICE] Not running"
@@ -651,7 +635,7 @@ Resources:
             done
             
             echo "Timeout reached! Abnormal services:" >&2
-            docker compose -f "$COMPOSE_FILE" ps --all
+            docker compose -f docker-compose.yaml ps --all
             exit 1
             EOF
             
@@ -675,11 +659,11 @@ Resources:
             INTERVAL=3
             
             echo "Waiting for ComfyUI to start..."
-            cd "$WORKING_DIR"
+            cd /root/ossutil-2.1.2-linux-amd64/comfy-ui/comfy
             
             for ((i=1; i<=MAX_ATTEMPTS; i++)); do
                 echo "Attempt $i/$MAX_ATTEMPTS..."
-                ALL_LOGS=$(docker compose -f "$COMPOSE_FILE" logs 2>&1)
+                ALL_LOGS=$(docker compose -f docker-compose.yaml logs 2>&1)
             
                 if echo "$ALL_LOGS" | grep -q "To see the GUI go to"; then
                     echo "Success: ComfyUI is ready!"
@@ -694,7 +678,7 @@ Resources:
             echo "Final service status:"
             systemctl status stable-diffusion-comfy --no-pager || true
             echo "Final docker compose status:"
-            docker compose -f "$COMPOSE_FILE" ps || true
+            docker compose -f docker-compose.yaml ps || true
 
           - ModelSeries:
               Fn::FindInMap:
