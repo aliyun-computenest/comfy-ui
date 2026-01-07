@@ -54,7 +54,7 @@ Service:
             - cn-beijing
             - cn-shanghai
       ArtifactRelation:
-        ecs_image-comfy-ui:
+        all-in-one:
           ArtifactId: ${Artifact.EcsImage.ArtifactId}
           ArtifactVersion: draft
 
