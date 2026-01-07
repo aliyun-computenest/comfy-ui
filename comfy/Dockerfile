@@ -55,8 +55,6 @@ RUN pip install --no-cache-dir --verbose opencv-python-headless 2>&1 | tee /tmp/
 
 RUN pip install --no-cache-dir pillow
 
-RUN pip install --no-cache-dir reportlab
-
 
 # 第五批：深度学习相关
 RUN pip install --no-cache-dir \
