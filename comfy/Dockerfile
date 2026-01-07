@@ -84,7 +84,18 @@ RUN pip install --no-cache-dir "gradio>=5.0.0"
 WORKDIR /root
 COPY download_custom_nodes_script.sh download_custom_nodes_script.sh
 RUN date > /tmp/build_time
-RUN chmod +x download_custom_nodes_script.sh && ./download_custom_nodes_script.sh
+
+# 添加重试机制和更好的错误处理
+RUN chmod +x download_custom_nodes_script.sh && \
+    for i in 1 2 3; do \
+        echo "尝试第 $i 次执行脚本..." && \
+        ./download_custom_nodes_script.sh && break || \
+        if [ $i -eq 3 ]; then \
+            echo "脚本执行失败，已重试 3 次" && exit 1; \
+        else \
+            echo "执行失败，等待 10 秒后重试..." && sleep 10; \
+        fi; \
+    done
 
 # 优化容器配置
 EXPOSE 8188

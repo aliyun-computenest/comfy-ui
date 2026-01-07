@@ -2,24 +2,58 @@
 
 set -euo pipefail
 
+# 设置 pip 超时和重试
+export PIP_DEFAULT_TIMEOUT=300
+export PIP_RETRIES=5
+
 function clone_and_install () {
     local original_dir=$(pwd)
     local url="$1"
     local repo_name=$(basename "$url" .git)
 
-    # 克隆阶段
+    # 克隆阶段（添加重试机制）
     echo "🔻 开始克隆: $repo_name"
-    if ! git clone --depth=1 --no-tags --recurse-submodules --shallow-submodules "$url"; then
-        echo "❌ 克隆失败: $url" >&2
+    local clone_success=false
+    for attempt in 1 2 3; do
+        if git clone --depth=1 --no-tags --recurse-submodules --shallow-submodules "$url"; then
+            clone_success=true
+            break
+        else
+            echo "⚠️ 克隆失败 (尝试 $attempt/3): $url" >&2
+            if [ $attempt -lt 3 ]; then
+                echo "等待 5 秒后重试..."
+                sleep 5
+            fi
+        fi
+    done
+
+    if [ "$clone_success" = false ]; then
+        echo "❌ 克隆最终失败: $url" >&2
         return 1
     fi
 
-    # 安装依赖阶段
+    # 安装依赖阶段（添加重试和更详细的错误处理）
     echo "📂 进入目录: $repo_name"
     cd "$repo_name" || return 2
     if [[ -f requirements.txt ]]; then
         echo "🔧 安装依赖: $repo_name"
-        pip install -r requirements.txt > /dev/null
+        local install_success=false
+        for attempt in 1 2 3; do
+            if pip install --no-cache-dir --timeout 300 -r requirements.txt > /dev/null 2>&1; then
+                install_success=true
+                break
+            else
+                echo "⚠️ 依赖安装失败 (尝试 $attempt/3): $repo_name" >&2
+                if [ $attempt -lt 3 ]; then
+                    echo "等待 5 秒后重试..."
+                    sleep 5
+                fi
+            fi
+        done
+
+        if [ "$install_success" = false ]; then
+            echo "⚠️ 依赖安装最终失败，但继续执行: $repo_name" >&2
+        fi
     else
         echo "ⓘ 未找到 requirements.txt"
     fi
@@ -35,18 +69,54 @@ function clone_and_install () {
 }
 
 function clone () {
-      set +e ;
-      git clone --depth=1 --no-tags --recurse-submodules --shallow-submodules "$1";
-      set -e ;
+    set +e
+    local url="$1"
+    local repo_name=$(basename "$url" .git)
+
+    for attempt in 1 2 3; do
+        if git clone --depth=1 --no-tags --recurse-submodules --shallow-submodules "$url"; then
+            echo "✅ 克隆成功: $repo_name"
+            set -e
+            return 0
+        else
+            echo "⚠️ 克隆失败 (尝试 $attempt/3): $repo_name" >&2
+            if [ $attempt -lt 3 ]; then
+                echo "等待 5 秒后重试..."
+                sleep 5
+            fi
+        fi
+    done
+
+    echo "❌ 克隆最终失败: $repo_name" >&2
+    set -e
+    return 1
 }
 
 
 cd /root
-clone https://github.com/comfyanonymous/ComfyUI.git
+clone https://github.com/comfyanonymous/ComfyUI.git || exit 1
 cd /root/ComfyUI
+
 # 修复版本不存在的问题：将固定版本改为兼容版本
 sed -i 's/comfyui-workflow-templates==0.7.66/comfyui-workflow-templates>=0.7.65,<0.8.0/g' requirements.txt
-pip install -r requirements.txt
+
+# 安装 ComfyUI 主要依赖（添加重试机制）
+echo "🔧 安装 ComfyUI 主要依赖..."
+for attempt in 1 2 3; do
+    if pip install --no-cache-dir --timeout 300 -r requirements.txt; then
+        echo "✅ ComfyUI 依赖安装成功"
+        break
+    else
+        echo "⚠️ ComfyUI 依赖安装失败 (尝试 $attempt/3)" >&2
+        if [ $attempt -eq 3 ]; then
+            echo "❌ ComfyUI 依赖安装最终失败" >&2
+            exit 1
+        else
+            echo "等待 10 秒后重试..."
+            sleep 10
+        fi
+    fi
+done
 cd /root/ComfyUI/custom_nodes
 clone_and_install https://github.com/ltdrdata/ComfyUI-Manager.git
 clone_and_install https://github.com/kijai/ComfyUI-WanVideoWrapper.git
