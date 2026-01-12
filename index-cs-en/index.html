@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="计算巢是阿里云开放给企业应用服务商的服务管理平台。服务商能够在计算巢上发布私有化部署服务，为其客户提供云上软件一键部署的能力；同时也支持全托管模式的服务，赋能服务商托管其客户资源。">
+  <title>Index cs en - Aliyun 计算巢 x Demo</title>
+
+  <link rel="shortcut icon" href="../img/favicon.ico">
+
+  <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.0/build/pure-min.css">
+  <link rel="stylesheet" href="../css/theme.css">
+  
+
+  
+
+  
+  
+
+  
+    <script src="../search/main.js"></script>
+  
+
+  
+
+  <script src="../js/highlight.min.js"></script>
+  <script>hljs.highlightAll();</script>
+</head>
+
+<body>
+  <div class="container">
+    <div class="nav">
+      <div class="nav-inner">
+        <div class="logo">
+          <img src="./img/logo-2x.png">
+        </div>
+        <div class="nav-list">
+          <ul>
+          
+              <li><a href="#comfyui-community-edition-container-cluster-edition">ComfyUI Community Edition-Container Cluster Edition</a></li>
+              
+                  <li><a href="#overview">Overview</a></li>
+                  
+              
+                  <li><a href="#prerequisites">Prerequisites</a></li>
+                  
+              
+                  <li><a href="#billing-description">Billing Description</a></li>
+                  
+                      <li class="li-h3"><a href="#container-cluster-version-fee">Container cluster version fee</a></li>
+                  
+              
+                  <li><a href="#overall-architecture">Overall architecture</a></li>
+                  
+              
+                  <li><a href="#deployment-process">Deployment process</a></li>
+                  
+                      <li class="li-h3"><a href="#container-cluster-version-deployment">Container cluster version deployment</a></li>
+                  
+              
+                  <li><a href="#parameter-description">Parameter description</a></li>
+                  
+              
+                  <li><a href="#built-in-model-description">Built-in model description</a></li>
+                  
+                      <li class="li-h3"><a href="#overview-of-main-models">Overview of main models</a></li>
+                  
+                      <li class="li-h3"><a href="#how-to-upload-your-own-model">How to upload your own model</a></li>
+                  
+              
+                  <li><a href="#use-process">Use process</a></li>
+                  
+                      <li class="li-h3"><a href="#tusheng-video-or-wensheng-video-function">Tusheng video or Wensheng video function</a></li>
+                  
+                      <li class="li-h3"><a href="#wensheng-diagram-function">Wensheng diagram function</a></li>
+                  
+                      <li class="li-h3"><a href="#figure-function">Figure function</a></li>
+                  
+              
+                  <li><a href="#api-call">API call</a></li>
+                  
+                      <li class="li-h3"><a href="#api-endpoint-overview">API Endpoint Overview</a></li>
+                  
+              
+          
+              <li><a href="#load-workflow">Load workflow</a></li>
+              
+          
+              <li><a href="#submitted">Submitted</a></li>
+              
+          
+              <li><a href="#wait-for-completion">Wait for completion</a></li>
+              
+          
+              <li><a href="#download-all-output-files">Download all output files</a></li>
+              
+          
+              <li><a href="#handle-different-types-of-output">Handle different types of output</a></li>
+              
+          
+              <li><a href="#use-examples">Use Examples</a></li>
+              
+                  <li><a href="#wen-sheng-video-api-mode">Wen Sheng Video API Mode</a></li>
+                  
+              
+                  <li><a href="#image-generation-video-api">Image Generation Video API</a></li>
+                  
+              
+                  <li><a href="#account-password">Account password</a></li>
+                  
+              
+                  <li><a href="#frequently-asked-questions">Frequently Asked Questions</a></li>
+                  
+              
+          
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="content theme-github">
+      
+      <div class="content-inner">        
+        
+        <hr />
+<h1 id="comfyui-community-edition-container-cluster-edition">ComfyUI Community Edition-Container Cluster Edition</h1>
+<blockquote>
+<p><strong>Disclaimer:</strong> This service is provided by a third party. We try our best to ensure its safety, accuracy and reliability, but we cannot guarantee that it is completely free from failures, interruptions, errors or attacks. Therefore, the company hereby declares that it makes no representations, warranties or commitments regarding the content, accuracy, completeness, reliability, suitability and timeliness of the Service and is not liable for any direct or indirect loss or damage arising from your use of the Service; for third-party websites, applications, products and services that you access through the Service, do not assume any responsibility for its content, accuracy, completeness, reliability, applicability and timeliness, and you shall bear the risks and responsibilities of the consequences of use; for any loss or damage arising from your use of this service, including but not limited to direct loss, indirect loss, loss of profits, loss of goodwill, loss of data or other economic losses, even if we have been advised in advance of the possibility of such loss or damage; we reserve the right to amend this statement from time to time, so please check this statement regularly before using the Service. If you have any questions or concerns about this Statement or the Service, please contact us.</p>
+</blockquote>
+<h2 id="overview">Overview</h2>
+<p>ComfyUI is the most powerful open source, node-based, generative AI application for creating images, video, and audio content. Relying on cutting-edge open source models can realize video and image generation.
+According to the official documentation, the ComfyUI has the following characteristics:
+Node/Graph/Flowchart interface for experimenting and creating complex stable diffusion workflows without writing any code.
+Full support for SD1.x, SD2.x and SDXL
+asynchronous queue system
+Multiple optimizations re-execute only those parts of the workflow that have changed between executions.
+Command line options: -- lowvram to make it run on GPUs with less than 3GB of memory (automatically enabled on GPUs with low memory)
+Can be used even without GPU: -- cpu (slow)
+Can load ckpt, safetensors, and diffusers models/checkpoints. Independent VAE and CLIP models.
+Embedding/Text Inversion
+Loras (regular, locon and loha)
+Hypernetwork
+Load the complete workflow from the generated PNG file (with seed
+Save/load workflow as Json file.
+The node interface can be used to create complex workflows, such as "Hires fix" or more advanced workflows.
+Regional Synthesis
+Inline using regular and Inline models.
+Control network and T2I adapter
+Upgrade models (ESRGAN, ESRGAN variants, SwinIR, Swin2SR, etc.)
+unCLIP model
+GLIGEN
+Model Merge
+Latent preview with TAESD
+Very fast start-up.
+Works completely offline: nothing is downloaded.
+The configuration file sets the search path for the model.</p>
+<h2 id="prerequisites">Prerequisites</h2>
+<p>To deploy the ComfyUI Community Edition service instance, you need to access and create some Alibaba Cloud resources. Therefore, your account must contain permissions for the following resources. <strong>Note</strong>: This permission is required only when your account is a RAM account.</p>
+<table>
+<thead>
+<tr>
+<th>Permission policy name</th>
+<th>Comment</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>AliyunVPCFullAccess</td>
+<td>Permissions to manage a VPC</td>
+</tr>
+<tr>
+<td>AliyunROSFullAccess</td>
+<td>Manage permissions for Resource Orchestration Service (ROS)</td>
+</tr>
+<tr>
+<td>AliyunCSFullAccess</td>
+<td>Manage permissions for Container Service (CS)</td>
+</tr>
+<tr>
+<td>AliyunComputeNestUserFullAccess</td>
+<td>Manage user-side permissions for the compute nest service (ComputeNest)</td>
+</tr>
+<tr>
+<td>AliyunOSSFullAccess</td>
+<td>Permissions to manage Network Object Storage Service (OSS)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="billing-description">Billing Description</h2>
+<h3 id="container-cluster-version-fee">Container cluster version fee</h3>
+<p>Billing method: pay by volume (hour) or package year and month
+The estimated cost can be seen in real time when the instance is created.</p>
+<h2 id="overall-architecture">Overall architecture</h2>
+<p><img alt="acs-arch.png" src="../images-en/acs-arch.png" /></p>
+<h2 id="deployment-process">Deployment process</h2>
+<h3 id="container-cluster-version-deployment">Container cluster version deployment</h3>
+<ol>
+<li>
+<p>Click <a href="https://computenest.console.aliyun.com/service/instance/create/cn-hangzhou?type=user&amp;ServiceName=ComfyUI-ACS社区版">Deployment Link</a>. Fill in the parameters according to the interface prompt to see the corresponding RFQ details. After confirming the parameters, click <strong>Next: Confirm Order</strong>.
+<img alt="img.png" src="../acs-en/img.png" /></p>
+</li>
+<li>
+<p>According to the situation, you can select the existing ACK and ACS clusters, or create a new ACK or ACS cluster deployment.</p>
+</li>
+<li>For example, select Create ACS Cluster. Default parameters can be directly selected:<img alt="img_6.png" src="../images-en/img_6.png" /></li>
+<li>For example, select New ACK Cluster. You need to select a worker node. Note that the node here is required and the subsequent graphics configuration has been. For example, if A10 node is selected, A10 should also be selected for subsequent GPU configuration<img alt="img_7.png" src="../images-en/img_7.png" /></li>
+<li>Select the model and network zone configuration you need to use.<img alt="img_8.png" src="../images-en/img_8.png" /></li>
+<li>
+<p>Click <strong>Next: After confirming the order</strong>, you can also see the price preview, and then click <strong>Deploy Now</strong> to wait for the deployment to complete.
+<img alt="price.png" src="../acs-en/price.png" /></p>
+</li>
+<li>
+<p>Wait for the deployment to complete before you can start using the service.
+<img alt="img_2.png" src="../acs-en/img_2.png" /></p>
+</li>
+</ol>
+<h2 id="parameter-description">Parameter description</h2>
+<table>
+<thead>
+<tr>
+<th>Parameter group</th>
+<th>Parameter item</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Service Instance</td>
+<td>Service Instance Name</td>
+<td>The service instance name must be no more than 64 characters in length and must start with an English letter. It can contain numbers, English letters, dashes (-), and underscores (_).</td>
+</tr>
+<tr>
+<td></td>
+<td>Region</td>
+<td>The region where the service instance is deployed</td>
+</tr>
+<tr>
+<td></td>
+<td>Billing Type</td>
+<td>Billing type of the resource: Pay-As-You-Go and Subscription</td>
+</tr>
+<tr>
+<td>Container Cluster Configuration</td>
+<td>Cluster Specifications</td>
+<td>Container Cluster Node Specifications</td>
+</tr>
+<tr>
+<td>Network Configuration</td>
+<td>Availability Zone</td>
+<td>The zone where the container cluster is located</td>
+</tr>
+<tr>
+<td></td>
+<td>VPC ID</td>
+<td>The VPC where the resource resides</td>
+</tr>
+<tr>
+<td></td>
+<td>VSwitch ID</td>
+<td>VSwitch where the resource resides</td>
+</tr>
+</tbody>
+</table>
+<h2 id="built-in-model-description">Built-in model description</h2>
+<h3 id="overview-of-main-models">Overview of main models</h3>
+<p>| Model Name | Type | Parameter Scale | Main Functions | Features | Applicable Scenarios |
+| --------- | ------ | --------- | ---------- | ---------- | ---------- | ---------- |
+| <strong>WanX-2.1</strong> | Multimodal video generation | I2V-14B, T2V-14B, VACE-1.3B, I2V-1.3B | Image to video/Text to video | Support multiple parameter scales, flexible configuration | Universal video generation, suitable for different performance requirements |
+| <strong>WanX-2.2</strong> | Multimodal Video Generation | I2V-14B, T2V-14B, TI2V-5B | Image to Video/Text to Video | Upgraded Version, Performance Optimization | High Quality Video Generation |
+| <strong>Qwen-Image</strong> | Image Generation | - | Text to Image Generation | Ali Tongyi Thousand Questions Image Model | Image Generation with Excellent Chinese Understanding |
+| <strong>WanX-2.2 Fun Camera</strong> | Video Generation | - | Fun Camera Effects | Special Visual Effects and Filters | Creative Video Maker, Entertainment Apps |
+| <strong>WanX-2.2 Fun Control</strong> | Video control | - | Video generation control | Precise control of video generation process | Professional video production, fine control |
+| <strong>WanX-2.2 Fun Inpaint</strong> | Video repair | - | First and last frame repair | Intelligent completion of first and last video frames | Video post-processing and content repair |
+| <strong>WanX-2.2 S2V</strong> | Voice to Video | - | Voice to Drive Video Generation | Generate Corresponding Video from Voice | Voice Visualization, Educational Content Production |
+| <strong>HunyuanVideo</strong> | Video Generation | - | Mixed-element Video Generation | Tencent Mixed-element Large-model Video Version | High-quality Video Content Creation |
+| <strong>Qwen-Image-Edit</strong> | Image editing | - | Intelligent image editing | Image editing based on natural language | Image post-processing, content modification |
+| <strong>Hunyuan3D-2.1</strong> | 3D Generation | - | 3D Model Generation | Latest Version 3D Content Generation | 3D Modeling, Game Development |
+| <strong>Hunyuan3D-2.0</strong> | 3D Generation | - | 3D Model Generation | 3D Content Creation | 3D Design, Virtual Reality |
+| <strong>Flux1-dev</strong> | Image generation | - | Developer version image generation | Experimental function, highly customizable | R &amp; D test, function verification |
+| <strong>Flux1-Krea</strong> | Image Generation | - | Creative Image Generation | Art Style Image Generation | Art Creation, Design Work |
+| <strong>Flux1-kontext</strong> | Image Generation | - | Context-Aware Image Generation | Intelligent Generation for Understanding Context | Continuous Content Creation, Story Illustration |
+| <strong>HunyuanImage2.1</strong> | Image Generation | - | Mixed Image Generation 2.1 Version | Tencent Mixed Image Model Upgrade Version | High Quality Image Generation, Commercial Application |</p>
+<h3 id="how-to-upload-your-own-model">How to upload your own model</h3>
+<ol>
+<li>Find the deployed service instance in the computing nest console, switch Tab to the resource interface, find the resource whose product is the object storage OSS, and click Enter.<img alt="img_3.png" src="../images-en/img_3.png" /></li>
+<li>Access the "file list", under the path/llm-model/model for all types of models.<img alt="img_4.png" src="../images-en/img_4.png" /></li>
+<li>You can upload the model according to your own needs and restart the comfyui client.<img alt="img_5.png" src="../images-en/img_5.png" /></li>
+</ol>
+<h2 id="use-process">Use process</h2>
+<p>This service already has two workflows built in that you can use directly. The plugins and models involved are also ready.
+<img alt="img_1.png" src="img/workflows.png" /></p>
+<h3 id="tusheng-video-or-wensheng-video-function">Tusheng video or Wensheng video function</h3>
+<ol>
+<li>Select the desired function in the figure below. It is recommended to choose only one to use to avoid memory explosion.<img alt="img.png" src="../img-en/option.png" /></li>
+<li>Select the workflow sidebar according to the instructions in the figure, select wanx-21.json and open it.<img alt="img.png" src="../img-en/app2.png" /></li>
+<li>Select a sample picture here or choose your own local computer to upload.<img alt="img.png" src="../img-en/app3.png" /></li>
+<li>Fill in the description at the TextEncode. The upper part is what you want to generate, and the lower part is what you don't want to generate.<img alt="img.png" src="../img-en/prompt.png" /></li>
+<li>The resolution and frame number of the picture can be set at the ImageClip Encode. This model can be set up to 720*720.<img alt="img.png" src="../img-en/definition.png" /></li>
+<li>Other parameters can refer to official website: https://comfyui-wiki.com/zh/interface/node-options或以下文档:https://github.com/kijai/ComfyUI-WanVideoWrapper/blob/main/readme.md</li>
+</ol>
+<p>PS: If you use the vace model, you can use the workflow vace.json as a reference
+<img alt="img_9.png" src="../images-en/img_9.png" /></p>
+<h3 id="wensheng-diagram-function">Wensheng diagram function</h3>
+<ol>
+<li>Select the workflow funny_pictures.json in the workflow box.<img alt="img.png" src="../img-en/text2img.png" /></li>
+<li>Enter what you want.<img alt="img.png" src="../img-en/text2img2.png" /></li>
+<li>Here you can enter some funny content, for example, I am Guan Yu vs. Snow White.</li>
+<li>The resolution of the picture and the number of pictures can be set here. If you want to speed up production, you can set the batch_size to 1.<img alt="img.png" src="../img-en/text2img3.png" /></li>
+<li>Wait for the image to be generated.</li>
+</ol>
+<h3 id="figure-function">Figure function</h3>
+<p>Access the template, or import your own workflow.<img alt="img2img.png" src="../img-en/img2img.png" /></p>
+<h2 id="api-call">API call</h2>
+<h3 id="api-endpoint-overview">API Endpoint Overview</h3>
+<p>| Endpoint | Method | Function | Description |
+| ------ | ------ | ------ | ------ | ------ |
+| '/queue' | GET | Get the queue status | View the current task queue |
+| '/prompt' | POST | Submit Workflow | Execute Build Task |
+| '/history/{prompt_id}' | GET | Obtain execution history | View task execution results |
+| '/upload/image' | POST | Upload an image | Upload an input image file |
+| '/view' | GET | Download the output file | Get the generated result file |</p>
+<p>Supports public or private network API calls.
+You can refer to the code to implement an API call script.</p>
+<p>'''python
+import requests
+import json
+import time</p>
+<p>def run_workflow_file(workflow_file, server="http://127.0.0.1:8188"):
+"" "Run Local Workflow JSON File" ""</p>
+<h1 id="load-workflow">Load workflow</h1>
+<p>with open(workflow_file, 'r', encoding='utf-8') as f:
+workflow = json.load(f)</p>
+<h1 id="submitted">Submitted</h1>
+<p>response = requests.post(f"{server}/prompt", json={"prompt": workflow})
+prompt_id = response.json()['prompt_id']
+print(f "Task submission: {prompt_id}")</p>
+<h1 id="wait-for-completion">Wait for completion</h1>
+<p>while True:
+response = requests.get(f"{server}/history/{prompt_id}")
+history = response.json()
+if prompt_id in history:
+break
+print("Waiting...")
+time.sleep(3)</p>
+<h1 id="download-all-output-files">Download all output files</h1>
+<p>outputs = history[prompt_id]['outputs']
+for node_id, node_output in outputs.items():</p>
+<h1 id="handle-different-types-of-output">Handle different types of output</h1>
+<p>for file_type in ['images', 'videos', 'gifs']:
+if file_type in node_output:
+for file_info in node_output[file_type]:
+filename = file_info['filename']
+file_url = f"{server}/view?filename={filename}&amp;type=output"</p>
+<p>response = requests.get(file_url)
+with open(filename, 'wb') as f:
+f.write(response.content)
+print(f "Downloaded: {filename}")</p>
+<h1 id="use-examples">Use Examples</h1>
+<p>run_workflow_file("my_workflow.json")
+'''</p>
+<p>The local workflow is obtained by using the method provided in the following figure:
+<img alt="img_6.png" src="../acs-en/img_6.png" /></p>
+<p>Since the Comfyui does not provide official API documents, here are two complete examples based on Wen Sheng video and Wen Sheng video: on how to use API to call workflow for Wen Sheng diagram or Wen Sheng video, etc.
+Visit: https://github.com/aliyun-computenest/comfyui-acs/
+Find the demo folder
+<img alt="img_7.png" src="../acs-en/img_7.png" /></p>
+<h3 id="wen-sheng-video-api-mode">Wen Sheng Video API Mode</h3>
+<ol>
+<li>Open the workflow defined for confirm the good model. (The default model defined inside is the 14B's Wanxiang 2.1 Wensheng video model)</li>
+<li>Confirm parameters such as Prompt and generated resolution</li>
+<li>Modify the server service address in the code from 127.0.0.1 to your actual service address.<img alt="img_8.png" src="../acs-en/img_8.png" /></li>
+<li>Local execution of python, waiting for video generation.</li>
+</ol>
+<h3 id="image-generation-video-api">Image Generation Video API</h3>
+<ol>
+<li>Open the workflow defined for confirm the good model. (The default model defined inside is the video model of 14B universal phase 2.1 map generation)</li>
+<li>Confirm parameters such as Prompt and generated resolution</li>
+<li>Modify the server service address in the code from 127.0.0.1 to your actual service address.<img alt="img_8.png" src="../acs-en/img_8.png" /></li>
+<li>Local execution of python, waiting for video generation.</li>
+</ol>
+<h2 id="account-password">Account password</h2>
+<p>The default account and password are:
+1. Account number: admin
+2. Password: admin</p>
+<h2 id="frequently-asked-questions">Frequently Asked Questions</h2>
+<ol>
+<li>If a node type does not exist, install the missing node through manager and restart.<img alt="img_1.png" src="../img-en/issue1.png" /><img alt="img.png" src="../img-en/issue2.png" /></li>
+</ol>
+        
+      </div>
+
+      <div class="copyrights">© 2009-2022 Aliyun.com 版权所有</div>
+    </div>
+  </div>
+  
+  <!--
+  MkDocs version      : 1.6.1
+  Docs Build Date UTC : 2026-01-12 02:43:13.854874+00:00
+  -->
+</body>
+</html>

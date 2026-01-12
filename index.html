@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="计算巢是阿里云开放给企业应用服务商的服务管理平台。服务商能够在计算巢上发布私有化部署服务，为其客户提供云上软件一键部署的能力；同时也支持全托管模式的服务，赋能服务商托管其客户资源。">
+  <title>ComfyUI社区版 - ECS版本 - Aliyun 计算巢 x Demo</title>
+
+  <link rel="shortcut icon" href="img/favicon.ico">
+
+  <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.0/build/pure-min.css">
+  <link rel="stylesheet" href="css/theme.css">
+  
+
+  
+
+  
+  
+
+  
+    <script src="search/main.js"></script>
+  
+
+  
+
+  <script src="js/highlight.min.js"></script>
+  <script>hljs.highlightAll();</script>
+</head>
+
+<body>
+  <div class="container">
+    <div class="nav">
+      <div class="nav-inner">
+        <div class="logo">
+          <img src="./img/logo-2x.png">
+        </div>
+        <div class="nav-list">
+          <ul>
+          
+              <li><a href="#comfyui-ecs">ComfyUI社区版 - ECS版本</a></li>
+              
+                  <li><a href="#_1">概述</a></li>
+                  
+              
+                  <li><a href="#_2">前提条件</a></li>
+                  
+              
+                  <li><a href="#_3">计费说明</a></li>
+                  
+              
+                  <li><a href="#_4">整体架构</a></li>
+                  
+              
+                  <li><a href="#_5">部署流程</a></li>
+                  
+                      <li class="li-h3"><a href="#ecs">ECS社区版部署</a></li>
+                  
+              
+                  <li><a href="#_6">参数说明</a></li>
+                  
+              
+                  <li><a href="#_7">内置模型说明</a></li>
+                  
+                      <li class="li-h3"><a href="#_8">主要模型概览</a></li>
+                  
+                      <li class="li-h3"><a href="#_9">模型下载</a></li>
+                  
+              
+                  <li><a href="#_10">使用流程</a></li>
+                  
+                      <li class="li-h3"><a href="#_11">图生视频或文生视频功能</a></li>
+                  
+                      <li class="li-h3"><a href="#_12">文生图功能</a></li>
+                  
+                      <li class="li-h3"><a href="#_13">图生图功能</a></li>
+                  
+              
+                  <li><a href="#api">API调用</a></li>
+                  
+                      <li class="li-h3"><a href="#api_1">API 端点概览</a></li>
+                  
+              
+                  <li><a href="#_14">账号密码</a></li>
+                  
+              
+                  <li><a href="#_15">常见问题</a></li>
+                  
+              
+          
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="content theme-github">
+      
+      <div class="content-inner">        
+        
+        <h1 id="comfyui-ecs">ComfyUI社区版 - ECS版本</h1>
+<blockquote>
+<p><strong>免责声明：</strong>本服务由第三方提供，我们尽力确保其安全性、准确性和可靠性，但无法保证其完全免于故障、中断、错误或攻击。因此，本公司在此声明：对于本服务的内容、准确性、完整性、可靠性、适用性以及及时性不作任何陈述、保证或承诺，不对您使用本服务所产生的任何直接或间接的损失或损害承担任何责任；对于您通过本服务访问的第三方网站、应用程序、产品和服务，不对其内容、准确性、完整性、可靠性、适用性以及及时性承担任何责任，您应自行承担使用后果产生的风险和责任；对于因您使用本服务而产生的任何损失、损害，包括但不限于直接损失、间接损失、利润损失、商誉损失、数据损失或其他经济损失，不承担任何责任，即使本公司事先已被告知可能存在此类损失或损害的可能性；我们保留不时修改本声明的权利，因此请您在使用本服务前定期检查本声明。如果您对本声明或本服务存在任何问题或疑问，请联系我们。</p>
+</blockquote>
+<h2 id="_1">概述</h2>
+<p>ComfyUI是 最强大的开源节点式生成式AI应用，支持创建图像、视频及音频内容。依托前沿开源模型可实现视频与图像生成。
+依据官方文档，ComfyUI具有以下特点：
++ 节点/图形/流程图界面，用于实验和创建复杂的稳定扩散工作流程，无需编写任何代码。
++ 完全支持 SD1.x、SD2.x 和 SDXL
++ 异步队列系统
++ 多项优化 只重新执行工作流中在两次执行之间发生变化的部分。
++ 命令行选项：--lowvram 可使其在 3GB 内存以下的 GPU 上运行（在低内存的 GPU 上自动启用）
++ 即使没有 GPU 也能使用： --cpu（慢速）
++ 可加载 ckpt、safetensors 和 diffusers 模型/检查点。独立的 VAE 和 CLIP 模型。
++ 嵌入/文本反演
++ Loras （常规、locon 和 loha）
++ 超网络
++ 从生成的 PNG 文件加载完整的工作流（含种子
++ 以 Json 文件保存/加载工作流。
++ 节点界面可用于创建复杂的工作流程，如 "Hires fix "或更高级的工作流程。
++ 区域合成
++ 使用常规和内绘模型进行内绘。
++ 控制网络和 T2I 适配器
++ 升级模型（ESRGAN、ESRGAN 变体、SwinIR、Swin2SR 等）
++ unCLIP 模型
++ GLIGEN
++ 模型合并
++ 使用 TAESD 进行潜伏预览
++ 启动速度极快。
++ 完全离线工作：不会下载任何东西。
++ 配置文件可设置模型的搜索路径。</p>
+<h2 id="_2">前提条件</h2>
+<p>部署ComfyUI社区版服务实例，需要对部分阿里云资源进行访问和创建操作。因此您的账号需要包含如下资源的权限。<strong>说明</strong>：当您的账号是RAM账号时，才需要添加此权限。</p>
+<table>
+<thead>
+<tr>
+<th>权限策略名称</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>AliyunECSFullAccess</td>
+<td>管理云服务器服务（ECS）的权限</td>
+</tr>
+<tr>
+<td>AliyunVPCFullAccess</td>
+<td>管理专有网络（VPC）的权限</td>
+</tr>
+<tr>
+<td>AliyunROSFullAccess</td>
+<td>管理资源编排服务（ROS）的权限</td>
+</tr>
+<tr>
+<td>AliyunComputeNestUserFullAccess</td>
+<td>管理计算巢服务（ComputeNest）的用户侧权限</td>
+</tr>
+<tr>
+<td>AliyunOSSFullAccess</td>
+<td>管理网络对象存储服务（OSS）的权限</td>
+</tr>
+</tbody>
+</table>
+<h2 id="_3">计费说明</h2>
+<p>社区版在计算巢部署的费用主要涉及：
++ 所选vCPU与内存规格
++ 系统盘类型及容量
++ 公网带宽</p>
+<p>计费方式：按量付费（小时）或包年包月
+预估费用在创建实例时可实时看到。</p>
+<h2 id="_4">整体架构</h2>
+<p><img alt="ecs-arch.png" src="ecs-arch.png" /></p>
+<h2 id="_5">部署流程</h2>
+<h3 id="ecs">ECS社区版部署</h3>
+<ol>
+<li>访问计算巢 <a href="https://computenest.console.aliyun.com/service/instance/create/cn-hangzhou?type=user&amp;ServiceName=Comfy-UI社区版">部署链接</a>，按提示填写部署参数</li>
+<li>填写实例参数<img alt="" src="img/param1.png" />，选择你想购买的方式和实例类型。</li>
+<li><strong>注意</strong> 如果您想要使用图生视频功能，为了降低爆RAM内存的可能，请选择60G以上的内存规格+A10以上的显卡规格。</li>
+<li>根据需求选择新建专用网络或直接使用已有的专有网络。填写可用区和网络参数<img alt="" src="img/param2.png" /></li>
+<li>点击立即创建，等待服务实例部署完成<img alt="" src="img/param3.png" /></li>
+<li>服务实例部署完成后，点击实例ID进入到详情界面<img alt="" src="img/serviceInstance2.png" /></li>
+<li>访问服务实例的使用URL，这里我们采用安全代理直接访问。避免您的数据暴露到公网被别人获取<img alt="" src="img/serviceInstance3.png" /></li>
+<li>进入ComfyUI使用界面</li>
+</ol>
+<h2 id="_6">参数说明</h2>
+<table>
+<thead>
+<tr>
+<th>参数组</th>
+<th>参数项</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>服务实例</td>
+<td>服务实例名称</td>
+<td>长度不超过64个字符，必须以英文字母开头，可包含数字、英文字母、短划线（-）和下划线（_）</td>
+</tr>
+<tr>
+<td></td>
+<td>地域</td>
+<td>服务实例部署的地域</td>
+</tr>
+<tr>
+<td></td>
+<td>付费类型</td>
+<td>资源的计费类型：按量付费和包年包月</td>
+</tr>
+<tr>
+<td>ECS实例配置</td>
+<td>实例类型</td>
+<td>可用区下可以使用的实例规格</td>
+</tr>
+<tr>
+<td>网络配置</td>
+<td>可用区</td>
+<td>ECS实例所在可用区</td>
+</tr>
+<tr>
+<td></td>
+<td>VPC ID</td>
+<td>资源所在VPC</td>
+</tr>
+<tr>
+<td></td>
+<td>交换机ID</td>
+<td>资源所在交换机</td>
+</tr>
+</tbody>
+</table>
+<h2 id="_7">内置模型说明</h2>
+<h3 id="_8">主要模型概览</h3>
+<table>
+<thead>
+<tr>
+<th>模型名称</th>
+<th>类型</th>
+<th>参数规模</th>
+<th>主要功能</th>
+<th>特色功能</th>
+<th>适用场景</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>WanX-2.1</strong></td>
+<td>多模态视频生成</td>
+<td>I2V-14B, T2V-14B, VACE-1.3B, I2V-1.3B</td>
+<td>图像到视频/文本到视频</td>
+<td>支持多种参数规模，灵活配置</td>
+<td>通用视频生成，适合不同性能需求</td>
+</tr>
+<tr>
+<td><strong>WanX-2.2</strong></td>
+<td>多模态视频生成</td>
+<td>I2V-14B, T2V-14B, TI2V-5B</td>
+<td>图像到视频/文本到视频</td>
+<td>升级版本，性能优化</td>
+<td>高质量视频生成</td>
+</tr>
+<tr>
+<td><strong>Qwen-Image</strong></td>
+<td>图像生成</td>
+<td>-</td>
+<td>文本到图像生成</td>
+<td>阿里通义千问图像模型</td>
+<td>中文理解优秀的图像生成</td>
+</tr>
+<tr>
+<td><strong>WanX-2.2 Fun Camera</strong></td>
+<td>视频生成</td>
+<td>-</td>
+<td>趣味相机效果</td>
+<td>特殊视觉效果和滤镜</td>
+<td>创意视频制作，娱乐应用</td>
+</tr>
+<tr>
+<td><strong>WanX-2.2 Fun Control</strong></td>
+<td>视频控制</td>
+<td>-</td>
+<td>视频生成控制</td>
+<td>精确控制视频生成过程</td>
+<td>专业视频制作，精细化控制</td>
+</tr>
+<tr>
+<td><strong>WanX-2.2 Fun Inpaint</strong></td>
+<td>视频修复</td>
+<td>-</td>
+<td>首尾帧修复</td>
+<td>视频首尾帧智能补全</td>
+<td>视频后期处理，内容修复</td>
+</tr>
+<tr>
+<td><strong>WanX-2.2 S2V</strong></td>
+<td>语音到视频</td>
+<td>-</td>
+<td>语音驱动视频生成</td>
+<td>从语音生成对应视频</td>
+<td>语音可视化，教育内容制作</td>
+</tr>
+<tr>
+<td><strong>HunyuanVideo</strong></td>
+<td>视频生成</td>
+<td>-</td>
+<td>混元视频生成</td>
+<td>腾讯混元大模型视频版本</td>
+<td>高质量视频内容创作</td>
+</tr>
+<tr>
+<td><strong>Qwen-Image-Edit</strong></td>
+<td>图像编辑</td>
+<td>-</td>
+<td>智能图像编辑</td>
+<td>基于自然语言的图像编辑</td>
+<td>图像后期处理，内容修改</td>
+</tr>
+<tr>
+<td><strong>Hunyuan3D-2.1</strong></td>
+<td>3D生成</td>
+<td>-</td>
+<td>3D模型生成</td>
+<td>最新版本3D内容生成</td>
+<td>3D建模，游戏开发</td>
+</tr>
+<tr>
+<td><strong>Hunyuan3D-2.0</strong></td>
+<td>3D生成</td>
+<td>-</td>
+<td>3D模型生成</td>
+<td>3D内容创建</td>
+<td>3D设计，虚拟现实</td>
+</tr>
+<tr>
+<td><strong>Flux1-dev</strong></td>
+<td>图像生成</td>
+<td>-</td>
+<td>开发者版图像生成</td>
+<td>实验性功能，高度可定制</td>
+<td>研发测试，功能验证</td>
+</tr>
+<tr>
+<td><strong>Flux1-Krea</strong></td>
+<td>图像生成</td>
+<td>-</td>
+<td>创意图像生成</td>
+<td>艺术风格图像生成</td>
+<td>艺术创作，设计工作</td>
+</tr>
+<tr>
+<td><strong>Flux1-kontext</strong></td>
+<td>图像生成</td>
+<td>-</td>
+<td>上下文感知图像生成</td>
+<td>理解上下文的智能生成</td>
+<td>连续内容创作，故事插图</td>
+</tr>
+<tr>
+<td><strong>HunyuanImage2.1</strong></td>
+<td>图像生成</td>
+<td>-</td>
+<td>混元图像生成2.1版</td>
+<td>腾讯混元图像模型升级版</td>
+<td>高质量图像生成，商业应用</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_9">模型下载</h3>
+<ol>
+<li>推荐前往魔搭下载</li>
+<li>模型存储路径为：/root/storage/models</li>
+</ol>
+<h2 id="_10">使用流程</h2>
+<p>本服务已经内置了两个可以直接使用的工作流。其中涉及的插件和模型也已经准备好。
+<img alt="img_1.png" src="img/workflows.png" /></p>
+<h3 id="_11">图生视频或文生视频功能</h3>
+<ol>
+<li>在下图处选择想要的功能。建议只选择一种进行使用，避免爆内存。<img alt="img.png" src="img/option.png" /></li>
+<li>按图中指引选择工作流侧栏，选择wanx-21.json并打开。<img alt="img.png" src="img/app2.png" /></li>
+<li>在此处选择示例图片或选择自己本机电脑上传。<img alt="img.png" src="img/app3.png" /></li>
+<li>在TextEncode处填写描述词。上面部分是你想要生成的内容，下面部分是你不想要生成的内容。<img alt="img.png" src="img/prompt.png" /></li>
+<li>在ImageClip Encode处可设置图片的分辨率和帧数。本模型最高可设置720*720。<img alt="img.png" src="img/definition.png" /></li>
+<li>其余参数可参考官网：https://comfyui-wiki.com/zh/interface/node-options  或以下文档：https://github.com/kijai/ComfyUI-WanVideoWrapper/blob/main/readme.md</li>
+</ol>
+<p>PS：如果使用vace模型，可使用工作流vace.json作为参考
+<img alt="img_9.png" src="img_9.png" /></p>
+<h3 id="_12">文生图功能</h3>
+<ol>
+<li>工作流框处选择该工作流funny_pictures.json。<img alt="img.png" src="img/text2img.png" /></li>
+<li>输入你想要的内容。<img alt="img.png" src="img/text2img2.png" /></li>
+<li>这里可以输入一些比较搞怪的内容，比如我这里是关羽大战白雪公主。</li>
+<li>可以在此处设置图片的分辨率和图片的数量。如果想加快生产速度，可将batch_size设置为1.<img alt="img.png" src="img/text2img3.png" /></li>
+<li>等待图片的生成。</li>
+</ol>
+<h3 id="_13">图生图功能</h3>
+<p>访问模版，或自己导入工作流使用。<img alt="img2img.png" src="img/img2img.png" /></p>
+<h2 id="api">API调用</h2>
+<h3 id="api_1">API 端点概览</h3>
+<table>
+<thead>
+<tr>
+<th>端点</th>
+<th>方法</th>
+<th>功能</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/queue</code></td>
+<td>GET</td>
+<td>获取队列状态</td>
+<td>查看当前任务队列</td>
+</tr>
+<tr>
+<td><code>/prompt</code></td>
+<td>POST</td>
+<td>提交工作流</td>
+<td>执行生成任务</td>
+</tr>
+<tr>
+<td><code>/history/{prompt_id}</code></td>
+<td>GET</td>
+<td>获取执行历史</td>
+<td>查看任务执行结果</td>
+</tr>
+<tr>
+<td><code>/upload/image</code></td>
+<td>POST</td>
+<td>上传图片</td>
+<td>上传输入图片文件</td>
+</tr>
+<tr>
+<td><code>/view</code></td>
+<td>GET</td>
+<td>下载输出文件</td>
+<td>获取生成的结果文件</td>
+</tr>
+</tbody>
+</table>
+<p>支持公网或者私网的API调用。
+可参考一下代码实现一个API调用的脚本。</p>
+<pre><code class="language-python">import requests
+import json
+import time
+
+def run_workflow_file(workflow_file, server=&quot;http://127.0.0.1:8188&quot;):
+    &quot;&quot;&quot;运行本地工作流JSON文件&quot;&quot;&quot;
+
+    # 加载工作流
+    with open(workflow_file, 'r', encoding='utf-8') as f:
+        workflow = json.load(f)
+
+    # 提交
+    response = requests.post(f&quot;{server}/prompt&quot;, json={&quot;prompt&quot;: workflow})
+    prompt_id = response.json()['prompt_id']
+    print(f&quot;任务提交: {prompt_id}&quot;)
+
+    # 等待完成
+    while True:
+        response = requests.get(f&quot;{server}/history/{prompt_id}&quot;)
+        history = response.json()
+        if prompt_id in history:
+            break
+        print(&quot;等待中...&quot;)
+        time.sleep(3)
+
+    # 下载所有输出文件
+    outputs = history[prompt_id]['outputs']
+    for node_id, node_output in outputs.items():
+        # 处理不同类型的输出
+        for file_type in ['images', 'videos', 'gifs']:
+            if file_type in node_output:
+                for file_info in node_output[file_type]:
+                    filename = file_info['filename']
+                    file_url = f&quot;{server}/view?filename={filename}&amp;type=output&quot;
+
+                    response = requests.get(file_url)
+                    with open(filename, 'wb') as f:
+                        f.write(response.content)
+                    print(f&quot;已下载: {filename}&quot;)
+
+# 使用示例
+run_workflow_file(&quot;my_workflow.json&quot;)
+</code></pre>
+<h2 id="_14">账号密码</h2>
+<p>默认账号和密码为:
+1. 账号：admin
+2. 密码：admin</p>
+<h2 id="_15">常见问题</h2>
+<ol>
+<li>出现某个节点类型不存在，通过manager安装缺少的节点，并重启。<img alt="img_1.png" src="img/issue1.png" /><img alt="img.png" src="img/issue2.png" /></li>
+</ol>
+        
+      </div>
+
+      <div class="copyrights">© 2009-2022 Aliyun.com 版权所有</div>
+    </div>
+  </div>
+  
+  <!--
+  MkDocs version      : 1.6.1
+  Docs Build Date UTC : 2026-01-12 02:43:13.836516+00:00
+  -->
+</body>
+</html>

@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="计算巢是阿里云开放给企业应用服务商的服务管理平台。服务商能够在计算巢上发布私有化部署服务，为其客户提供云上软件一键部署的能力；同时也支持全托管模式的服务，赋能服务商托管其客户资源。">
+  <title>ComfyUI Community Edition - Aliyun 计算巢 x Demo</title>
+
+  <link rel="shortcut icon" href="../img/favicon.ico">
+
+  <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.0/build/pure-min.css">
+  <link rel="stylesheet" href="../css/theme.css">
+  
+
+  
+
+  
+  
+
+  
+    <script src="../search/main.js"></script>
+  
+
+  
+
+  <script src="../js/highlight.min.js"></script>
+  <script>hljs.highlightAll();</script>
+</head>
+
+<body>
+  <div class="container">
+    <div class="nav">
+      <div class="nav-inner">
+        <div class="logo">
+          <img src="./img/logo-2x.png">
+        </div>
+        <div class="nav-list">
+          <ul>
+          
+              <li><a href="#comfyui-community-edition">ComfyUI Community Edition</a></li>
+              
+                  <li><a href="#overview">Overview</a></li>
+                  
+              
+                  <li><a href="#prerequisites">Prerequisites</a></li>
+                  
+              
+                  <li><a href="#billing-information">Billing Information</a></li>
+                  
+              
+                  <li><a href="#parameter-description">Parameter Description</a></li>
+                  
+              
+                  <li><a href="#deployment-process">Deployment Process</a></li>
+                  
+              
+                  <li><a href="#switch-comfyuis-default-language-to-english">Switch ComfyUI's default language to English</a></li>
+                  
+              
+                  <li><a href="#usage-guide">Usage Guide</a></li>
+                  
+                      <li class="li-h3"><a href="#model-categories-overview">📊 Model Categories Overview</a></li>
+                  
+              
+                  <li><a href="#model-downloads">Model Downloads</a></li>
+                  
+              
+                  <li><a href="#account-credentials">Account Credentials</a></li>
+                  
+              
+                  <li><a href="#frequently-asked-questions">Frequently Asked Questions</a></li>
+                  
+              
+          
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="content theme-github">
+      
+      <div class="content-inner">        
+        
+        <h1 id="comfyui-community-edition">ComfyUI Community Edition</h1>
+<blockquote>
+<p><strong>Disclaimer:</strong> This service is provided by a third party. While we strive to ensure its security, accuracy, and reliability, we cannot guarantee it is completely free from failures, interruptions, errors, or attacks. Therefore, our company hereby declares: We make no representations, warranties, or commitments regarding the content, accuracy, completeness, reliability, applicability, and timeliness of this service, and assume no responsibility for any direct or indirect losses or damages arising from your use of this service; We assume no responsibility for the content, accuracy, completeness, reliability, applicability, and timeliness of third-party websites, applications, products, and services accessed through this service - you should bear the risks and responsibilities arising from their use; We assume no responsibility for any losses or damages arising from your use of this service, including but not limited to direct losses, indirect losses, profit losses, goodwill losses, data losses, or other economic losses, even if our company has been previously informed of the possibility of such losses or damages; We reserve the right to modify this disclaimer from time to time, so please check this disclaimer regularly before using this service. If you have any questions or concerns about this disclaimer or this service, please contact us.</p>
+</blockquote>
+<h2 id="overview">Overview</h2>
+<p>ComfyUI is the most powerful open-source node-based generative AI application, supporting the creation of images, videos, and audio content. Leveraging cutting-edge open-source models, it enables video and image generation.</p>
+<p>According to the official documentation, ComfyUI features:</p>
+<ul>
+<li><strong>Node/Graph/Flowchart Interface</strong> - Experiment and create complex Stable Diffusion workflows without writing any code</li>
+<li><strong>Full Support</strong> for SD1.x, SD2.x, and SDXL</li>
+<li><strong>Asynchronous Queue System</strong></li>
+<li><strong>Multiple Optimizations</strong> - Only re-executes parts of the workflow that changed between executions</li>
+<li><strong>Command Line Options</strong> - <code>--lowvram</code> enables running on GPUs with less than 3GB memory (automatically enabled on low-memory GPUs)</li>
+<li><strong>CPU Support</strong> - Works even without GPU using <code>--cpu</code> (slower)</li>
+<li><strong>Model Loading</strong> - Supports ckpt, safetensors, and diffusers models/checkpoints. Standalone VAE and CLIP models</li>
+<li><strong>Embeddings/Textual Inversion</strong></li>
+<li><strong>LoRAs</strong> (regular, locon, and loha)</li>
+<li><strong>Hypernetworks</strong></li>
+<li><strong>Workflow Loading</strong> - Load complete workflows from generated PNG files (including seeds)</li>
+<li><strong>JSON Export/Import</strong> - Save/load workflows as JSON files</li>
+<li><strong>Complex Workflows</strong> - Node interface for creating complex workflows like "Hires fix" or more advanced workflows</li>
+<li><strong>Area Composition</strong></li>
+<li><strong>Inpainting</strong> - Using regular and inpainting models</li>
+<li><strong>ControlNet and T2I Adapters</strong></li>
+<li><strong>Upscaling Models</strong> (ESRGAN, ESRGAN variants, SwinIR, Swin2SR, etc.)</li>
+<li><strong>unCLIP Models</strong></li>
+<li><strong>GLIGEN</strong></li>
+<li><strong>Model Merging</strong></li>
+<li><strong>Latent Previews</strong> using TAESD</li>
+<li><strong>Fast Startup</strong></li>
+<li><strong>Fully Offline</strong> - Downloads nothing</li>
+<li><strong>Configuration Files</strong> for setting model search paths</li>
+</ul>
+<h2 id="prerequisites">Prerequisites</h2>
+<p>Deploying the ComfyUI Community Edition service instance requires access and creation permissions for certain Alibaba Cloud resources. Therefore, your account needs permissions for the following resources. <strong>Note</strong>: These permissions are only required when your account is a RAM account.</p>
+<table>
+<thead>
+<tr>
+<th><strong>Permission Policy Name</strong></th>
+<th><strong>Description</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>AliyunECSFullAccess</td>
+<td>Permission to manage Elastic Compute Service (ECS)</td>
+</tr>
+<tr>
+<td>AliyunVPCFullAccess</td>
+<td>Permission to manage Virtual Private Cloud (VPC)</td>
+</tr>
+<tr>
+<td>AliyunROSFullAccess</td>
+<td>Permission to manage Resource Orchestration Service (ROS)</td>
+</tr>
+<tr>
+<td>AliyunComputeNestUserFullAccess</td>
+<td>User-side permission to manage Compute Nest Service</td>
+</tr>
+</tbody>
+</table>
+<h2 id="billing-information">Billing Information</h2>
+<p>The costs for deploying the Community Edition on Compute Nest mainly include:</p>
+<ul>
+<li><strong>Selected vCPU and memory specifications</strong></li>
+<li><strong>System disk type and capacity</strong></li>
+<li><strong>Public network bandwidth</strong></li>
+</ul>
+<h2 id="parameter-description">Parameter Description</h2>
+<table>
+<thead>
+<tr>
+<th><strong>Parameter Group</strong></th>
+<th><strong>Parameter</strong></th>
+<th><strong>Description</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Service Instance</td>
+<td>Service Instance Name</td>
+<td>Maximum 64 characters, must start with an English letter, can include numbers, English letters, hyphens (-), and underscores (_)</td>
+</tr>
+<tr>
+<td></td>
+<td>Region</td>
+<td>Region where the service instance is deployed</td>
+</tr>
+<tr>
+<td></td>
+<td>Payment Type</td>
+<td>Billing type for resources: Pay-as-you-go and Subscription</td>
+</tr>
+<tr>
+<td>ECS Instance Configuration</td>
+<td>Instance Type</td>
+<td>Available instance specifications in the availability zone</td>
+</tr>
+<tr>
+<td>Network Configuration</td>
+<td>Availability Zone</td>
+<td>Availability zone where the ECS instance is located</td>
+</tr>
+<tr>
+<td></td>
+<td>VPC ID</td>
+<td>VPC where resources are located</td>
+</tr>
+<tr>
+<td></td>
+<td>Switch ID</td>
+<td>Switch where resources are located</td>
+</tr>
+</tbody>
+</table>
+<h2 id="deployment-process">Deployment Process</h2>
+<ol>
+<li>
+<p><strong>Access Compute Nest</strong> <a href="https://computenest.console.aliyun.com/service/instance/create/ap-southeast-1?type=user&amp;ServiceId=service-11cf4eb33d1442ea8533">deployment link</a> and fill in deployment parameters as prompted</p>
+</li>
+<li>
+<p><strong>Fill in instance parameters</strong> and select your desired purchase method and instance type
+   <img alt="img.png" src="../img.png" /></p>
+</li>
+<li>
+<p><strong>Important Note</strong>: If you want to use image-to-video functionality, to reduce the possibility of RAM overflow, please select memory specifications of 60GB or higher + A10 or higher GPU specifications</p>
+</li>
+<li>
+<p><strong>Configure network settings</strong> - Choose to create a new dedicated network or use an existing VPC. Fill in availability zone and network parameters
+   <img alt="img_1.png" src="../img_1.png" /></p>
+</li>
+<li>
+<p><strong>Create instance</strong> - Click "Create Now" and wait for service instance deployment to complete</p>
+</li>
+<li>
+<p><strong>Access instance details</strong> - After deployment completion, click the instance ID to enter the details interface
+   <img alt="img_2.png" src="../img_2.png" /></p>
+</li>
+<li>
+<p><strong>Access service</strong> - Visit the service instance's usage URL. We use secure proxy for direct access to prevent your data from being exposed to the public network
+   <img alt="Service Access" src="../img/serviceInstance3.png" /></p>
+</li>
+<li>
+<p><strong>Enter ComfyUI interface</strong>
+<img alt="img_3.png" src="../img_3.png" /></p>
+</li>
+</ol>
+<h2 id="switch-comfyuis-default-language-to-english">Switch ComfyUI's default language to English</h2>
+<ol>
+<li>Click the settings button in the image</li>
+</ol>
+<p><img alt="img_4.png" src="../img_4.png" />
+2. Search for "Language" in the search box, then switch the option to English</p>
+<p><img alt="img_5.png" src="../img_5.png" />
+3. Then the UI will automatically change.</p>
+<h2 id="usage-guide">Usage Guide</h2>
+<h3 id="model-categories-overview">📊 <strong>Model Categories Overview</strong></h3>
+<table>
+<thead>
+<tr>
+<th>Model Name</th>
+<th>Type</th>
+<th>Parameter Scale</th>
+<th>Main Function</th>
+<th>Special Features</th>
+<th>Use Cases</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>WanX-2.1</strong></td>
+<td>Multimodal Video Generation</td>
+<td>I2V-14B, T2V-14B, VACE-1.3B, I2V-1.3B</td>
+<td>Image-to-Video/Text-to-Video</td>
+<td>Supports multiple parameter scales, flexible configuration</td>
+<td>General video generation, suitable for different performance requirements</td>
+</tr>
+<tr>
+<td><strong>WanX-2.2</strong></td>
+<td>Multimodal Video Generation</td>
+<td>I2V-14B, T2V-14B, TI2V-5B</td>
+<td>Image-to-Video/Text-to-Video</td>
+<td>Upgraded version with performance optimization</td>
+<td>High-quality video generation</td>
+</tr>
+<tr>
+<td><strong>Qwen-Image</strong></td>
+<td>Image Generation</td>
+<td>-</td>
+<td>Text-to-Image Generation</td>
+<td>Alibaba Tongyi Qianwen image model</td>
+<td>Image generation with excellent Chinese understanding</td>
+</tr>
+<tr>
+<td><strong>WanX-2.2 Fun Camera</strong></td>
+<td>Video Generation</td>
+<td>-</td>
+<td>Fun Camera Effects</td>
+<td>Special visual effects and filters</td>
+<td>Creative video production, entertainment applications</td>
+</tr>
+<tr>
+<td><strong>WanX-2.2 Fun Control</strong></td>
+<td>Video Control</td>
+<td>-</td>
+<td>Video Generation Control</td>
+<td>Precise control of video generation process</td>
+<td>Professional video production, fine-grained control</td>
+</tr>
+<tr>
+<td><strong>WanX-2.2 Fun Inpaint</strong></td>
+<td>Video Repair</td>
+<td>-</td>
+<td>First and Last Frame Repair</td>
+<td>Intelligent completion of video first and last frames</td>
+<td>Video post-processing, content repair</td>
+</tr>
+<tr>
+<td><strong>WanX-2.2 S2V</strong></td>
+<td>Speech-to-Video</td>
+<td>-</td>
+<td>Speech-Driven Video Generation</td>
+<td>Generate corresponding videos from speech</td>
+<td>Speech visualization, educational content creation</td>
+</tr>
+<tr>
+<td><strong>HunyuanVideo</strong></td>
+<td>Video Generation</td>
+<td>-</td>
+<td>Hunyuan Video Generation</td>
+<td>Tencent Hunyuan large model video version</td>
+<td>High-quality video content creation</td>
+</tr>
+<tr>
+<td><strong>Qwen-Image-Edit</strong></td>
+<td>Image Editing</td>
+<td>-</td>
+<td>Intelligent Image Editing</td>
+<td>Natural language-based image editing</td>
+<td>Image post-processing, content modification</td>
+</tr>
+<tr>
+<td><strong>Hunyuan3D-2.1</strong></td>
+<td>3D Generation</td>
+<td>-</td>
+<td>3D Model Generation</td>
+<td>Latest version 3D content generation</td>
+<td>3D modeling, game development</td>
+</tr>
+<tr>
+<td><strong>Hunyuan3D-2.0</strong></td>
+<td>3D Generation</td>
+<td>-</td>
+<td>3D Model Generation</td>
+<td>3D content creation</td>
+<td>3D design, virtual reality</td>
+</tr>
+<tr>
+<td><strong>Flux1-dev</strong></td>
+<td>Image Generation</td>
+<td>-</td>
+<td>Developer Version Image Generation</td>
+<td>Experimental features, highly customizable</td>
+<td>R&amp;D testing, feature validation</td>
+</tr>
+<tr>
+<td><strong>Flux1-Krea</strong></td>
+<td>Image Generation</td>
+<td>-</td>
+<td>Creative Image Generation</td>
+<td>Artistic style image generation</td>
+<td>Artistic creation, design work</td>
+</tr>
+<tr>
+<td><strong>Flux1-kontext</strong></td>
+<td>Image Generation</td>
+<td>-</td>
+<td>Context-Aware Image Generation</td>
+<td>Context-understanding intelligent generation</td>
+<td>Continuous content creation, story illustration</td>
+</tr>
+<tr>
+<td><strong>HunyuanImage2.1</strong></td>
+<td>Image Generation</td>
+<td>-</td>
+<td>Hunyuan Image Generation v2.1</td>
+<td>Tencent Hunyuan image model upgraded version</td>
+<td>High-quality image generation, commercial applications</td>
+</tr>
+</tbody>
+</table>
+<h2 id="model-downloads">Model Downloads</h2>
+<ol>
+<li><strong>Recommended source</strong>: ModelScope (魔搭)</li>
+<li><strong>Model storage path</strong>: <code>/root/storage/models</code></li>
+</ol>
+<h2 id="account-credentials">Account Credentials</h2>
+<p>Default username and password:
+- <strong>Username</strong>: admin
+- <strong>Password</strong>: admin</p>
+<h2 id="frequently-asked-questions">Frequently Asked Questions</h2>
+<ol>
+<li><strong>Missing node types</strong>: If you encounter "node type does not exist" errors, install missing nodes through the manager and restart
+   <img alt="Issue 1" src="../img/issue1.png" />
+   <img alt="Issue 2" src="../img/issue2.png" /></li>
+</ol>
+<hr />
+<p><em>This documentation provides comprehensive guidance for deploying and using ComfyUI Community Edition on Alibaba Cloud's Compute Nest platform.</em></p>
+        
+      </div>
+
+      <div class="copyrights">© 2009-2022 Aliyun.com 版权所有</div>
+    </div>
+  </div>
+  
+  <!--
+  MkDocs version      : 1.6.1
+  Docs Build Date UTC : 2026-01-12 02:43:13.861413+00:00
+  -->
+</body>
+</html>
