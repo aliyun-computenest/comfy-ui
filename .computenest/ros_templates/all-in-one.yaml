@@ -35,12 +35,12 @@ Mappings:
       'Wanx2.2-s2v': 400
       'HunyuanVideo': 500
       'Qwen-Image-Edit': 350
-      'Hunyuan3D-2.1': 200
-      'Hunyuan3D-2': 200
-      'Flux1-dev': 200
-      'Flux1-Krea': 200
-      'Flux1-kontext': 200
-      'HunyuanImage2.1': 200
+      'Hunyuan3D-2.1': 250
+      'Hunyuan3D-2': 250
+      'Flux1-dev': 250
+      'Flux1-Krea': 250
+      'Flux1-kontext': 250
+      'HunyuanImage2.1': 250
       'Z-Image-Turbo': 250
 
     ModelWaitTimeMap:
